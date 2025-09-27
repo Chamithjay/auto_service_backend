@@ -13,7 +13,6 @@ public class LoginResponse {
     private String email;
     private String role;
 
-    // Constructors
     public LoginResponse() {}
 
     public LoginResponse(String token, String username, String email, String role) {
@@ -26,7 +25,6 @@ public class LoginResponse {
     public LoginResponse(String token, String username, String email, Role role) {
     }
 
-    // Getters and Setters
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 

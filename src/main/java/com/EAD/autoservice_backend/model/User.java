@@ -6,14 +6,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * User entity that implements UserDetails for Spring Security integration.
- * This represents a user in the database with authentication capabilities.
- */
+
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +30,10 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    private Role role = Role.CUSTOMER;
+
+    @Column(name = "password_reset_required", nullable = false)
+    private boolean passwordResetRequired = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -47,7 +52,8 @@ public class User implements UserDetails {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // UserDetails implementation - Spring Security methods
+    // --- Spring Security Methods (These must stay) ---
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(() -> "ROLE_" + role.name());
@@ -65,27 +71,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 
-    // Standard getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // --- All manual getters and setters are now removed ---
 
-    @Override
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    @Override
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

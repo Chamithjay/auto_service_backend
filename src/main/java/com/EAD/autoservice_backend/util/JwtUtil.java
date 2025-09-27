@@ -11,29 +11,36 @@ import java.util.Date;
 import java.util.function.Function;
 
 /**
- * Utility class for JWT token operations
- * Handles token creation, validation, and extraction of claims
+
+ * Utility class for JWT token operations.
+ * <p>
+ * Provides methods for generating, validating, and extracting claims from JWT tokens.
  */
 @Component
 public class JwtUtil {
 
-    // Use application.properties for configuration
     @Value("${jwt.secret:mySecretKeyForJWTTokenGenerationThatShouldBeLongEnoughForSecurity}")
     private String SECRET_KEY;
 
-    @Value("${jwt.expiration:86400}") // 24 hours default
+    @Value("${jwt.expiration:86400}")
     private Long TOKEN_VALIDITY;
 
     /**
-     * Generate signing key from secret
+
+     * Generates a signing key from the configured secret.
+     *
+     * @return the HMAC-SHA key
      */
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     /**
-     * Generate JWT token for authenticated user
-     * Called ONLY after successful login
+
+     * Generates a JWT token for the given username.
+     *
+     * @param username the username for which the token is generated
+     * @return a signed JWT token
      */
     public String generateToken(String username) {
         return Jwts.builder()
@@ -45,21 +52,35 @@ public class JwtUtil {
     }
 
     /**
-     * Extract username from JWT token
+
+     * Extracts the username from a JWT token.
+     *
+     * @param token the JWT token
+     * @return the username contained in the token
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
-     * Extract expiration date from JWT token
+
+     * Extracts the expiration date from a JWT token.
+     *
+     * @param token the JWT token
+     * @return the expiration date
      */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     /**
-     * Extract specific claim from JWT token
+
+     * Extracts a specific claim from a JWT token.
+     *
+     * @param token the JWT token
+     * @param claimsResolver a function to extract a claim from the token
+     * @param <T> the type of the claim
+     * @return the extracted claim
      */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -67,7 +88,11 @@ public class JwtUtil {
     }
 
     /**
-     * Extract all claims from JWT token
+
+     * Extracts all claims from a JWT token.
+     *
+     * @param token the JWT token
+     * @return the claims contained in the token
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -78,14 +103,23 @@ public class JwtUtil {
     }
 
     /**
-     * Check if JWT token is expired
+
+     * Checks whether a JWT token is expired.
+     *
+     * @param token the JWT token
+     * @return true if the token is expired, false otherwise
      */
     public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     /**
-     * Validate JWT token against username and expiration
+
+     * Validates a JWT token against a username and expiration.
+     *
+     * @param token the JWT token
+     * @param username the username to validate against
+     * @return true if the token is valid, false otherwise
      */
     public Boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
