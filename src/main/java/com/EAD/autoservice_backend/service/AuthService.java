@@ -68,7 +68,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        user.setRole(Role.valueOf("USER")); // default role
+        user.setRole(Role.valueOf("USER"));
 
         User savedUser = userRepository.save(user);
 
@@ -91,7 +91,6 @@ public class AuthService {
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             String token = jwtUtil.generateToken(userDetails.getUsername());
 
-            // get user info from DB
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("User not found"));
 

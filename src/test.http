@@ -1,0 +1,37 @@
+### 1. Add a new Service
+# @name addService
+POST http://localhost:8080/api/admin/services
+Content-Type: application/json
+
+{
+  "serviceItemName": "Premium Synthetic Oil Change",
+  "vehicleType": "CAR",
+  "requiredEmployeeCount": 1,
+  "serviceItemCost": 99.99,
+  "serviceItemType": "SERVICE",
+  "estimatedDuration": 45
+}
+
+### 2. Add a new Employee
+# @name addAdmin
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+
+{
+  "username": "heshani",
+  "email": "john.doe@autoservice.com",
+  "password": "pwd123",
+  "role": "ADMIN"
+}
+
+### 2. Add a new Employee
+# @name addEmployee
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+
+{
+  "username": "SAVINDU",
+  "email": "john@autoservice.com",
+  "password": "pwd123",
+  "role": "EMPLOYEE"
+}
