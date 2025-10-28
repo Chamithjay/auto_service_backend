@@ -97,6 +97,7 @@ public class SecurityConfig {
                 // Allow only registration endpoint without authentication
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register").permitAll()  // public registration
+                        .requestMatchers("/api/auth/password/**").permitAll()
                         .anyRequest().permitAll()
                 )
 
