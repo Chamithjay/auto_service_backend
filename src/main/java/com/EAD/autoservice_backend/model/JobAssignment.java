@@ -1,11 +1,17 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalTime;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class JobAssignment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

@@ -1,17 +1,15 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Table(name = "employee")
-public class Employee {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long employeeId;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+@Getter
+@Setter
+@NoArgsConstructor
+@DiscriminatorValue("EMPLOYEE")
+public class Employee extends User{
+    @Column(unique = true)
+    private String nic;
 
 }

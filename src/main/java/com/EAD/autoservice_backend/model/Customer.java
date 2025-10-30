@@ -1,17 +1,12 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Table(name = "customer")
-public class Customer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long customerId;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@DiscriminatorValue("CUSTOMER")
+public class Customer extends User {
 }

@@ -1,0 +1,10 @@
+package com.EAD.autoservice_backend.repository;
+
+import com.EAD.autoservice_backend.model.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    // You don't need to add anything yet — findById() is already built-in!
+}
