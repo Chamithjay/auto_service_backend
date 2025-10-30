@@ -98,7 +98,8 @@ public class AuthService {
                     token,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole()
+                    //user.getRole()
+                    user.getRole().name()  // CHANGE: Pass string "ADMIN" instead of Role enum
             );
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");

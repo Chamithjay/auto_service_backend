@@ -94,19 +94,23 @@ public class SecurityConfig {
                 // Disable CSRF for Postman / React
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Allow only registration endpoint without authentication
+                // Authorize requests
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register").permitAll()  // public registration
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()     // public login
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")// Secure admin paths
+                        .requestMatchers("/api/profile/**").authenticated() //admin profile
+                        .anyRequest().authenticated()  // Require auth for everything else
                 )
-
 
                 .formLogin(AbstractHttpConfigurer::disable)
 
-
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                )
+
+                // ADD: JWT filter chain integration
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
