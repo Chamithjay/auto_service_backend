@@ -5,6 +5,7 @@ import com.EAD.autoservice_backend.dto.LoginResponse;
 import com.EAD.autoservice_backend.dto.RegisterRequest;
 import com.EAD.autoservice_backend.dto.RegisterResponse;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.repository.UserRepository;
@@ -62,15 +63,17 @@ public class AuthService {
             throw new UserAlreadyExistsException("Email '" + request.getEmail() + "' is already registered");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setRole(Role.valueOf("USER"));
+        Customer customer = new Customer();
+        customer.setUsername(request.getUsername());
+        customer.setEmail(request.getEmail());
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setPhoneNumber(request.getPhoneNumber());
+        customer.setCreatedAt(LocalDateTime.now());
+        customer.setUpdatedAt(LocalDateTime.now());
+        customer.setRole(Role.CUSTOMER);
 
-        User savedUser = userRepository.save(user);
+
+        User savedUser = userRepository.save(customer);
 
         return new RegisterResponse(
                 "User registered successfully. Please login to continue.",

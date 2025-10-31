@@ -7,14 +7,11 @@ import java.time.LocalDateTime;
  * Admin entity extending User with admin-specific attributes
  */
 @Entity
-@DiscriminatorValue("ADMIN")
+@Table(name = "admins")
 public class Admin extends User {
 
     @Column(name = "department", length = 50)
     private String department;
-
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
 
     @Column(name = "access_level")
     private Integer accessLevel = 1; // 1 = full access, 2 = limited, etc.
@@ -37,14 +34,6 @@ public class Admin extends User {
 
     public void setDepartment(String department) {
         this.department = department;
-    }
-
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
-    }
-
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
     }
 
     public Integer getAccessLevel() {
