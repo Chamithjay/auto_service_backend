@@ -11,5 +11,5 @@ import java.time.LocalTime;
 @Builder
 public class AppointmentCalculationResponse {
     private BigDecimal totalCost;
-    private LocalTime estimatedEndTime;
+    private String message;
 }

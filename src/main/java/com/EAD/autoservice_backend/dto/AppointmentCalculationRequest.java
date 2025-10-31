@@ -1,9 +1,9 @@
 package com.EAD.autoservice_backend.dto;
 
+import com.EAD.autoservice_backend.model.SessionType;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -15,5 +15,5 @@ public class AppointmentCalculationRequest {
     private Long vehicleId;
     private List<Long> selectedServiceItemIds;
     private LocalDate appointmentDate;
-    private LocalTime startTime;
+    private SessionType sessionType;
 }

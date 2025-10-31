@@ -45,22 +45,31 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ STEP 4: Calculate total cost and end time (preview before submit)
-    @PostMapping("/calculate")
-    public ResponseEntity<AppointmentCalculationResponse> calculateAppointmentDetails(
+    @PostMapping("/availability")
+    public ResponseEntity<AppointmentCalculationResponse> getAvailableTimes(
             @RequestBody AppointmentCalculationRequest request
     ) {
-        AppointmentCalculationResponse response =
-                appointmentService.calculateAppointmentDetails(request);
+        AppointmentCalculationResponse response = appointmentService.calculateAppointmentDetails(request);
         return ResponseEntity.ok(response);
     }
 
-    // ✅ STEP 5: Submit the final appointment
-    @PostMapping("/create")
-    public ResponseEntity<AppointmentResponse> createAppointmentTemp(
-            @RequestBody AppointmentCreateRequest request,@RequestParam Long userId
-    ) {
-        AppointmentResponse response = appointmentService.createAppointmentTemp(request, userId);
-        return ResponseEntity.ok(response);
-    }
+
+//    // ✅ STEP 4: Calculate total cost and end time (preview before submit)
+//    @PostMapping("/calculate")
+//    public ResponseEntity<AppointmentCalculationResponse> calculateAppointmentDetails(
+//            @RequestBody AppointmentCalculationRequest request
+//    ) {
+//        AppointmentCalculationResponse response =
+//                appointmentService.calculateAppointmentDetails(request);
+//        return ResponseEntity.ok(response);
+//    }
+//
+//     //✅ STEP 5: Submit the final appointment
+//    @PostMapping("/create")
+//    public ResponseEntity<AppointmentResponse> createAppointmentTemp(
+//            @RequestBody AppointmentCreateRequest request,@RequestParam Long userId
+//    ) {
+//        AppointmentResponse response = appointmentService.createAppointmentTemp(request, userId);
+//        return ResponseEntity.ok(response);
+//    }
 }
