@@ -2,7 +2,6 @@ package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ public class ServiceItem {
     @Column(nullable = false)
     private Integer requiredEmployeeCount;
 
-    @Column(precision = 17, scale = 2)
+    @Column(precision = 17, scale = 2, nullable = false)
     private BigDecimal serviceItemCost;
 
     @Column(name = "service_item_type", nullable = false)

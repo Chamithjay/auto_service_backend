@@ -2,7 +2,6 @@ package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -38,5 +37,7 @@ public class Vehicle {
     @OneToMany(mappedBy = "vehicle")
     private Set<Appointment> appointments;
 
-    //Should add the customer.
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 }

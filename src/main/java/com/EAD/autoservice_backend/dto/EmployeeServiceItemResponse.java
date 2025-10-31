@@ -6,4 +6,5 @@ import lombok.Value;
 public class ServiceItemResponse {
     private final Long serviceItemId;
     private final String serviceItemName;
+    private final Integer estimatedDuration;
 }

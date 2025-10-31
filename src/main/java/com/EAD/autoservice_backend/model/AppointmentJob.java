@@ -33,7 +33,7 @@ public class AppointmentJob {
     @Column(nullable = false)
     private Status jobStatus = Status.NEW;
 
-    private String description;
+    private String jobNote;
 
     @Column(precision = 17, scale = 2)
     private BigDecimal additional_cost;
@@ -43,7 +43,7 @@ public class AppointmentJob {
     private Appointment appointment;
 
     @ManyToOne
-    @JoinColumn(name = "service_itme_id", nullable = false)
+    @JoinColumn(name = "service_item_id", nullable = false)
     private ServiceItem serviceItem;
 
     @OneToMany(mappedBy = "appointmentJob")

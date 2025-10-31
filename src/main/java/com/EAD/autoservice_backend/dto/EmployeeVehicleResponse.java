@@ -4,9 +4,7 @@ import lombok.Value;
 
 @Value
 public class VehicleResponse {
-    private final Long vehicleId;
     private final String registrationNo;
     private final String vehicleType;
     private final String vehicleModel;
-
 }

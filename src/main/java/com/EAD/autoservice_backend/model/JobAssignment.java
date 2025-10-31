@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 
 @Getter
@@ -13,7 +14,7 @@ import java.time.LocalTime;
 public class JobAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long jobAssignmentId;
 
     @ManyToOne
     @JoinColumn(name = "appointment_job_id", nullable = false)
@@ -23,9 +24,16 @@ public class JobAssignment {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "start_time", nullable = false) //18:50:00
+    @Column(name = "start_time") //18:50:00
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time")
     private LocalTime endTime;
+
+    @Column(precision = 17, scale = 2)
+    private BigDecimal additional_cost;
+
+    @Column
+    private String costNote;
+
 }
