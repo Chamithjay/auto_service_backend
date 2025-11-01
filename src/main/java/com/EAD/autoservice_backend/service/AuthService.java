@@ -5,6 +5,7 @@ import com.EAD.autoservice_backend.dto.LoginResponse;
 import com.EAD.autoservice_backend.dto.RegisterRequest;
 import com.EAD.autoservice_backend.dto.RegisterResponse;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.model.Customer;
@@ -58,14 +59,15 @@ public class AuthService {
             throw new UserAlreadyExistsException("Email '" + request.getEmail() + "' is already registered");
         }
 
-        // Create Customer entity (default registration creates customers)
         Customer customer = new Customer();
         customer.setUsername(request.getUsername());
         customer.setEmail(request.getEmail());
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setPhoneNumber(request.getPhoneNumber());
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
         customer.setRole(Role.CUSTOMER);
+
 
         User savedUser = userRepository.save(customer);
 

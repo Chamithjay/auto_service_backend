@@ -20,6 +20,10 @@ public class RegisterRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 9, max = 20, message = "Phone number must be between 9 and 20 characters")
+    private String phoneNumber;
+
     // Constructors
     public RegisterRequest() {}
 
@@ -27,6 +31,7 @@ public class RegisterRequest {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getUsername() { return username; }
@@ -37,4 +42,8 @@ public class RegisterRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
 }

@@ -6,17 +6,12 @@ import jakarta.persistence.*;
  * Customer entity extending User with customer-specific attributes
  */
 @Entity
-@DiscriminatorValue("CUSTOMER")
+@Table(name = "customers")
 public class Customer extends User {
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "loyalty_points")
-    private Integer loyaltyPoints = 0;
 
     // Constructors
     public Customer() {
@@ -38,20 +33,6 @@ public class Customer extends User {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getAddress() {
-        return address;
-    }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Integer getLoyaltyPoints() {
-        return loyaltyPoints;
-    }
-
-    public void setLoyaltyPoints(Integer loyaltyPoints) {
-        this.loyaltyPoints = loyaltyPoints;
-    }
 }
 

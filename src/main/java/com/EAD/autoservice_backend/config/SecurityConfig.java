@@ -101,6 +101,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")// Secure admin paths
                         .requestMatchers("/api/profile/**").authenticated() //admin profile
                         .anyRequest().authenticated()  // Require auth for everything else
+                        .requestMatchers("/api/auth/password/**").permitAll()
+                        .anyRequest().permitAll()
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)
