@@ -8,6 +8,7 @@ import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
 import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.repository.UserRepository;
 import com.EAD.autoservice_backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-/**
- * Service layer for authentication operations
- * Contains business logic for registration and login
- */
 @Service
 @Transactional
 public class AuthService {
@@ -51,8 +48,7 @@ public class AuthService {
     }
 
     /**
-     * Register a new user
-     * NO JWT TOKEN GENERATION - user must login after registration
+     * Register a new user (defaults to CUSTOMER)
      */
     public RegisterResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -101,7 +97,7 @@ public class AuthService {
                     token,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole()
+                    user.getRole().name()
             );
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");

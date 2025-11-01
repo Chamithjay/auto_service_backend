@@ -23,6 +23,10 @@ public class LoginResponse {
     }
 
     public LoginResponse(String token, String username, String email, Role role) {
+        this.token = token;
+        this.username = username;
+        this.email = email;
+        this.role = role.name();
     }
 
     public String getToken() { return token; }
