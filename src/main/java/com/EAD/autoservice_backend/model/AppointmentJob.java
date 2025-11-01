@@ -1,13 +1,17 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
-@Table(name = "appointment_job",
+@Table(name = "appointment jobs",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "UK_APPOINTMENT_JOB",
@@ -17,7 +21,7 @@ import java.util.Set;
 public class AppointmentJob {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long appointmentJobId;
 
     @Column(name = "start_time") //18:50:00
     private LocalTime startTime;
@@ -27,9 +31,9 @@ public class AppointmentJob {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AppointmentStatus itemStatus = AppointmentStatus.NEW;
+    private Status jobStatus = Status.NEW;
 
-    private String description;
+    private String jobNote;
 
     @Column(precision = 17, scale = 2)
     private BigDecimal additional_cost;
@@ -39,7 +43,7 @@ public class AppointmentJob {
     private Appointment appointment;
 
     @ManyToOne
-    @JoinColumn(name = "service_itme_id", nullable = false)
+    @JoinColumn(name = "service_item_id", nullable = false)
     private ServiceItem serviceItem;
 
     @OneToMany(mappedBy = "appointmentJob")
