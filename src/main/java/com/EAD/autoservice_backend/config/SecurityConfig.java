@@ -74,7 +74,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -98,11 +98,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register").permitAll()  // public registration
                         .requestMatchers("/api/auth/login").permitAll()     // public login
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")// Secure admin paths
-                        .requestMatchers("/api/profile/**").authenticated() //admin profile
+                        .requestMatchers("/api/auth/password/**").permitAll() // password reset endpoints
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")   // Secure admin paths
+                        .requestMatchers("/api/profile/**").authenticated()  // admin profile
                         .anyRequest().authenticated()  // Require auth for everything else
-                        .requestMatchers("/api/auth/password/**").permitAll()
-                        .anyRequest().permitAll()
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)
