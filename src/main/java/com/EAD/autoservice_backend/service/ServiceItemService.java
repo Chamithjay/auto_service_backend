@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.service;
 
-import com.EAD.autoservice_backend.dto.ServiceItemResponse;
+import com.EAD.autoservice_backend.dto.EmployeeServiceItemResponse;
+import com.EAD.autoservice_backend.exception.ServiceItemNotFoundException;
 import com.EAD.autoservice_backend.model.ServiceItem;
 import com.EAD.autoservice_backend.repository.ServiceItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,18 +13,19 @@ public class ServiceItemService {
 
     private final ServiceItemRepository serviceItemRepository;
 
-    @Autowired
     public ServiceItemService(ServiceItemRepository serviceItemRepository) {
         this.serviceItemRepository = serviceItemRepository;
     }
 
-    public ServiceItemResponse getServiceItemById(Long serviceItemId) {
+    // Get service item deetails using the servie item ID.
+    public EmployeeServiceItemResponse getServiceItemById(Long serviceItemId) {
         ServiceItem serviceItem = serviceItemRepository.findById(serviceItemId)
-                .orElseThrow(() -> new EntityNotFoundException("Service Item  not found with ID: " + serviceItemId));
+                .orElseThrow(() -> new ServiceItemNotFoundException("Service Item  not found with ID: " + serviceItemId));
 
-        return new ServiceItemResponse(
+        return new EmployeeServiceItemResponse(
                 serviceItem.getServiceItemId(),
-                serviceItem.getServiceItemName()
+                serviceItem.getServiceItemName(),
+                serviceItem.getEstimatedDuration()
         );
     }
 }

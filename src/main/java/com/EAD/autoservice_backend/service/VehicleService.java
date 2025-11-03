@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.service;
 
-import com.EAD.autoservice_backend.dto.VehicleResponse;
+import com.EAD.autoservice_backend.dto.EmployeeVehicleResponse;
+import com.EAD.autoservice_backend.exception.VehicleNotFoundException;
 import com.EAD.autoservice_backend.model.Vehicle;
 import com.EAD.autoservice_backend.repository.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,18 +13,18 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
 
-    @Autowired
     public VehicleService(VehicleRepository vehicleRepository) {
+
         this.vehicleRepository = vehicleRepository;
     }
 
-    public VehicleResponse getVehicleById(Long vehicleId) {
+    // Get vehicle details using vehicle ID.
+    public EmployeeVehicleResponse getVehicleById(Long vehicleId) {
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with ID: " + vehicleId));
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with ID: " + vehicleId));
 
-        return new VehicleResponse(
-                vehicle.getVehicleId(),
+        return new EmployeeVehicleResponse(
                 vehicle.getRegistrationNo(),
                 vehicle.getVehicleType().name(),
                 vehicle.getModel()
