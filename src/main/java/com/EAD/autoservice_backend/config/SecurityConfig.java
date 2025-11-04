@@ -96,13 +96,16 @@ public class SecurityConfig {
 
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register").permitAll()  // public registration
-                        .requestMatchers("/api/auth/login").permitAll()     // public login
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")// Secure admin paths
-                        .requestMatchers("/api/profile/**").authenticated() //admin profile
-                        .anyRequest().authenticated()  // Require auth for everything else
-                        .requestMatchers("/api/auth/password/**").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/password/**" // for forgot/reset password
+                        ).permitAll()
+
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/profile/**").authenticated()
+
+                        .anyRequest().authenticated()
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)
