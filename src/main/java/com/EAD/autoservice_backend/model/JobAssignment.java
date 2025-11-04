@@ -1,17 +1,17 @@
-// File: src/main/java/com/EAD/autoservice_backend/model/JobAssignment.java
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+
 import java.math.BigDecimal;
 import java.time.LocalTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "job_assignments") // <-- FIXED
+@Table(name = "job assignments")
 public class JobAssignment {
-    // ... (rest of the file is fine)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long jobAssignmentId;
@@ -24,7 +24,7 @@ public class JobAssignment {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time") //18:50:00
     private LocalTime startTime;
 
     @Column(name = "end_time")
@@ -35,4 +35,5 @@ public class JobAssignment {
 
     @Column
     private String costNote;
+
 }

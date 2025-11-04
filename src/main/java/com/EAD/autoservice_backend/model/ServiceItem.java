@@ -1,4 +1,3 @@
-// File: src/main/java/com/EAD/autoservice_backend/model/ServiceItem.java
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
@@ -9,7 +8,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "services_modifications") // <-- FIXED
+@Table(name = "services and modifications")
 public class ServiceItem {
 
     @Id
@@ -38,4 +37,5 @@ public class ServiceItem {
 
     @OneToMany(mappedBy = "serviceItem")
     private Set<AppointmentJob> bookedItems;
+
 }

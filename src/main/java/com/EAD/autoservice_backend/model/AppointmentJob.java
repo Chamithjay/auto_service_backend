@@ -1,8 +1,9 @@
-// File: src/main/java/com/EAD/autoservice_backend/model/AppointmentJob.java
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Set;
@@ -10,20 +11,19 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "appointment_jobs", // <-- FIXED
+@Table(name = "appointment jobs",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "UK_APPOINTMENT_JOB",
-                        columnNames = {"appointment_id", "service_item_id"}
+                        columnNames = {"appointment_id", "service_item_id"} // The columns that must be unique together
                 )
         })
 public class AppointmentJob {
-    // ... (rest of the file is fine)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long appointmentJobId;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time") //18:50:00
     private LocalTime startTime;
 
     @Column(name = "end_time")

@@ -1,8 +1,9 @@
-// File: src/main/java/com/EAD/autoservice_backend/model/Appointment.java
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,10 +18,10 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long appointmentId;
 
-    @Column(name = "appointment_date", nullable = false)
+    @Column(name = "appointment_date", nullable = false) // 2025-10-24
     private LocalDate appointmentDate;
 
-    @Column(name = "appointment_start_time", nullable = false)
+    @Column(name = "appointment_start_time", nullable = false) //18:50:00
     private LocalTime startTime;
 
     @Column(name = "appointment_end_time", nullable = false)
@@ -34,11 +35,6 @@ public class Appointment {
     private BigDecimal totalCost;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_id", nullable = false) // <-- FIXED SPELLING
+    @JoinColumn(name = "vehicl_id", nullable = false)
     private Vehicle vehicle;
-
-    // --- CRITICAL FIX ADDED ---
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false) // <-- ADDED THIS
-    private Customer customer;
 }
