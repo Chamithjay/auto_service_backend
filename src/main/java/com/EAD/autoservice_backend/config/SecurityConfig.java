@@ -74,7 +74,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",    // Vite dev server
+                "http://localhost:5174",    // Vite dev server (alternate)
+                "http://localhost:5175",    // Vite dev server (alternate)
+                "http://localhost",         // Docker nginx frontend (port 80)
+                "http://localhost:80",      // Docker nginx frontend (explicit port)
+                "http://127.0.0.1:*",       // Minikube service tunnel (any port)
+                "http://192.168.49.2:*"     // Minikube IP (any port)
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
