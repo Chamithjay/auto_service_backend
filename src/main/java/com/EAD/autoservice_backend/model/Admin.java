@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  * Admin entity extending User with admin-specific attributes
  */
 @Entity
-@Table(name = "admins")
+@DiscriminatorValue("ADMIN")
 public class Admin extends User {
 
     @Column(name = "department", length = 50)
