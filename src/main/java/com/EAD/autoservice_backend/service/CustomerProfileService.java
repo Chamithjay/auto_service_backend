@@ -6,6 +6,7 @@ import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
 import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.repository.CustomerRepository;
+import com.EAD.autoservice_backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +22,13 @@ import java.time.format.DateTimeFormatter;
 public class CustomerProfileService {
 
     private final CustomerRepository customerRepository;
+    private final JwtUtil jwtUtil;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    public CustomerProfileService(CustomerRepository customerRepository) {
+    public CustomerProfileService(CustomerRepository customerRepository, JwtUtil jwtUtil) {
         this.customerRepository = customerRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -45,12 +48,15 @@ public class CustomerProfileService {
         Customer customer = customerRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with username: " + username));
 
+        boolean usernameChanged = false;
+        
         // Check if username is being changed and if new username already exists
         if (request.getUsername() != null && !request.getUsername().equals(customer.getUsername())) {
             if (customerRepository.existsByUsernameAndIdNot(request.getUsername(), customer.getId())) {
                 throw new UserAlreadyExistsException("Username '" + request.getUsername() + "' is already taken");
             }
             customer.setUsername(request.getUsername());
+            usernameChanged = true;
         }
 
         // Check if email is being changed and if new email already exists
@@ -69,7 +75,19 @@ public class CustomerProfileService {
         customer.setUpdatedAt(LocalDateTime.now());
         Customer updatedCustomer = customerRepository.save(customer);
 
-        return mapToProfileResponse(updatedCustomer);
+        // Generate new token if username was changed
+        CustomerProfileResponse response = mapToProfileResponse(updatedCustomer);
+        if (usernameChanged) {
+            String newToken = jwtUtil.generateToken(
+                updatedCustomer.getUsername(), 
+                updatedCustomer.getId(), 
+                updatedCustomer.getEmail(), 
+                "CUSTOMER"
+            );
+            response.setToken(newToken);
+        }
+        
+        return response;
     }
 
     /**

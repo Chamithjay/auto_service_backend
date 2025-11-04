@@ -10,6 +10,7 @@ public class CustomerProfileResponse {
     private String phoneNumber;
     private String createdAt;
     private String updatedAt;
+    private String token; // New JWT token when username is updated
 
     public CustomerProfileResponse() {}
 
@@ -21,6 +22,17 @@ public class CustomerProfileResponse {
         this.phoneNumber = phoneNumber;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+    
+    public CustomerProfileResponse(Long id, String username, String email, String phoneNumber, 
+                                   String createdAt, String updatedAt, String token) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.token = token;
     }
 
     // Getters and Setters
@@ -41,4 +53,7 @@ public class CustomerProfileResponse {
 
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

@@ -7,6 +7,7 @@ import com.EAD.autoservice_backend.exception.InvalidPasswordException;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.repository.UserRepository;
+import com.EAD.autoservice_backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,11 +22,13 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public ProfileService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public ProfileService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -50,11 +53,14 @@ public class ProfileService {
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + currentUsername));
 
+        boolean usernameChanged = false;
+        
         // Check if new username is taken by another user
         if (!user.getUsername().equalsIgnoreCase(request.getUsername())) {
             if (userRepository.existsByUsername(request.getUsername())) {
                 throw new UserAlreadyExistsException("Username '" + request.getUsername() + "' is already taken");
             }
+            usernameChanged = true;
         }
 
         // Check if new email is taken by another user
@@ -71,12 +77,25 @@ public class ProfileService {
 
         User updatedUser = userRepository.save(user);
 
-        return new ProfileResponse(
+        ProfileResponse response = new ProfileResponse(
                 updatedUser.getId(),
                 updatedUser.getUsername(),
                 updatedUser.getEmail(),
                 updatedUser.getRole().name()
         );
+        
+        // Generate new token if username was changed
+        if (usernameChanged) {
+            String newToken = jwtUtil.generateToken(
+                updatedUser.getUsername(), 
+                updatedUser.getId(), 
+                updatedUser.getEmail(), 
+                updatedUser.getRole().name()
+            );
+            response.setToken(newToken);
+        }
+        
+        return response;
     }
 
     /**
