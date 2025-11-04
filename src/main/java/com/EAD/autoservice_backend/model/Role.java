@@ -5,6 +5,6 @@ package com.EAD.autoservice_backend.model;
  */
 public enum Role {
     CUSTOMER,
-    EMPLOYEE,
-    ADMIN
+    ADMIN,
+    EMPLOYEE
 }
