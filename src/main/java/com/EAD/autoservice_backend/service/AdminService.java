@@ -1,91 +1,66 @@
 package com.EAD.autoservice_backend.service;
 
-// DTO imports
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
-
-// Model imports
-import com.EAD.autoservice_backend.model.*; // Import all models
-
-// Repository imports
-import com.EAD.autoservice_backend.repository.ServiceItemRepository;
-import com.EAD.autoservice_backend.repository.UserRepository;
-
-// Exception imports
 import com.EAD.autoservice_backend.exception.BadRequestException;
 import com.EAD.autoservice_backend.exception.ResourceConflictException;
-
-// Spring imports
-import org.springframework.beans.factory.annotation.Autowired;
+import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
+import com.EAD.autoservice_backend.model.Admin;
+import com.EAD.autoservice_backend.model.Employee;
+import com.EAD.autoservice_backend.model.ServiceItem;
+import com.EAD.autoservice_backend.model.ServiceItemType;
+import com.EAD.autoservice_backend.model.User;
+import com.EAD.autoservice_backend.model.VehicleType;
+import com.EAD.autoservice_backend.repository.ServiceItemRepository;
+import com.EAD.autoservice_backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class AdminService {
 
-    @Autowired
-    private ServiceItemRepository serviceItemRepository;
+    private final ServiceItemRepository serviceItemRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    public AdminService(ServiceItemRepository serviceItemRepository,
+                        UserRepository userRepository,
+                        PasswordEncoder passwordEncoder) {
+        this.serviceItemRepository = serviceItemRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     // --- Service CRUD Logic ---
 
     public ServiceItem createServiceItem(ServiceItemRequest request) {
-
         ServiceItem newItem = new ServiceItem();
-        newItem.setServiceItemName(request.serviceItemName());
-        newItem.setServiceItemCost(request.serviceItemCost());
-        newItem.setRequiredEmployeeCount(request.requiredEmployeeCount());
-        newItem.setEstimatedDuration(request.estimatedDuration());
-
-        try {
-            newItem.setVehicleType(VehicleType.valueOf(request.vehicleType().toUpperCase()));
-            newItem.setServiceItemType(ServiceItemType.valueOf(request.serviceItemType().toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid enum value provided for type: " + e.getMessage());
-        }
+        mapRequestToServiceItem(request, newItem);
         return serviceItemRepository.save(newItem);
     }
 
+    @Transactional(readOnly = true)
     public ServiceItem getServiceById(Long id) {
         return serviceItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<ServiceItem> getAllServices() {
         return serviceItemRepository.findAll();
     }
 
     public ServiceItem updateService(Long id, ServiceItemRequest request) {
-        // 1. Find the existing service or throw 404
         ServiceItem existingService = getServiceById(id);
-
-        // 2. Update the fields from the DTO
-        existingService.setServiceItemName(request.serviceItemName());
-        existingService.setServiceItemCost(request.serviceItemCost());
-        existingService.setRequiredEmployeeCount(request.requiredEmployeeCount());
-        existingService.setEstimatedDuration(request.estimatedDuration());
-
-        try {
-            existingService.setVehicleType(VehicleType.valueOf(request.vehicleType().toUpperCase()));
-            existingService.setServiceItemType(ServiceItemType.valueOf(request.serviceItemType().toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid enum value provided for type: " + e.getMessage());
-        }
-
-        // 3. Save the updated object
+        mapRequestToServiceItem(request, existingService);
         return serviceItemRepository.save(existingService);
     }
 
@@ -96,68 +71,62 @@ public class AdminService {
         serviceItemRepository.deleteById(id);
     }
 
-
     // --- User (Employee/Admin) CRUD Logic ---
 
     public UserCreateResponse createUser(UserCreateRequest request) {
-
-        // Username uniqueness
-        String reqUsername = Optional.ofNullable(request.username()).map(String::trim).orElse("");
-        if (reqUsername.isBlank()) {
-            throw new BadRequestException("Username is required");
-        }
-        if (userRepository.findByUsername(reqUsername).isPresent()) {
-            throw new ResourceConflictException("Error: Username is already taken!");
-        }
-
-        // Email uniqueness
-        String reqEmail = Optional.ofNullable(request.email()).map(String::trim).orElse("");
-        if (reqEmail.isBlank()) {
-            throw new BadRequestException("Email is required");
-        }
-        if (userRepository.findByEmail(reqEmail).isPresent()) {
-            throw new ResourceConflictException("Error: User with this email is already in use!");
-        }
+        validateUserUniqueness(request.username(), request.email(), null);
 
         if (request.password() == null || request.password().isBlank()) {
             throw new BadRequestException("Password is required");
         }
 
-        String hashedPassword = passwordEncoder.encode(request.password());
         User newUser;
-        String role = request.role().toUpperCase();
+        String role = Optional.ofNullable(request.role()).map(String::toUpperCase).orElse("");
 
-        if (role.equals("EMPLOYEE")) {
-            Employee newEmployee = new Employee();
-            newEmployee.setUsername(reqUsername);
-            newEmployee.setEmail(reqEmail);
-            newEmployee.setPassword(hashedPassword);
-            newUser = newEmployee;
-        } else if (role.equals("ADMIN")) {
-            Admin newAdmin = new Admin();
-            newAdmin.setUsername(reqUsername);
-            newAdmin.setEmail(reqEmail);
-            newAdmin.setPassword(hashedPassword);
-            newUser = newAdmin;
-        } else {
-            throw new BadRequestException("Invalid role specified. Use 'EMPLOYEE' or 'ADMIN'.");
-        }
+        newUser = switch (role) {
+            case "EMPLOYEE" -> new Employee();
+            case "ADMIN" -> new Admin();
+            default -> throw new BadRequestException("Invalid role specified. Use 'EMPLOYEE' or 'ADMIN'.");
+        };
+
+        newUser.setUsername(request.username().trim());
+        newUser.setEmail(request.email().trim());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+        // requiresPasswordChange is true by default from the entity definition
 
         User savedUser = userRepository.save(newUser);
-        return mapUserToResponse(savedUser); // Use a helper method
+        return mapUserToResponse(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public UserCreateResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return mapUserToResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public List<UserCreateResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::mapUserToResponse) // Convert each User to a UserCreateResponse
+                .map(this::mapUserToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public UserCreateResponse updateUser(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        validateUserUniqueness(request.username(), request.email(), id);
+
+        Optional.ofNullable(request.username()).map(String::trim).ifPresent(user::setUsername);
+        Optional.ofNullable(request.email()).map(String::trim).ifPresent(user::setEmail);
+
+        // Note: This implementation does not allow changing the role of an existing user.
+        // This is often a good security practice to prevent accidental privilege escalation.
+
+        User updatedUser = userRepository.save(user);
+        return mapUserToResponse(updatedUser);
     }
 
     public void deleteUser(Long id) {
@@ -167,74 +136,55 @@ public class AdminService {
         userRepository.deleteById(id);
     }
 
-    // Update user basic info (username, email, role validation)
-    public UserCreateResponse updateUser(Long id, UserUpdateRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    // --- Helper Methods ---
 
-        // Normalize inputs
-        String newUsername = Optional.ofNullable(request.username()).map(String::trim).orElse(null);
-        String newEmail = Optional.ofNullable(request.email()).map(String::trim).orElse(null);
-        String newRoleStr = Optional.ofNullable(request.role()).map(String::trim).orElse(null);
+    private void mapRequestToServiceItem(ServiceItemRequest request, ServiceItem serviceItem) {
+        serviceItem.setServiceItemName(request.serviceItemName());
+        serviceItem.setServiceItemCost(request.serviceItemCost());
+        serviceItem.setRequiredEmployeeCount(request.requiredEmployeeCount());
+        serviceItem.setEstimatedDuration(request.estimatedDuration());
 
-        // username conflict (case-insensitive), excluding self
-        if (newUsername != null && !newUsername.equalsIgnoreCase(user.getUsername())) {
-            userRepository.findByUsername(newUsername).ifPresent(conflict -> {
-                if (!conflict.getId().equals(id)) {
+        try {
+            serviceItem.setVehicleType(VehicleType.valueOf(request.vehicleType().toUpperCase()));
+            serviceItem.setServiceItemType(ServiceItemType.valueOf(request.serviceItemType().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid enum value provided for type: " + e.getMessage());
+        }
+    }
+
+    private void validateUserUniqueness(String username, String email, Long currentUserId) {
+        Optional.ofNullable(username).map(String::trim).ifPresent(u -> {
+            if (u.isBlank()) throw new BadRequestException("Username cannot be blank");
+            userRepository.findByUsername(u).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(currentUserId)) {
                     throw new ResourceConflictException("Error: Username is already taken!");
                 }
             });
-            if (newUsername.isBlank()) {
-                throw new BadRequestException("Username cannot be blank");
-            }
-            user.setUsername(newUsername);
-        }
+        });
 
-        // email conflict (case-insensitive), excluding self
-        if (newEmail != null && !newEmail.equalsIgnoreCase(user.getEmail())) {
-            userRepository.findByEmail(newEmail).ifPresent(conflict -> {
-                if (!conflict.getId().equals(id)) {
+        Optional.ofNullable(email).map(String::trim).ifPresent(e -> {
+            if (e.isBlank()) throw new BadRequestException("Email cannot be blank");
+            userRepository.findByEmail(e).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(currentUserId)) {
                     throw new ResourceConflictException("Error: User with this email is already in use!");
                 }
             });
-            if (newEmail.isBlank()) {
-                throw new BadRequestException("Email cannot be blank");
-            }
-            user.setEmail(newEmail);
-        }
-
-        // role validation: do not allow changing concrete type via this endpoint
-        if (newRoleStr != null && !newRoleStr.isBlank()) {
-            Role requestedRole;
-            try {
-                requestedRole = Role.valueOf(newRoleStr.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new BadRequestException("Invalid role specified. Allowed: ADMIN, EMPLOYEE");
-            }
-            Role currentRole = user.getRole();
-            if (!requestedRole.equals(currentRole)) {
-                // Disallow changing discriminator type through simple update
-                throw new BadRequestException("Changing user role type is not supported in updateUser. Create the desired type and migrate data instead.");
-            }
-        }
-
-        // touch updatedAt
-        user.setUpdatedAt(java.time.LocalDateTime.now());
-
-        // Persist changes
-        User saved = userRepository.save(user);
-        return mapUserToResponse(saved);
+        });
     }
 
-
-
     private UserCreateResponse mapUserToResponse(User user) {
+        String role = "USER"; // Default
+        if (user instanceof Admin) {
+            role = "ADMIN";
+        } else if (user instanceof Employee) {
+            role = "EMPLOYEE";
+        }
         return new UserCreateResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole().name()
+                role,
+                user.isRequiresPasswordChange()
         );
     }
 }
-

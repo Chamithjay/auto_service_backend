@@ -5,13 +5,15 @@ import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
 import com.EAD.autoservice_backend.model.ServiceItem;
-import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.service.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -19,15 +21,26 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
+    private final AdminService adminService;
+
     @Autowired
-    private AdminService adminService;
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
+    }
 
     // --- Service CRUD ---
 
     @PostMapping("/services")
-    public ResponseEntity<ServiceItem> addServiceItem(@RequestBody ServiceItemRequest request) {
+    public ResponseEntity<ServiceItem> addServiceItem(@Valid @RequestBody ServiceItemRequest request) {
         ServiceItem createdItem = adminService.createServiceItem(request);
-        return ResponseEntity.ok(createdItem);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdItem.getServiceItemId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdItem);
     }
 
     @GetMapping("/services/{id}")
@@ -43,7 +56,7 @@ public class AdminController {
     }
 
     @PutMapping("/services/{id}")
-    public ResponseEntity<ServiceItem> updateServiceItem(@PathVariable Long id, @RequestBody ServiceItemRequest request) {
+    public ResponseEntity<ServiceItem> updateServiceItem(@PathVariable Long id, @Valid @RequestBody ServiceItemRequest request) {
         ServiceItem updatedItem = adminService.updateService(id, request);
         return ResponseEntity.ok(updatedItem);
     }
@@ -51,15 +64,22 @@ public class AdminController {
     @DeleteMapping("/services/{id}")
     public ResponseEntity<Void> deleteServiceItem(@PathVariable Long id) {
         adminService.deleteService(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     // --- User (Employee/Admin) CRUD ---
 
-    @PostMapping({"/employees"})
-    public ResponseEntity<UserCreateResponse> createUser(@RequestBody UserCreateRequest request) {
+    @PostMapping("/employees")
+    public ResponseEntity<UserCreateResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
         UserCreateResponse newUser = adminService.createUser(request);
-        return ResponseEntity.ok(newUser);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newUser.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(newUser);
     }
 
     @GetMapping({"/employees/{id}"})
@@ -83,6 +103,6 @@ public class AdminController {
     @DeleteMapping({"/employees/{id}"})
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }
