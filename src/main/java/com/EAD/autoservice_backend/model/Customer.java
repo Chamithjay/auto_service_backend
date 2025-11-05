@@ -34,5 +34,8 @@ public class Customer extends User {
     }
 
 
+    public Long getCustomerId() {
+        return getId();
+    }
 }
 
