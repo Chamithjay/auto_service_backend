@@ -97,8 +97,10 @@ public class AuthService {
                     token,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole().name()
+                    user.getRole().name(),
+                    user.isRequiresPasswordChange()
             );
+
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         }

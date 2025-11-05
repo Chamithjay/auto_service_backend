@@ -29,10 +29,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "requires_password_change", nullable = false)
+    private boolean requiresPasswordChange = true;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.CUSTOMER;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
@@ -48,6 +51,16 @@ public class User implements UserDetails {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    public boolean isRequiresPasswordChange() {
+        return requiresPasswordChange;
+    }
+
+    public void setRequiresPasswordChange(boolean requiresPasswordChange) {
+        this.requiresPasswordChange = requiresPasswordChange;
+    }
+
+    // --- UserDetails Methods ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -6,5 +6,6 @@ public record UserCreateResponse(
         Long id,
         String username,
         String email,
-        String role
+        String role,
+        boolean requiresPasswordChange
 ) {}
