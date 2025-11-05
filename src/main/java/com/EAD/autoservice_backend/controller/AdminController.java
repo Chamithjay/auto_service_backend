@@ -3,6 +3,7 @@ package com.EAD.autoservice_backend.controller;
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
+import com.EAD.autoservice_backend.dto.UserUpdateRequest;
 import com.EAD.autoservice_backend.model.ServiceItem;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.service.AdminService;
@@ -55,27 +56,31 @@ public class AdminController {
 
     // --- User (Employee/Admin) CRUD ---
 
-    @PostMapping("/users")
+    @PostMapping({"/employees"})
     public ResponseEntity<UserCreateResponse> createUser(@RequestBody UserCreateRequest request) {
         UserCreateResponse newUser = adminService.createUser(request);
         return ResponseEntity.ok(newUser);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping({"/employees/{id}"})
     public ResponseEntity<UserCreateResponse> getUserById(@PathVariable Long id) {
         UserCreateResponse user = adminService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/users")
+    @GetMapping({"/employees"})
     public ResponseEntity<List<UserCreateResponse>> getAllUsers() {
         List<UserCreateResponse> users = adminService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    // a new DTO for updating a user without changing password
+    @PutMapping({"/employees/{id}"})
+    public ResponseEntity<UserCreateResponse> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+        UserCreateResponse updated = adminService.updateUser(id, request);
+        return ResponseEntity.ok(updated);
+    }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping({"/employees/{id}"})
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.noContent().build(); // 204 No Content

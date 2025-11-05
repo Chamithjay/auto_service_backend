@@ -87,10 +87,7 @@ public class ProfileService {
         // Generate new token if username was changed
         if (usernameChanged) {
             String newToken = jwtUtil.generateToken(
-                updatedUser.getUsername(), 
-                updatedUser.getId(), 
-                updatedUser.getEmail(), 
-                updatedUser.getRole().name()
+                updatedUser.getUsername()
             );
             response.setToken(newToken);
         }

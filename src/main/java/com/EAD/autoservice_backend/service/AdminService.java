@@ -4,6 +4,7 @@ package com.EAD.autoservice_backend.service;
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
+import com.EAD.autoservice_backend.dto.UserUpdateRequest;
 
 // Model imports
 import com.EAD.autoservice_backend.model.*; // Import all models
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class AdminService {
@@ -99,11 +101,26 @@ public class AdminService {
 
     public UserCreateResponse createUser(UserCreateRequest request) {
 
-        if (userRepository.findByUsername(request.username()).isPresent()) {
+        // Username uniqueness
+        String reqUsername = Optional.ofNullable(request.username()).map(String::trim).orElse("");
+        if (reqUsername.isBlank()) {
+            throw new BadRequestException("Username is required");
+        }
+        if (userRepository.findByUsername(reqUsername).isPresent()) {
             throw new ResourceConflictException("Error: Username is already taken!");
         }
-        if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new ResourceConflictException("Error: Email is already in use!");
+
+        // Email uniqueness
+        String reqEmail = Optional.ofNullable(request.email()).map(String::trim).orElse("");
+        if (reqEmail.isBlank()) {
+            throw new BadRequestException("Email is required");
+        }
+        if (userRepository.findByEmail(reqEmail).isPresent()) {
+            throw new ResourceConflictException("Error: User with this email is already in use!");
+        }
+
+        if (request.password() == null || request.password().isBlank()) {
+            throw new BadRequestException("Password is required");
         }
 
         String hashedPassword = passwordEncoder.encode(request.password());
@@ -112,14 +129,14 @@ public class AdminService {
 
         if (role.equals("EMPLOYEE")) {
             Employee newEmployee = new Employee();
-            newEmployee.setUsername(request.username());
-            newEmployee.setEmail(request.email());
+            newEmployee.setUsername(reqUsername);
+            newEmployee.setEmail(reqEmail);
             newEmployee.setPassword(hashedPassword);
             newUser = newEmployee;
         } else if (role.equals("ADMIN")) {
             Admin newAdmin = new Admin();
-            newAdmin.setUsername(request.username());
-            newAdmin.setEmail(request.email());
+            newAdmin.setUsername(reqUsername);
+            newAdmin.setEmail(reqEmail);
             newAdmin.setPassword(hashedPassword);
             newUser = newAdmin;
         } else {
@@ -150,6 +167,66 @@ public class AdminService {
         userRepository.deleteById(id);
     }
 
+    // Update user basic info (username, email, role validation)
+    public UserCreateResponse updateUser(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Normalize inputs
+        String newUsername = Optional.ofNullable(request.username()).map(String::trim).orElse(null);
+        String newEmail = Optional.ofNullable(request.email()).map(String::trim).orElse(null);
+        String newRoleStr = Optional.ofNullable(request.role()).map(String::trim).orElse(null);
+
+        // username conflict (case-insensitive), excluding self
+        if (newUsername != null && !newUsername.equalsIgnoreCase(user.getUsername())) {
+            userRepository.findByUsername(newUsername).ifPresent(conflict -> {
+                if (!conflict.getId().equals(id)) {
+                    throw new ResourceConflictException("Error: Username is already taken!");
+                }
+            });
+            if (newUsername.isBlank()) {
+                throw new BadRequestException("Username cannot be blank");
+            }
+            user.setUsername(newUsername);
+        }
+
+        // email conflict (case-insensitive), excluding self
+        if (newEmail != null && !newEmail.equalsIgnoreCase(user.getEmail())) {
+            userRepository.findByEmail(newEmail).ifPresent(conflict -> {
+                if (!conflict.getId().equals(id)) {
+                    throw new ResourceConflictException("Error: User with this email is already in use!");
+                }
+            });
+            if (newEmail.isBlank()) {
+                throw new BadRequestException("Email cannot be blank");
+            }
+            user.setEmail(newEmail);
+        }
+
+        // role validation: do not allow changing concrete type via this endpoint
+        if (newRoleStr != null && !newRoleStr.isBlank()) {
+            Role requestedRole;
+            try {
+                requestedRole = Role.valueOf(newRoleStr.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException("Invalid role specified. Allowed: ADMIN, EMPLOYEE");
+            }
+            Role currentRole = user.getRole();
+            if (!requestedRole.equals(currentRole)) {
+                // Disallow changing discriminator type through simple update
+                throw new BadRequestException("Changing user role type is not supported in updateUser. Create the desired type and migrate data instead.");
+            }
+        }
+
+        // touch updatedAt
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+
+        // Persist changes
+        User saved = userRepository.save(user);
+        return mapUserToResponse(saved);
+    }
+
+
 
     private UserCreateResponse mapUserToResponse(User user) {
         return new UserCreateResponse(
@@ -160,3 +237,4 @@ public class AdminService {
         );
     }
 }
+

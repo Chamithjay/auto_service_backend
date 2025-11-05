@@ -12,26 +12,49 @@ Content-Type: application/json
   "estimatedDuration": 45
 }
 
-### 2. Add a new Employee
+### 2. Add a new Admin
 # @name addAdmin
 POST http://localhost:8080/api/admin/users
 Content-Type: application/json
 
 {
-  "username": "heshani",
-  "email": "john.doe@autoservice.com",
+  "username": "admin2",
+  "email": "admin2@autoservice.com",
   "password": "pwd123",
   "role": "ADMIN"
 }
 
-### 2. Add a new Employee
+### 3. Add a new Employee
 # @name addEmployee
 POST http://localhost:8080/api/admin/users
 Content-Type: application/json
 
 {
-  "username": "SAVINDU",
-  "email": "john@autoservice.com",
+  "username": "emp_mark",
+  "email": "mark@autoservice.com",
   "password": "pwd123",
   "role": "EMPLOYEE"
 }
+
+### 4. Get all users
+GET http://localhost:8080/api/admin/users
+
+### 5. Get a user by id
+# @prompt id Enter user id
+GET http://localhost:8080/api/admin/users/{{id}}
+
+### 6. Update a user (username/email)
+# @name updateUser
+# @prompt uid Enter user id
+PUT http://localhost:8080/api/admin/users/{{uid}}
+Content-Type: application/json
+
+{
+  "username": "emp_mark_new",
+  "email": "mark.new@autoservice.com",
+  "role": "EMPLOYEE"
+}
+
+### 7. Delete a user
+# @prompt did Enter user id
+DELETE http://localhost:8080/api/admin/users/{{did}}

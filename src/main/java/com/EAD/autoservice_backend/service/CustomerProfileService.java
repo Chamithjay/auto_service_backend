@@ -79,10 +79,7 @@ public class CustomerProfileService {
         CustomerProfileResponse response = mapToProfileResponse(updatedCustomer);
         if (usernameChanged) {
             String newToken = jwtUtil.generateToken(
-                updatedCustomer.getUsername(), 
-                updatedCustomer.getId(), 
-                updatedCustomer.getEmail(), 
-                "CUSTOMER"
+                updatedCustomer.getUsername()
             );
             response.setToken(newToken);
         }
