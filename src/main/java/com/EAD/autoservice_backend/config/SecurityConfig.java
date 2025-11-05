@@ -87,30 +87,56 @@ public class SecurityConfig {
     /**
      * Main security filter chain configuration
      */
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // Disable CSRF for Postman / React
-                .csrf(AbstractHttpConfigurer::disable)
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http
+    //             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    //             // Disable CSRF for Postman / React
+    //             .csrf(AbstractHttpConfigurer::disable)
 
-                // Allow only registration endpoint without authentication
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register").permitAll()  // public registration
-                        .requestMatchers("/api/auth/password/**").permitAll()
-                        .anyRequest().permitAll()
-                )
-
-
-                .formLogin(AbstractHttpConfigurer::disable)
+    //             // Allow only registration endpoint without authentication
+    //             .authorizeHttpRequests(auth -> auth
+    //                     .requestMatchers("/api/auth/register").permitAll()  // public registration
+    //                     .requestMatchers("/api/auth/password/**").permitAll()
+    //                     .requestMatchers("/api/auth/login").permitAll()
+    //                     .anyRequest().permitAll()
+    //             )
 
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+    //             .formLogin(AbstractHttpConfigurer::disable)
 
-        return http.build();
-    }
+
+    //             .sessionManagement(session -> session
+    //                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    //             );
+
+    // // Register authentication provider and add JWT filter into the chain
+    // http.authenticationProvider(authenticationProvider());
+    // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    // return http.build();
+    // }
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(AbstractHttpConfigurer::disable) // disable CSRF for APIs
+        .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/api/auth/register",
+                    "/api/auth/login",           // <--- allow login without auth
+                    "/api/auth/password/**"
+                ).permitAll()
+                .anyRequest().authenticated()  // protect all other endpoints
+        )
+        .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+}
 
 
 }
