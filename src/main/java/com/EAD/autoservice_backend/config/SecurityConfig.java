@@ -74,15 +74,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:5173",    // Vite dev server
-                "http://localhost:5174",    // Vite dev server (alternate)
-                "http://localhost:5175",    // Vite dev server (alternate)
-                "http://localhost",         // Docker nginx frontend (port 80)
-                "http://localhost:80",      // Docker nginx frontend (explicit port)
-                "http://127.0.0.1:*",       // Minikube service tunnel (any port)
-                "http://192.168.49.2:*"     // Minikube IP (any port)
-        ));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -104,12 +96,18 @@ public class SecurityConfig {
 
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register").permitAll()  // public registration
-                        .requestMatchers("/api/auth/login").permitAll()     // public login
-                        .requestMatchers("/api/auth/password/**").permitAll() // password reset endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")   // Secure admin paths
-                        .requestMatchers("/api/profile/**").authenticated()  // admin profile
-                        .anyRequest().authenticated()  // Require auth for everything else
+                        .requestMatchers(
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/password/**", // for forgot/reset password
+                                "/api/v1/appointment-jobs/**",
+                                "/api/v1/leaves/**"
+                        ).permitAll()
+
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/profile/**").authenticated()
+
+                        .anyRequest().authenticated()
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)
