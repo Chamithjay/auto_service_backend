@@ -8,7 +8,7 @@ import java.time.LocalDate;
  * Employee entity extending User with employee-specific attributes
  */
 @Entity
-@Table(name = "employees")
+@DiscriminatorValue("EMPLOYEE")
 public class Employee extends User {
 
     @Column(name = "employee_id", unique = true, length = 20)

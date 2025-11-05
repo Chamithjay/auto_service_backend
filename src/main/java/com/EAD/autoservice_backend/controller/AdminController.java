@@ -1,0 +1,108 @@
+package com.EAD.autoservice_backend.controller;
+
+import com.EAD.autoservice_backend.dto.ServiceItemRequest;
+import com.EAD.autoservice_backend.dto.UserCreateRequest;
+import com.EAD.autoservice_backend.dto.UserCreateResponse;
+import com.EAD.autoservice_backend.dto.UserUpdateRequest;
+import com.EAD.autoservice_backend.model.ServiceItem;
+import com.EAD.autoservice_backend.service.AdminService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/admin")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminController {
+
+    private final AdminService adminService;
+
+    @Autowired
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
+    }
+
+    // --- Service CRUD ---
+
+    @PostMapping("/services")
+    public ResponseEntity<ServiceItem> addServiceItem(@Valid @RequestBody ServiceItemRequest request) {
+        ServiceItem createdItem = adminService.createServiceItem(request);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdItem.getServiceItemId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdItem);
+    }
+
+    @GetMapping("/services/{id}")
+    public ResponseEntity<ServiceItem> getServiceItemById(@PathVariable Long id) {
+        ServiceItem serviceItem = adminService.getServiceById(id);
+        return ResponseEntity.ok(serviceItem);
+    }
+
+    @GetMapping("/services")
+    public ResponseEntity<List<ServiceItem>> getAllServiceItems() {
+        List<ServiceItem> items = adminService.getAllServices();
+        return ResponseEntity.ok(items);
+    }
+
+    @PutMapping("/services/{id}")
+    public ResponseEntity<ServiceItem> updateServiceItem(@PathVariable Long id, @Valid @RequestBody ServiceItemRequest request) {
+        ServiceItem updatedItem = adminService.updateService(id, request);
+        return ResponseEntity.ok(updatedItem);
+    }
+
+    @DeleteMapping("/services/{id}")
+    public ResponseEntity<Void> deleteServiceItem(@PathVariable Long id) {
+        adminService.deleteService(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // --- User (Employee/Admin) CRUD ---
+
+    @PostMapping("/employees")
+    public ResponseEntity<UserCreateResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
+        UserCreateResponse newUser = adminService.createUser(request);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newUser.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(newUser);
+    }
+
+    @GetMapping({"/employees/{id}"})
+    public ResponseEntity<UserCreateResponse> getUserById(@PathVariable Long id) {
+        UserCreateResponse user = adminService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping({"/employees"})
+    public ResponseEntity<List<UserCreateResponse>> getAllUsers() {
+        List<UserCreateResponse> users = adminService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @PutMapping({"/employees/{id}"})
+    public ResponseEntity<UserCreateResponse> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+        UserCreateResponse updated = adminService.updateUser(id, request);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping({"/employees/{id}"})
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+}
