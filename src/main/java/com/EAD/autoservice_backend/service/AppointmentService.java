@@ -1,18 +1,25 @@
 package com.EAD.autoservice_backend.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import com.EAD.autoservice_backend.dto.*;
 import com.EAD.autoservice_backend.model.*;
 import com.EAD.autoservice_backend.repository.*;
+import com.EAD.autoservice_backend.exception.NoAvailableEmployeeException;
+import com.EAD.autoservice_backend.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
-
+    private JwtUtil jwtUtil;
     private final VehicleRepository vehicleRepository;
     private final ServiceItemRepository serviceItemRepository;
     private final CustomerRepository customerRepository;
@@ -20,10 +27,26 @@ public class AppointmentService {
     private final EmployeeRepository employeeRepository;
     private final LeaveRepository leaveRepository;
     private final WorkSessionRepository workSessionRepository;
+    private final AppointmentJobRepository appointmentJobRepository;
+    private final JobAssignmentRepository jobAssignmentRepository;
 
-    public UserInfoResponse getLoggedUserInfoTemp(Long userId) {
-        Customer customer=customerRepository.findById(userId)
+    public UserInfoResponse getLoggedUserInfo(String token) {
+        // Remove "Bearer " prefix if present
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        // Extract user ID from JWT
+        Long userId = jwtUtil.extractUserId(token);
+        if (userId == null) {
+            throw new RuntimeException("Invalid token: user ID not found");
+        }
+
+        // Retrieve the customer using the extracted user ID
+        Customer customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // Build and return response
         return UserInfoResponse.builder()
                 .userId(customer.getId())
                 .fullName(customer.getFullName())
@@ -31,8 +54,22 @@ public class AppointmentService {
                 .build();
     }
 
-    public List<VehicleResponse> getVehiclesForUserTemp(Long userId) {
-        List<Vehicle> vehicles=vehicleRepository.findByCustomerId(userId);
+    public List<VehicleResponse> getVehiclesForUser(Long userId) {
+        // Remove "Bearer " prefix if present
+//        if (token.startsWith("Bearer ")) {
+//            token = token.substring(7);
+//        }
+//
+//        // Extract user ID from JWT
+//        Long userId = jwtUtil.extractUserId(token);
+//        if (userId == null) {
+//            throw new RuntimeException("Invalid token: user ID not found");
+//        }
+
+        // Retrieve all vehicles for the user
+        List<Vehicle> vehicles = vehicleRepository.findByCustomerId(userId);
+
+        // Convert to response DTOs
         return vehicles.stream()
                 .map(v -> new VehicleResponse(
                         v.getVehicleId(),
@@ -40,7 +77,6 @@ public class AppointmentService {
                         v.getVehicleType()
                 ))
                 .toList();
-
     }
     private ServiceItemDTO mapToServiceItemDTO(ServiceItem item) {
         return ServiceItemDTO.builder()
@@ -76,7 +112,7 @@ public class AppointmentService {
 
 
     public AppointmentCalculationResponse calculateAppointmentDetails(AppointmentCalculationRequest request) {
-        // 1️⃣ Get selected service items
+
         List<ServiceItem> selectedItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());
         if (selectedItems.isEmpty()) {
             return AppointmentCalculationResponse.builder()
@@ -84,120 +120,256 @@ public class AppointmentService {
                     .build();
         }
 
-        // 2️⃣ Calculate total cost and total duration
         BigDecimal totalCost = selectedItems.stream()
                 .map(ServiceItem::getServiceItemCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        int totalDuration = selectedItems.stream()
-                .mapToInt(ServiceItem::getEstimatedDuration)
-                .sum(); // total in minutes
-
-        // 3️⃣ Get total employees
-        long totalEmployees = employeeRepository.count();
-
-        // 4️⃣ Get employees on leave for the selected day and session
-        // 1️⃣ Extract the session from request
         SessionType sessionType = request.getSessionType();
+        LeaveType leaveType = (sessionType == SessionType.MORNING) ? LeaveType.HALFDAY_MORNING : LeaveType.HALFDAY_EVENING;
 
-// 2️⃣ Map to LeaveType
-        LeaveType leaveType;
-        switch (sessionType) {
-            case MORNING -> leaveType = LeaveType.MORNING;
-            case EVENING -> leaveType = LeaveType.EVENING;
-            default -> throw new IllegalArgumentException("Invalid session type");
+        List<Employee> allEmployees = employeeRepository.findAll();
+        if (allEmployees.isEmpty()) {
+            return AppointmentCalculationResponse.builder()
+                    .message("No employees found in the system.")
+                    .build();
         }
 
-// 3️⃣ Call repository with correct LeaveType
-        long employeesOnLeave = leaveRepository.countEmployeesOnLeave(
-                request.getAppointmentDate(),
-                leaveType
-        );
+        List<Employee> availableEmployees = allEmployees.stream()
+                .filter(emp -> !leaveRepository.isEmployeeOnApprovedLeave(emp.getId(), request.getAppointmentDate(), leaveType))
+                .toList();
 
-        long availableEmployees = totalEmployees - employeesOnLeave;
-        if (availableEmployees <= 0) {
+        if (availableEmployees.isEmpty()) {
             return AppointmentCalculationResponse.builder()
                     .message("No employees available for the selected date and session.")
                     .build();
         }
 
-        // 5️⃣ Get work session hours (e.g., MORNING = 5 hours, EVENING = 4 hours)
-        double sessionHours = workSessionRepository.findBySessionType(request.getSessionType())
+        int sessionMinutes = (int) (workSessionRepository.findBySessionType(sessionType)
                 .map(WorkSession::getDurationHours)
-                .orElse(5.0); // fallback
+                .orElse(5.0) * 60);
 
-        // total man hours = available employees × session hours
-        double totalManHours = availableEmployees * sessionHours;
+        // ✅ Check each service item individually
+        for (ServiceItem item : selectedItems) {
+            int serviceDuration = item.getEstimatedDuration();
 
-        // 6️⃣ Get total duration already booked (in hours)
-        long usedMinutes = appointmentRepository.sumTotalDurationByDateAndSession(
-                request.getAppointmentDate(),
-                request.getSessionType()
-        );
+            boolean canBeAssigned = availableEmployees.stream()
+                    .anyMatch(emp -> {
+                        int usedMinutes = jobAssignmentRepository
+                                .sumTotalDurationByDateAndEmployeeAndSession(emp.getId(), request.getAppointmentDate(), sessionType);
+                        return (usedMinutes + serviceDuration) <= sessionMinutes;
+                    });
 
-
-        double usedHours = usedMinutes / 60.0;
-        double requiredHours = totalDuration / 60.0;
-
-        // 7️⃣ Check availability
-        if ((usedHours + requiredHours) > totalManHours) {
-            return AppointmentCalculationResponse.builder()
-                    .message("No available slots for the selected date and session.")
-                    .build();
+            if (!canBeAssigned) {
+                return AppointmentCalculationResponse.builder()
+                        .message("No available employees can take the service item: " + item.getServiceItemName())
+                        .build();
+            }
         }
 
-        // ✅ Success case
         return AppointmentCalculationResponse.builder()
                 .totalCost(totalCost)
                 .message("Slot available for the selected session.")
                 .build();
     }
-//    public AppointmentResponse createAppointmentTemp(AppointmentCreateRequest request, Long userId) {
-//        Customer customer=customerRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("Customer not found"));
-//        Vehicle vehicle=vehicleRepository.findByVehicleId(request.getVehicleId());
-//        List<ServiceItem> serviceItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());
+
+
+
+    private Employee getNextEmployee(
+            Long lastEmployeeId,
+            LocalDate date,
+            int newJobDuration,
+            SessionType sessionType,
+            List<Employee> availableEmployees
+    ) {
+        int lastIndex = -1;
+
+        for (int i = 0; i < availableEmployees.size(); i++) {
+            if (availableEmployees.get(i).getId().equals(lastEmployeeId)) {
+                lastIndex = i;
+                break;
+            }
+        }
+
+        for (int offset = 1; offset <= availableEmployees.size(); offset++) {
+            Employee candidate = availableEmployees.get((lastIndex + offset) % availableEmployees.size());
+
+            // Total minutes already assigned to this employee in this session
+            int totalMinutes = jobAssignmentRepository
+                    .sumTotalDurationByDateAndEmployeeAndSession(candidate.getId(), date, sessionType);
+
+            // Available minutes in session
+            WorkSession session = workSessionRepository
+                    .findBySessionType(sessionType)
+                    .orElseThrow(() -> new RuntimeException("Work session not configured"));
+
+            int availableMinutes = (int) (session.getDurationHours() * 60);
+
+            if (totalMinutes + newJobDuration <= availableMinutes) {
+                return candidate;
+            }
+        }
+
+        throw new NoAvailableEmployeeException("No available employee for the session.");
+    }
+
+
+    @Transactional
+    public AppointmentResponse createAppointment(AppointmentCreateRequest request,@RequestParam Long userId ) {
+//        if (token.startsWith("Bearer ")) {
+//            token = token.substring(7);
+//        }
 //
-//        BigDecimal totalCost = serviceItems.stream()
-//                .map(ServiceItem::getServiceItemCost)
-//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//        Long userId = jwtUtil.extractUserId(token);
+//        if (userId == null) {
+//            throw new RuntimeException("Invalid token: user ID not found");
+//        }
+
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Vehicle vehicle = vehicleRepository.findByVehicleId(request.getVehicleId());
+
+        List<ServiceItem> serviceItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());
+
+        BigDecimal totalCost = serviceItems.stream()
+                .map(ServiceItem::getServiceItemCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int totalDuration = serviceItems.stream()
+                .mapToInt(ServiceItem::getEstimatedDuration)
+                .sum();
+
+        Appointment appointment = Appointment.builder()
+                .customer(customer)
+                .vehicle(vehicle)
+                .vehicleName(vehicle.getVehicleName())
+                .appointmentDate(request.getAppointmentDate())
+                .sessionType(request.getSessionType())
+                .totalCost(totalCost)
+                .totalApproximatedDuration(totalDuration)
+                .status(AppointmentStatus.NEW)
+                .build();
+
+        appointmentRepository.save(appointment);
+
+        // Determine leave type based on session
+        LeaveType leaveType = (request.getSessionType() == SessionType.MORNING)
+                ? LeaveType.HALFDAY_MORNING
+                : LeaveType.HALFDAY_EVENING;
+
+        // Filter only employees not on approved leave
+        List<Employee> availableEmployees = employeeRepository.findAllByOrderByIdAsc().stream()
+                .filter(emp -> !leaveRepository.isEmployeeOnApprovedLeave(
+                        emp.getId(),
+                        request.getAppointmentDate(),
+                        leaveType
+                ))
+                .toList();
+
+        if (availableEmployees.isEmpty()) {
+            throw new NoAvailableEmployeeException("No employees available due to approved leave");
+        }
+
+        Long lastEmployeeId = jobAssignmentRepository.findLastAssignedEmployeeId().orElse(null);
+
+        for (ServiceItem item : serviceItems) {
+            int newJobDuration = item.getEstimatedDuration();
+
+            // ⭐ Use modified getNextEmployee method
+            Employee nextEmployee = getNextEmployee(
+                    lastEmployeeId,
+                    request.getAppointmentDate(),
+                    newJobDuration,
+                    request.getSessionType(),
+                    availableEmployees
+            );
+
+            AppointmentJob job = new AppointmentJob();
+            job.setAppointment(appointment);
+            job.setServiceItem(item);
+            job.setItemStatus(AppointmentStatus.NEW);
+            job.setEmployeeAssignments(new HashSet<>());
+            appointmentJobRepository.save(job);
+
+            JobAssignment assignment = new JobAssignment();
+            assignment.setAppointmentJob(job);
+            assignment.setEmployee(nextEmployee);
+            jobAssignmentRepository.save(assignment);
+
+            job.getEmployeeAssignments().add(assignment);
+            appointmentJobRepository.save(job);
+
+            lastEmployeeId = nextEmployee.getId();
+        }
+
+        return AppointmentResponse.builder()
+                .appointmentId(appointment.getAppointmentId())
+                .vehicleName(appointment.getVehicleName())
+                .appointmentDate(appointment.getAppointmentDate())
+                .sessionType(appointment.getSessionType())
+                .totalCost(appointment.getTotalCost())
+                .totalApproximatedDuration(totalDuration)
+                .status(appointment.getStatus().name())
+                .message("Appointment created successfully.")
+                .build();
+    }
+
+
+
+//    public List<AppointmentHistoryResponse> getCustomerAppointments(HttpServletRequest request) {
+//        String authHeader = request.getHeader("Authorization");
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            throw new RuntimeException("Missing or invalid Authorization header");
+//        }
 //
-//        int totalDuration = serviceItems.stream()
-//                .mapToInt(ServiceItem::getEstimatedDuration)
-//                .sum();
+//        String token = authHeader.substring(7);
+//        Long customerId = jwtUtil.extractUserId(token);
 //
-//        LocalTime estimatedEndTime = request.getStartTime().plusMinutes(totalDuration);
+//        // 1️⃣ Fetch all appointments for the logged-in customer
+//        List<Appointment> appointments = appointmentRepository.findByCustomerId(customerId);
 //
-//        Appointment appointment = Appointment.builder()
-//                .customer(customer)
-//                .vehicle(vehicle)
-//                .vehicleName(vehicle.getVehicleName())
-//                .appointmentDate(request.getAppointmentDate())
-//                .startTime(request.getStartTime())
-//                .endTime(estimatedEndTime)
-//                .totalCost(totalCost)
-//                .status(AppointmentStatus.NEW)
-//                .build();
+//        // 2️⃣ Build response list
+//        return appointments.stream().map(appointment -> {
+//            // Fetch all AppointmentJobs related to this appointment
+//            List<AppointmentJob> jobs = appointmentJobRepository.findByAppointment(appointment);
 //
-//        appointment=appointmentRepository.save(appointment);
+//            // For each job, get the service/modification name
+//            List<String> serviceNames = jobs.stream()
+//                    .map(job -> job.getServiceItem().getServiceItemName())
+//                    .toList();
 //
-//        return AppointmentResponse.builder()
-//                .appointmentId(appointment.getAppointmentId())
-//                .vehicleName(appointment.getVehicleName())
-//                .appointmentDate(appointment.getAppointmentDate())
-//                .startTime(appointment.getStartTime())
-//                .endTime(appointment.getEndTime())
-//                .totalCost(appointment.getTotalCost())
-//                .status(appointment.getStatus().name()) // assuming AppointmentStatus is an enum
-//                .selectedItems(
-//                        serviceItems.stream()
-//                                .map(item -> ServiceItemDTO.builder()
-//                                        .id(item.getServiceItemId())
-//                                        .name(item.getServiceItemName())
-//                                        .type(item.getServiceItemType().name())
-//                                        .build())
-//                                .toList()
-//                )
-//                .build();
+//            return AppointmentHistoryResponse.builder()
+//                    .appointmentId(appointment.getAppointmentId())
+//                    .appointmentDate(appointment.getAppointmentDate())
+//                    .sessionType(appointment.getSessionType())
+//                    .status(appointment.getStatus())
+//                    .totalCost(appointment.getTotalCost())
+//                    .vehicleName(appointment.getVehicleName())
+//                    .selectedServices(serviceNames)
+//                    .build();
+//        }).toList();
 //    }
+
+    public List<AppointmentHistoryResponse> getCustomerAppointments(Long customerId) {
+        List<Appointment> appointments = appointmentRepository.findByCustomerId(customerId);
+
+        return appointments.stream().map(appointment -> {
+            List<AppointmentJob> jobs = appointmentJobRepository.findByAppointment(appointment);
+
+            List<String> serviceNames = jobs.stream()
+                    .map(job -> job.getServiceItem().getServiceItemName())
+                    .toList();
+
+            return AppointmentHistoryResponse.builder()
+                    .appointmentId(appointment.getAppointmentId())
+                    .appointmentDate(appointment.getAppointmentDate())
+                    .sessionType(appointment.getSessionType())
+                    .status(appointment.getStatus())
+                    .totalCost(appointment.getTotalCost())
+                    .vehicleName(appointment.getVehicleName())
+                    .selectedServices(serviceNames)
+                    .build();
+        }).toList();
+    }
+
+
 }

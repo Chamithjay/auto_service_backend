@@ -9,12 +9,9 @@ import java.util.List;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-
-    // Find all employees
     List<Employee> findAll();
-
-    // Find employee by NIC
     Optional<Employee> findByNic(String nic);
+    List<Employee> findAllByOrderByIdAsc();
 }
 
 

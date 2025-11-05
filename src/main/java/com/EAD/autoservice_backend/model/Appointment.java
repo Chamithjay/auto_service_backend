@@ -44,6 +44,6 @@ public class Appointment {
     @Column(precision = 17, scale = 2)
     private BigDecimal totalCost;
 
-    @Column(name = "total_approximated_duration", nullable = false)
+    @Column(name = "total_approximated_duration", nullable = false) //this should be removed
     private Integer totalApproximatedDuration;
 }

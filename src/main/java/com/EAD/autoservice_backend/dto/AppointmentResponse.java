@@ -1,5 +1,6 @@
 package com.EAD.autoservice_backend.dto;
 
+import com.EAD.autoservice_backend.model.SessionType;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -16,9 +17,12 @@ public class AppointmentResponse {
     private Long appointmentId;
     private String vehicleName;
     private LocalDate appointmentDate;
+    private SessionType sessionType;             // 🆕 Added
     private LocalTime startTime;
     private LocalTime endTime;
     private BigDecimal totalCost;
+    private Integer totalApproximatedDuration;   // 🆕 Added
     private String status;
+    private String message;                      // 🆕 Added
     private List<ServiceItemDTO> selectedItems;
 }

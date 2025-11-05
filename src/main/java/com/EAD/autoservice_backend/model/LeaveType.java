@@ -1,7 +1,7 @@
 package com.EAD.autoservice_backend.model;
 
 public enum LeaveType {
-    MORNING,
-    EVENING,
+    HALFDAY_MORNING,
+    HALFDAY_EVENING,
     FULLDAY
 }

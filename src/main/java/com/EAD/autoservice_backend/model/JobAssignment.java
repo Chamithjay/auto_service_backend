@@ -24,9 +24,9 @@ public class JobAssignment {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "start_time", nullable = false) //18:50:00
+    @Column(name = "start_time") //18:50:00
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time")
     private LocalTime endTime;
 }

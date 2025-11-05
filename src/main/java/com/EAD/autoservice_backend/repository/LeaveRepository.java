@@ -11,13 +11,16 @@ import java.time.LocalDate;
 public interface LeaveRepository extends JpaRepository<Leave, Long> {
 
     @Query("""
-        SELECT COUNT(l)
-        FROM Leave l
-        WHERE l.leaveDate = :date
-          AND (l.leaveType = :leaveType OR l.leaveType = com.EAD.autoservice_backend.model.LeaveType.FULLDAY)
-    """)
-    long countEmployeesOnLeave(
-            @Param("date") LocalDate date,
-            @Param("leaveType") LeaveType leaveType
-    );
+    SELECT COUNT(l) > 0
+    FROM Leave l
+    WHERE l.employee.id = :employeeId
+      AND l.leaveDate = :date
+      AND l.leaveStatus = 'APPROVED'
+      AND (l.leaveType = :leaveType OR l.leaveType = 'FULLDAY')
+""")
+    boolean isEmployeeOnApprovedLeave(@Param("employeeId") Long employeeId,
+                                      @Param("date") LocalDate date,
+                                      @Param("leaveType") LeaveType leaveType);
+
+
 }

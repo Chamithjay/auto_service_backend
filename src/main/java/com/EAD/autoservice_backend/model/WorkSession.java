@@ -14,7 +14,6 @@ public class WorkSession {
 
     @Enumerated(EnumType.STRING)
     private SessionType sessionType;
-
     private LocalTime startTime;
     private LocalTime endTime;
     private double durationHours;
