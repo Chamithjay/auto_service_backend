@@ -10,8 +10,8 @@ import java.util.List;
 public class EmployeeAppointmentJobResponse {
 
     private final Long appointmentJobId;
-    private final String jonNote;
-    private final BigDecimal additional_cost;
+    private final String jobNote;
+    private final BigDecimal additionalCost;
     private final String jobStatus;
 
     private final EmployeeVehicleResponse vehicle;

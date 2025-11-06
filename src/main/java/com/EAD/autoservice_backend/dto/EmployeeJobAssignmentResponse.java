@@ -14,6 +14,6 @@ public class EmployeeJobAssignmentResponse {
     private final String employeeName;
     private final LocalTime startTime;
     private final LocalTime endTime;
-    private final BigDecimal additional_cost;
-    private final String jobNote;
+    private final BigDecimal additionalCost;
+    private final String costNote;
 }
