@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LeaveDTO {
+public class LeaveReqDTO {
     private Long leaveId;
     private LeaveType leaveType;
     private LocalDate leaveDate;

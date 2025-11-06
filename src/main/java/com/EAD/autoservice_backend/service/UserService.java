@@ -1,7 +1,6 @@
 package com.EAD.autoservice_backend.service;
 
-import com.EAD.autoservice_backend.dto.UserDTO;
-import com.EAD.autoservice_backend.dto.UserDTO;
+import com.EAD.autoservice_backend.dto.UsersDTO;
 import com.EAD.autoservice_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -15,7 +14,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<UserDTO> getAllCustomersBasicInfo() {
+    public List<UsersDTO> getAllCustomersBasicInfo() {
         return userRepository.findAllCustomersBasicInfo();
     }
 }

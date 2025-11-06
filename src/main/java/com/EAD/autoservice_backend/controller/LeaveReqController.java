@@ -1,19 +1,18 @@
 package com.EAD.autoservice_backend.controller;
 
-import com.EAD.autoservice_backend.model.Admin;
 import com.EAD.autoservice_backend.model.Leave;
 import com.EAD.autoservice_backend.model.LeaveStatus;
-import com.EAD.autoservice_backend.service.LeaveService;
+import com.EAD.autoservice_backend.service.LeaveReqService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/leaves")
 @CrossOrigin(origins = "*")
-public class LeaveController {
+public class LeaveReqController {
 
     @Autowired
-    private LeaveService leaveService;
+    private LeaveReqService leaveService;
 
     // Fetch all leaves
     @GetMapping

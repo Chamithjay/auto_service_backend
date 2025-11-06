@@ -1,7 +1,6 @@
 package com.EAD.autoservice_backend.controller;
 
-import com.EAD.autoservice_backend.dto.UserDTO;
-import com.EAD.autoservice_backend.dto.UserDTO;
+import com.EAD.autoservice_backend.dto.UsersDTO;
 import com.EAD.autoservice_backend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -9,17 +8,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
-public class UserController {
+public class UsersController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UsersController(UserService userService) {
         this.userService = userService;
     }
 
     // ✅ GET all customer emails, phone numbers, and IDs
     @GetMapping("/customers")
-    public List<UserDTO> getAllCustomerInfo() {
+    public List<UsersDTO> getAllCustomerInfo() {
         return userService.getAllCustomersBasicInfo();
     }
 }

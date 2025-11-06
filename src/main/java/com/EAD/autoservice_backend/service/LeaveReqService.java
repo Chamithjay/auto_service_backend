@@ -11,7 +11,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 @Service
-public class LeaveService {
+public class LeaveReqService {
 
     @Autowired
     private LeaveRepository leaveRepository;

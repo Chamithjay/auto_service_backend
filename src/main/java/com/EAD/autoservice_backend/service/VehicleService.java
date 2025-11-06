@@ -1,6 +1,6 @@
 package com.EAD.autoservice_backend.service;
 
-import com.EAD.autoservice_backend.dto.VehicleDTO;
+import com.EAD.autoservice_backend.dto.VehiclesDTO;
 import com.EAD.autoservice_backend.model.Vehicle;
 import com.EAD.autoservice_backend.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +15,14 @@ public class VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    public List<VehicleDTO> getAllVehicles() {
+    public List<VehiclesDTO> getAllVehicles() {
         return vehicleRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    private VehicleDTO convertToDTO(Vehicle vehicle) {
-        return VehicleDTO.builder()
+    private VehiclesDTO convertToDTO(Vehicle vehicle) {
+        return VehiclesDTO.builder()
                 .vehicleId(vehicle.getVehicleId())
                 .vehicleName(vehicle.getVehicleName())
                 .registrationNo(vehicle.getRegistrationNo())

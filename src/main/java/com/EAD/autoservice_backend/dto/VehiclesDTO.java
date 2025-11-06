@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VehicleDTO {
+public class VehiclesDTO {
     private Long vehicleId;
     private String vehicleName;
     private String registrationNo;

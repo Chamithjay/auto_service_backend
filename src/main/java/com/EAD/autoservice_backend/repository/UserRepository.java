@@ -1,7 +1,6 @@
 package com.EAD.autoservice_backend.repository;
 
-import com.EAD.autoservice_backend.dto.UserDTO;
-import com.EAD.autoservice_backend.model.Role;
+import com.EAD.autoservice_backend.dto.UsersDTO;
 import com.EAD.autoservice_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -44,5 +43,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     @Query("SELECT new com.EAD.autoservice_backend.dto.UserDTO(c.id, c.email, c.phoneNumber) FROM Customer c")
-    List<UserDTO> findAllCustomersBasicInfo();
+    List<UsersDTO> findAllCustomersBasicInfo();
 }
