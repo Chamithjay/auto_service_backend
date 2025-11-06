@@ -25,7 +25,7 @@ public class AppointmentJobController {
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeAppointmentJobResponse> getAppointmentJobById(@PathVariable("id") Long appointmentJobId){
         try{
-            EmployeeAppointmentJobResponse employeeAppointmentJobResponse = appointmentJobService.getAppointmentById(appointmentJobId);
+            EmployeeAppointmentJobResponse employeeAppointmentJobResponse = appointmentJobService.getAppointmentJobById(appointmentJobId);
             return new ResponseEntity<>(employeeAppointmentJobResponse, HttpStatus.OK);
 
         }catch (EntityNotFoundException e){
