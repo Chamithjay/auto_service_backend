@@ -105,7 +105,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setTitle(title);
         notification.setMessage(message);
         notification.setUserId(userId);
-        notification.setTargetRole(Role.ALL); // Use ALL for user-specific notifications
+//        notification.setTargetRole(Role.ALL); // Use ALL for user-specific notifications
         notification.setType(type);
         notification.setRead(false);
         return notificationRepository.save(notification);

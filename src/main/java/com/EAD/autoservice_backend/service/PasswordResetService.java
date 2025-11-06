@@ -51,7 +51,7 @@ public class PasswordResetService {
         Optional<PasswordResetOTP> resetOTPOpt = otpRepository
                 .findByEmailAndOtpAndIsUsedFalse(email, otp);
 
-        if (!resetOTPOpt.isPresent()) {
+        if (resetOTPOpt.isEmpty()) {
             return false;
         }
 
