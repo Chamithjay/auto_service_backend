@@ -36,7 +36,7 @@ public class AppointmentJob {
     private String jobNote;
 
     @Column(precision = 17, scale = 2)
-    private BigDecimal additional_cost;
+    private BigDecimal additionalCost;
 
     @ManyToOne
     @JoinColumn(name = "appointment_id", nullable = false)
