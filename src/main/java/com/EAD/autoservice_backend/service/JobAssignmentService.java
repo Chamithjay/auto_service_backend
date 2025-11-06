@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JobAssignmentService {
@@ -36,7 +35,8 @@ public class JobAssignmentService {
             throw new IllegalArgumentException("Appointment job ID cannot be empty");
         }
 
-        List<JobAssignment> jobAssignmentList = jobAssignmentRepository.findByAppointmentJobId(appointmentJobId);
+        // Use nested property method to fetch by relation id
+        List<JobAssignment> jobAssignmentList = jobAssignmentRepository.findByAppointmentJob_Id(appointmentJobId);
 
         return jobAssignmentList.stream()
                 .map(this::toDto)
@@ -53,7 +53,7 @@ public class JobAssignmentService {
                 employeeUsername,
                 jobAssignment.getStartTime(),
                 jobAssignment.getEndTime(),
-                jobAssignment.getAdditional_cost(),
+                jobAssignment.getAdditionalCost(),
                 jobAssignment.getCostNote()
         );
     }
@@ -75,17 +75,17 @@ public class JobAssignmentService {
                 jobAssignment.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());
                 JobAssignment updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);
 
-                // Update the appointment job status to Ongoing and update start time.
+                // Update the appointment job status to ONGOING and update start time.
                 AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();
-                Status jobStatus = parseStatus(employeeJobAssignmentLogStartTimeRequest.getStatus());
-                appointmentJob.setJobStatus(jobStatus);
+                com.EAD.autoservice_backend.model.AppointmentStatus appStatus = parseAppointmentStatus(employeeJobAssignmentLogStartTimeRequest.getStatus());
+                appointmentJob.setItemStatus(appStatus);
                 appointmentJob.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());
                 appointmentJobRepository.save(appointmentJob);
 
-                // Update the appointment status to Ongoing if it is not already.
+                // Update the appointment status to ONGOING if it is not already.
                 Appointment appointment = appointmentJob.getAppointment();
-                if (appointment.getStatus().equals(Status.NEW)){
-                    appointment.setStatus(jobStatus);
+                if (appointment.getStatus() == com.EAD.autoservice_backend.model.AppointmentStatus.NEW){
+                    appointment.setStatus(appStatus);
                     appointmentRepository.save(appointment);
                 }
 
@@ -98,9 +98,9 @@ public class JobAssignmentService {
     }
 
 
-    // Helper method to safely parse status string to Status enum
-    private Status parseStatus(String statusStr) {
-        for (Status s : Status.values()) {
+    // Helper to parse incoming status string to AppointmentStatus enum
+    private com.EAD.autoservice_backend.model.AppointmentStatus parseAppointmentStatus(String statusStr) {
+        for (com.EAD.autoservice_backend.model.AppointmentStatus s : com.EAD.autoservice_backend.model.AppointmentStatus.values()) {
             if (s.name().equalsIgnoreCase(statusStr)) {
                 return s;
             }
@@ -125,7 +125,10 @@ public class JobAssignmentService {
                 return toDto(updatedJobAssignment);
             }
 
-        } catch (Exception e) {
+        }catch (JobAssignmentNotFoundException | FieldUpdatingException e) {
+            throw e;
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to log end time for Job Assignment: " + e.getMessage());
         }
     }
@@ -135,12 +138,12 @@ public class JobAssignmentService {
                 JobAssignment jobAssignment = jobAssignmentRepository.findById(jobAssignmentId)
                 .orElseThrow(() -> new JobAssignmentNotFoundException("Job Assignment not found"));
 
-        BigDecimal additionalCost = employeeJobAssignmentAddCostsRequest.getAdditional_cost() != null ? employeeJobAssignmentAddCostsRequest.getAdditional_cost() : BigDecimal.ZERO;
+        BigDecimal additionalCost = employeeJobAssignmentAddCostsRequest.getAdditionalcost();
         JobAssignment updatedJobAssignment;
 
-        if (jobAssignment.getAdditional_cost() == null) {
-            jobAssignment.setAdditional_cost(additionalCost);
-            jobAssignment.setCostNote(employeeJobAssignmentAddCostsRequest.getCost_note());
+        if (jobAssignment.getAdditionalCost() == null) {
+            jobAssignment.setAdditionalCost(additionalCost);
+            jobAssignment.setCostNote(employeeJobAssignmentAddCostsRequest.getCostNote());
             updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);
 
         }else{
@@ -151,8 +154,8 @@ public class JobAssignmentService {
 
         // Update the total additional cost in the AppointmentJob entity.
         AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();
-        BigDecimal totalJobCost = additionalCost.add(appointmentJob.getAdditional_cost() != null ? appointmentJob.getAdditional_cost() : BigDecimal.ZERO);
-        appointmentJob.setAdditional_cost(totalJobCost);
+        BigDecimal totalJobCost = additionalCost.add(appointmentJob.getAdditionalCost() != null ? appointmentJob.getAdditionalCost() : BigDecimal.ZERO);
+        appointmentJob.setAdditionalCost(totalJobCost);
         appointmentJobRepository.save(appointmentJob);
 
         //Update the total cost in appointment entity.

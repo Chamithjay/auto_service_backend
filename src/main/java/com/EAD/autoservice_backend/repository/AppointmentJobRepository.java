@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.repository;
 
 import com.EAD.autoservice_backend.dto.reports.ServicePopularity;
+import com.EAD.autoservice_backend.model.Appointment;
 import com.EAD.autoservice_backend.model.AppointmentJob;
 import com.EAD.autoservice_backend.model.Status;
 import org.springframework.data.jpa.repository.JpaRepository;

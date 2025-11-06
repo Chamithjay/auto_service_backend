@@ -15,8 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,17 +30,18 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "requires_password_change", nullable = false)
-    private boolean requiresPasswordChange = true;
-
     @Enumerated(EnumType.STRING)
     private Role role = Role.CUSTOMER;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(name = "requires_password_change", nullable = false)
+    private boolean requiresPasswordChange = true;
+
 
     // Constructors
     public User() {}
@@ -61,8 +61,6 @@ public class User implements UserDetails {
     public void setRequiresPasswordChange(boolean requiresPasswordChange) {
         this.requiresPasswordChange = requiresPasswordChange;
     }
-
-    // --- UserDetails Methods ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
