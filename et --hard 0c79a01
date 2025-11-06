@@ -1,0 +1,72 @@
+[33mb2eafe0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mHeshani[m[33m)[m merged with main
+[33m0c79a01[m reports
+[33mf42d7ae[m Admin Generate Reports
+[33mbb3cc2e[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m Merge pull request #9 from Chamithjay/Dulani
+[33me54b0d3[m[33m ([m[1;31morigin/Dulani[m[33m)[m Merge master into dulani
+[33m9b82690[m admin service and user service unit testing
+[33m4cb71f3[m Final changes in appointment booking and history
+[33m9cd9417[m[33m ([m[1;31morigin/test[m[33m)[m Unit tests added to PasswordResetService
+[33m46f2c05[m Unit tests added to EmailService and AuthService
+[33m5dca965[m Error resolved after merge heshani
+[33m6613644[m Error resolved after merge heshani
+[33m0b9c74c[m Error resolved after merge
+[33m4d4be4c[m Merge pull request #7 from Chamithjay/Heshani
+[33mf9ccf06[m[33m ([m[1;31morigin/Heshani[m[33m)[m Implement CustomerProfileController with CRUD operations
+[33mbfeb859[m Uncomment CustomerDashboardController code
+[33m497e877[m Restore CustomerDashboardService class and methods
+[33m799454a[m Update CustomerProfileService.java
+[33mce26ea0[m merged
+[33mf0f02e2[m first time login - password reset function
+[33mfed4ef8[m v1 added to api endpoints
+[33md2da593[m v1 added to api endpoints
+[33m362a995[m Appointment History Feature
+[33mbbe6fc8[m user and service update function edited.
+[33m8cdd75b[m Remove application.properties from version control and add to .gitignore
+[33m11eafb5[m git ignore update
+[33m64a8ffe[m DB hosted
+[33mb19105e[m merged with master
+[33m698be8d[m Merged Kalani
+[33mae5862c[m Merge pull request #6 from Chamithjay/Kalani
+[33m7cc2173[m Merge branch 'master' into Kalani
+[33mb26b6c5[m Merge remote-tracking branch 'origin/Heshani' into Heshani
+[33m475bfb6[m Models corrected
+[33mc1b74a7[m Merge remote-tracking branch 'origin/Heshani' into Heshani
+[33m600edd1[m add user and add service CRUD
+[33m97a7ab2[m Merge pull request #4 from Chamithjay/nipuna
+[33m3411c70[m[33m ([m[1;31morigin/nipuna[m[33m)[m Dockerfile update
+[33md972764[m Merge pull request #3 from Chamithjay/nipuna
+[33m6ca6eba[m fix gitignore1
+[33m177ca0d[m fix gitignore
+[33m80f28a0[m fix gitignore
+[33mdfa0821[m fix customers profile edit section errors
+[33m7697942[m updated appointment job, service-itme  and vehicle services
+[33m7799a68[m Updated appointment, service-item, and vehicle controller
+[33m0961b26[m Added features for an employee to update individual job assignment details
+[33mf10b480[m Added DTOs for API requests
+[33m9a30345[m added repositories
+[33m997181d[m Added exceptions classes
+[33m19c26a8[m Added the feature for employee to request a leave
+[33m0a6fe46[m added customer, vehicle, profile
+[33mcec23cf[m add user and add service CRUD
+[33m94fa6b4[m Merge pull request #2 from Chamithjay/feature/admin-dashboard-profile
+[33mcec3d04[m[33m ([m[1;31morigin/feature/admin-dashboard-profile[m[33m)[m Merge branch 'master' into feature/admin-dashboard-profile
+[33m9e5e6a8[m Admin Dashboard and Profile Done
+[33m569a742[m Add uid, email, role to the jwt
+[33m3aef44c[m updates-admin-dashboard
+[33macaba4f[m updated models
+[33mc30de34[m Change in Appointment Calculation method
+[33mb1f529d[m User roles
+[33m6705557[m User roles
+[33m0f2ff7d[m Admin Profile Done with Dashboard
+[33mbbbaeaf[m Appointment Booking
+[33mdbad40f[m Forgot password flow
+[33m91f4c4a[m Add all new models and changes
+[33m58ac8e5[m Created the feature for employee to view an appointment job
+[33mac90ffc[m Created the feature to get service item information by ID
+[33mf840f4b[m Created the feature to get vehicle information by vehicle ID
+[33md413ddc[m Added models
+[33me71fa09[m Add the Lombok library
+[33m8885e86[m CORS update
+[33m06c6239[m User Login
+[33mb65a910[m User registration
+[33m0eb5587[m init commit
