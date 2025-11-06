@@ -1,0 +1,53 @@
+# Backend .dockerignore file
+# Excludes unnecessary files from Docker build context
+
+# Maven build artifacts
+target/
+!target/*.jar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.eclipse/
+.settings/
+.classpath
+.project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+logs/
+
+# Test files
+src/test/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Docker files (not needed in build context)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Environment files (should be injected via Kubernetes secrets)
+.env
+*.env
+application-local.properties
+application-dev.properties
+
+# Backup files
+*.bak
+*.swp
+*.tmp
+*~

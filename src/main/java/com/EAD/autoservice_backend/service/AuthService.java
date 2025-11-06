@@ -5,6 +5,7 @@ import com.EAD.autoservice_backend.dto.LoginResponse;
 import com.EAD.autoservice_backend.dto.RegisterRequest;
 import com.EAD.autoservice_backend.dto.RegisterResponse;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.model.Customer;
@@ -58,14 +59,15 @@ public class AuthService {
             throw new UserAlreadyExistsException("Email '" + request.getEmail() + "' is already registered");
         }
 
-        // Create Customer entity (default registration creates customers)
         Customer customer = new Customer();
         customer.setUsername(request.getUsername());
         customer.setEmail(request.getEmail());
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setPhoneNumber(request.getPhoneNumber());
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
         customer.setRole(Role.CUSTOMER);
+
 
         User savedUser = userRepository.save(customer);
 
@@ -81,22 +83,29 @@ public class AuthService {
      */
     public LoginResponse loginUser(LoginRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            String token = jwtUtil.generateToken(userDetails.getUsername());
-
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+            // Generate token with user ID, email, and role claims
+            String token = jwtUtil.generateToken(
+                    user.getUsername(),
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole().name()
+            );
 
             return new LoginResponse(
                     token,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole().name()
+                    user.getRole().name(),
+                    user.isRequiresPasswordChange()
             );
+
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
