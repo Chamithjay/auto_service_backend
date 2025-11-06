@@ -13,6 +13,7 @@ import java.util.Collections;
  */
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +29,7 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    private Role role = Role.CUSTOMER;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
