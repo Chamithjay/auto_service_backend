@@ -125,7 +125,12 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 .requestMatchers(
                     "/api/auth/register",
                     "/api/auth/login",           // <--- allow login without auth
-                    "/api/auth/password/**"
+                    "/api/auth/password/**",
+                    "/api/leaves/**",
+                    "/api/v1/leaves/**",
+                    "/api/vehicles",
+                    "/api/users/**",
+                    "/api/v1/auth/**"
                 ).permitAll()
                 .anyRequest().authenticated()  // protect all other endpoints
         )

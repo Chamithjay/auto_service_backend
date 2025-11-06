@@ -1,5 +1,6 @@
 package com.EAD.autoservice_backend.service;
 
+import com.EAD.autoservice_backend.dto.LeaveReqDTO;
 import com.EAD.autoservice_backend.model.*;
 import com.EAD.autoservice_backend.repository.AdminRepository;
 import com.EAD.autoservice_backend.repository.LeaveRepository;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +24,10 @@ public class LeaveReqService {
     public java.util.List<Leave> getAllLeaves() {
         return leaveRepository.findAll();
     }
+//    public List<LeaveReqDTO> getAllLeaves() {
+//        return leaveRepository.findAllLeaveRequestsWithEmployee();
+//    }
+
 
     public Leave updateLeaveStatus(Long leaveId, LeaveStatus status, Long adminId) {
         Optional<Leave> optionalLeave = leaveRepository.findById(leaveId);

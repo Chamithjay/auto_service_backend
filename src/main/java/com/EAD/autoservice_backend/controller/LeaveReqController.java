@@ -1,10 +1,13 @@
 package com.EAD.autoservice_backend.controller;
 
+import com.EAD.autoservice_backend.dto.LeaveReqDTO;
 import com.EAD.autoservice_backend.model.Leave;
 import com.EAD.autoservice_backend.model.LeaveStatus;
 import com.EAD.autoservice_backend.service.LeaveReqService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/leaves")
@@ -14,11 +17,16 @@ public class LeaveReqController {
     @Autowired
     private LeaveReqService leaveService;
 
-    // Fetch all leaves
+   //  Fetch all leaves
     @GetMapping
     public java.util.List<Leave> getAllLeaves() {
         return leaveService.getAllLeaves();
     }
+//    @GetMapping("/allleaves")
+//    public List<LeaveReqDTO> getAllLeaves() {
+//        return leaveService.getAllLeaves();
+//    }
+
 
     // ✅ Approve a leave
     @PutMapping("/{leaveId}/approve")

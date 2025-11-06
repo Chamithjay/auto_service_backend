@@ -43,8 +43,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(@Param("email") String email);
 
 
-    @Query("SELECT new com.EAD.autoservice_backend.dto.UserDTO(c.id, c.email, c.phoneNumber) FROM Customer c")
-    List<UserDTO> findAllCustomersBasicInfo();
+//    @Query("SELECT new com.EAD.autoservice_backend.dto.UserDTO(c.id, c.email, c.phoneNumber) FROM Customer c")
+//    List<UserDTO> findAllCustomersBasicInfo();
 
     //Admin
     @Query("SELECT u FROM User u WHERE u.role = :role")
@@ -54,4 +54,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.role = :role")
     Long countByRole(@Param("role") Role role);
+    @Query("SELECT new com.EAD.autoservice_backend.dto.UserDTO(c.id, c.email, c.phoneNumber) " +
+            "FROM Customer c")
+    List<UserDTO> findAllCustomersBasicInfo();
+
+
 }
