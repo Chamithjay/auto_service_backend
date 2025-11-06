@@ -90,18 +90,18 @@ class DashboardServiceTest {
         Appointment appointment1 = new Appointment();
         appointment1.setAppointmentId(1L);
         appointment1.setAppointmentDate(LocalDate.now().minusDays(2));
-        appointment1.setStartTime(LocalTime.of(9, 0));
-        appointment1.setEndTime(LocalTime.of(11, 0));
-        appointment1.setStatus(Status.COMPLETED);
+        appointment1.setAppointmentStartTime(LocalDateTime.of(2024, 11, 10, 9, 0));
+        appointment1.setAppointmentEndTime(LocalDateTime.of(2024, 11, 10, 10, 0));
+        appointment1.setStatus(AppointmentStatus.COMPLETED);
         appointment1.setTotalCost(new BigDecimal("250.00"));
         appointment1.setVehicle(testVehicle);
 
         Appointment appointment2 = new Appointment();
         appointment2.setAppointmentId(2L);
         appointment2.setAppointmentDate(LocalDate.now());
-        appointment2.setStartTime(LocalTime.of(14, 0));
-        appointment2.setEndTime(LocalTime.of(16, 0));
-        appointment2.setStatus(Status.NEW);
+        appointment2.setAppointmentStartTime(LocalDateTime.of(2024, 11, 10, 9, 0));
+        appointment2.setAppointmentEndTime(LocalDateTime.of(2024, 11, 10, 10, 0));
+        appointment2.setStatus(AppointmentStatus.NEW);
         appointment2.setTotalCost(new BigDecimal("180.00"));
         appointment2.setVehicle(testVehicle);
 
