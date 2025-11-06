@@ -1,7 +1,7 @@
 package com.EAD.autoservice_backend.repository;
 
 import com.EAD.autoservice_backend.model.Vehicle;
-import com.EAD.autoservice_backend.model.VehicleType;
+// import com.EAD.autoservice_backend.model.VehicleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

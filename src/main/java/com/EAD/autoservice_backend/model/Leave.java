@@ -18,10 +18,10 @@ public class Leave {
     private Long leaveId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LeaveType leaveType;
 
-    @Column(nullable = false) // 2025-10-24
+    @Column(nullable = false, updatable = false) // 2025-10-24
     private LocalDate leaveDate;
 
     private String leaveReason;
@@ -35,8 +35,8 @@ public class Leave {
     private LeaveStatus leaveStatus = LeaveStatus.NEW;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
+    @JoinColumn(name = "employee_user_id", nullable = true)
+    private User employee;
 
     @ManyToOne
     @JoinColumn(name = "approved_by")
