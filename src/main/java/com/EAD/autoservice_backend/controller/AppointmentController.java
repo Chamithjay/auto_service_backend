@@ -4,14 +4,16 @@ import com.EAD.autoservice_backend.dto.*;
 import com.EAD.autoservice_backend.service.AppointmentService;
 import com.EAD.autoservice_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/appointments")
+@RequestMapping("/api/v1/appointments")
 @RequiredArgsConstructor
 public class AppointmentController {
 
@@ -23,7 +25,9 @@ public class AppointmentController {
             @RequestHeader("Authorization") String authHeader
     ) {
         String token = authHeader.replace("Bearer ", "");
+        log.info("Extracting userId from token");
         Long userId = jwtUtil.extractUserId(token);
+        log.info("Extracted userId: {}", userId);
 
         List<VehicleResponse> response = appointmentService.getVehiclesForUser(userId);
         return ResponseEntity.ok(response);

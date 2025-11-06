@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface JobAssignmentRepository extends JpaRepository<JobAssignment, Long> {
@@ -30,4 +31,9 @@ public interface JobAssignmentRepository extends JpaRepository<JobAssignment, Lo
     @Query("SELECT ja.employee.id FROM JobAssignment ja ORDER BY ja.id DESC LIMIT 1")
     Optional<Long> findLastAssignedEmployeeId();
 
+    // Added to support JobAssignmentService.getJobAssignmentListByAppointmentJobId
+    List<JobAssignment> findByAppointmentJobId(Long appointmentJobId);
+
+    // Preferred form using nested property for the relation's id
+    List<JobAssignment> findByAppointmentJob_Id(Long appointmentJobId);
 }

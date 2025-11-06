@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +22,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a WHERE a.status = :status ORDER BY a.appointmentDate DESC")
     List<Appointment> findByStatusOrderByDateDesc(@Param("status") Status status);
+
     @Query("""
-    SELECT a FROM Appointment a
-    WHERE a.customer.id = :customerId
-      AND a.createdAt BETWEEN :startDate AND :endDate
-    ORDER BY a.createdAt DESC
-""")
+        SELECT a FROM Appointment a
+        WHERE a.customer.id = :customerId
+          AND a.createdAt BETWEEN :startDate AND :endDate
+        ORDER BY a.createdAt DESC
+        """)
     List<Appointment> findByCustomerIdAndDateRange(
             @Param("customerId") Long customerId,
             @Param("startDate") LocalDateTime startDate,
@@ -42,17 +42,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllByCurrentYear();
 
     /**
-     * Find all appointments for a specific customer
+     * Find all appointments for a specific customer ordered by appointment date
      */
-    @Query("SELECT a FROM Appointment a WHERE a.vehicle.customer.id = :customerId ORDER BY a.appointmentDate DESC, a.startTime DESC")
-    List<Appointment> findByCustomerId(@Param("customerId") Long customerId);
+    @Query("SELECT a FROM Appointment a WHERE a.vehicle.customer.id = :customerId ORDER BY a.appointmentDate DESC")
+    List<Appointment> findByCustomerIdOrderByAppointmentDateDesc(@Param("customerId") Long customerId);
 
     /**
      * Find appointment by ID and customer ID (for authorization)
      */
     @Query("SELECT a FROM Appointment a WHERE a.appointmentId = :appointmentId AND a.vehicle.customer.id = :customerId")
     Optional<Appointment> findByAppointmentIdAndCustomerId(@Param("appointmentId") Long appointmentId,
-                                                            @Param("customerId") Long customerId);
+                                                           @Param("customerId") Long customerId);
 
     /**
      * Count total appointments by customer ID

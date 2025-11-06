@@ -31,6 +31,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     Optional<Vehicle> findByVehicleIdAndCustomerId(@Param("vehicleId") Long vehicleId, 
                                                     @Param("customerId") Long customerId);
 
+    // Minimal addition to support service usage without changing service code.
+    Vehicle findByVehicleId(Long vehicleId);
+
     /**
      * Count vehicles by customer ID
      */

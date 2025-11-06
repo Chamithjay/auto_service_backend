@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JobAssignmentService {
@@ -36,7 +35,8 @@ public class JobAssignmentService {
             throw new IllegalArgumentException("Appointment job ID cannot be empty");
         }
 
-        List<JobAssignment> jobAssignmentList = jobAssignmentRepository.findByAppointmentJobId(appointmentJobId);
+        // Use nested property method to fetch by relation id
+        List<JobAssignment> jobAssignmentList = jobAssignmentRepository.findByAppointmentJob_Id(appointmentJobId);
 
         return jobAssignmentList.stream()
                 .map(this::toDto)
@@ -75,17 +75,17 @@ public class JobAssignmentService {
                 jobAssignment.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());
                 JobAssignment updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);
 
-                // Update the appointment job status to Ongoing and update start time.
+                // Update the appointment job status to ONGOING and update start time.
                 AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();
-                Status jobStatus = parseStatus(employeeJobAssignmentLogStartTimeRequest.getStatus());
-                appointmentJob.setJobStatus(jobStatus);
+                com.EAD.autoservice_backend.model.AppointmentStatus appStatus = parseAppointmentStatus(employeeJobAssignmentLogStartTimeRequest.getStatus());
+                appointmentJob.setItemStatus(appStatus);
                 appointmentJob.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());
                 appointmentJobRepository.save(appointmentJob);
 
-                // Update the appointment status to Ongoing if it is not already.
+                // Update the appointment status to ONGOING if it is not already.
                 Appointment appointment = appointmentJob.getAppointment();
-                if (appointment.getStatus().equals(Status.NEW)){
-                    appointment.setStatus(jobStatus);
+                if (appointment.getStatus() == com.EAD.autoservice_backend.model.AppointmentStatus.NEW){
+                    appointment.setStatus(appStatus);
                     appointmentRepository.save(appointment);
                 }
 
@@ -98,9 +98,9 @@ public class JobAssignmentService {
     }
 
 
-    // Helper method to safely parse status string to Status enum
-    private Status parseStatus(String statusStr) {
-        for (Status s : Status.values()) {
+    // Helper to parse incoming status string to AppointmentStatus enum
+    private com.EAD.autoservice_backend.model.AppointmentStatus parseAppointmentStatus(String statusStr) {
+        for (com.EAD.autoservice_backend.model.AppointmentStatus s : com.EAD.autoservice_backend.model.AppointmentStatus.values()) {
             if (s.name().equalsIgnoreCase(statusStr)) {
                 return s;
             }

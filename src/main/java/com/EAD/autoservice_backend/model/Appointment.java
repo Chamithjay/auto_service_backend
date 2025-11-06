@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "appointments")
@@ -32,6 +34,13 @@ public class Appointment {
 
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
+
+    @Column(name = "appointment_start_time", nullable = false)
+    private LocalDateTime appointmentStartTime;
+
+
+    @Column(name = "appointment_end_time", nullable = false)
+    private LocalDateTime appointmentEndTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "session_type", nullable = false, length = 20)

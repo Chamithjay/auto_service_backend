@@ -83,15 +83,20 @@ public class AuthService {
      */
     public LoginResponse loginUser(LoginRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            String token = jwtUtil.generateToken(userDetails.getUsername());
-
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+            // Generate token with user ID, email, and role claims
+            String token = jwtUtil.generateToken(
+                    user.getUsername(),
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole().name()
+            );
 
             return new LoginResponse(
                     token,

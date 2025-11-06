@@ -64,11 +64,13 @@ public class DashboardService {
         // Get recent appointments (new ones)
         List<Appointment> recentAppointments = appointmentRepository.findAllOrderByDateDesc();
         recentAppointments.stream()
+                .filter(appointment -> appointment.getVehicle() != null
+                        && appointment.getVehicle().getCustomer() != null)
                 .limit(3)
                 .forEach(appointment -> {
-                    String description = appointment.getStatus() == Status.NEW
+                    String description = appointment.getStatus() == AppointmentStatus.NEW
                             ? "New appointment created"
-                            : appointment.getStatus() == Status.COMPLETED
+                            : appointment.getStatus() == AppointmentStatus.COMPLETED
                             ? "Appointment completed"
                             : "Appointment in progress";
 
@@ -76,7 +78,7 @@ public class DashboardService {
                             "APPOINTMENT",
                             description,
                             appointment.getVehicle().getCustomer().getUsername(),
-                            appointment.getVehicle().getCreatedAt(),
+                            appointment.getCreatedAt() != null ? appointment.getCreatedAt() : LocalDateTime.now(),
                             appointment.getStatus().name()
                     ));
                 });
@@ -114,6 +116,7 @@ public class DashboardService {
         // Get recent vehicles
         List<Vehicle> recentVehicles = vehicleRepository.findAllByOrderByCreatedAtDesc();
         recentVehicles.stream()
+                .filter(vehicle -> vehicle.getCustomer() != null)
                 .limit(2)
                 .forEach(vehicle -> {
                     activities.add(new RecentActivityResponse(

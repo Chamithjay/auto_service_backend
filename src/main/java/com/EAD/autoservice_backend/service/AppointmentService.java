@@ -5,9 +5,8 @@ import com.EAD.autoservice_backend.dto.*;
 import com.EAD.autoservice_backend.model.*;
 import com.EAD.autoservice_backend.repository.*;
 import com.EAD.autoservice_backend.exception.NoAvailableEmployeeException;
-import com.EAD.autoservice_backend.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -17,10 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
-    private JwtUtil jwtUtil;
     private final VehicleRepository vehicleRepository;
     private final ServiceItemRepository serviceItemRepository;
     private final CustomerRepository customerRepository;
@@ -32,14 +31,24 @@ public class AppointmentService {
     private final JobAssignmentRepository jobAssignmentRepository;
 
     public List<VehicleResponse> getVehiclesForUser(Long userId) {
+        log.info("Fetching vehicles for user ID: {}", userId);
         List<Vehicle> vehicles = vehicleRepository.findByCustomerId(userId);
-        return vehicles.stream()
-                .map(v -> new VehicleResponse(
-                        v.getVehicleId(),
-                        v.getVehicleName(),
-                        v.getVehicleType()
-                ))
+        log.info("Found {} vehicles for user ID: {}", vehicles.size(), userId);
+
+        List<VehicleResponse> response = vehicles.stream()
+                .map(v -> {
+                    log.debug("Mapping vehicle: ID={}, Name={}, Type={}",
+                            v.getVehicleId(), v.getVehicleName(), v.getVehicleType());
+                    return new VehicleResponse(
+                            v.getVehicleId(),
+                            v.getVehicleName(),
+                            v.getVehicleType()
+                    );
+                })
                 .toList();
+
+        log.info("Returning {} vehicle responses", response.size());
+        return response;
     }
 
     private ServiceItemDTO mapToServiceItemDTO(ServiceItem item) {
@@ -52,9 +61,10 @@ public class AppointmentService {
 
 
     public ServiceAndModificationResponse getServicesAndModificationsForVehicle(VehicleSelectionRequest request) {
-        Vehicle vehicle=vehicleRepository.findByVehicleId(request.getVehicleId());
-        VehicleType vehicleType=vehicle.getVehicleType();
-        List<ServiceItem> allItems=serviceItemRepository.findByVehicleType(vehicleType);
+        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        VehicleType vehicleType = vehicle.getVehicleType();
+        List<ServiceItem> allItems = serviceItemRepository.findByVehicleType(vehicleType);
 
         List<ServiceItemDTO> services = allItems.stream()
                 .filter(i -> i.getServiceItemType() == ServiceItemType.SERVICE)
@@ -176,13 +186,40 @@ public class AppointmentService {
 
         Customer customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-        Vehicle vehicle = vehicleRepository.findByVehicleId(request.getVehicleId());
+        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
         List<ServiceItem> serviceItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());
 
         BigDecimal totalCost = serviceItems.stream()
                 .map(ServiceItem::getServiceItemCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Calculate total duration in minutes
+        int totalDurationMinutes = serviceItems.stream()
+                .mapToInt(ServiceItem::getEstimatedDuration)
+                .sum();
+
+        log.info("Total service duration: {} minutes for {} items", totalDurationMinutes, serviceItems.size());
+
+        // Get work session to determine start time
+        WorkSession workSession = workSessionRepository.findBySessionType(request.getSessionType())
+                .orElseThrow(() -> new RuntimeException("Work session not configured for " + request.getSessionType()));
+
+        // Calculate appointment start time: appointment date + work session start time
+        LocalDateTime appointmentStartTime = LocalDateTime.of(
+                request.getAppointmentDate(),
+                workSession.getStartTime()
+        );
+
+        // Calculate appointment end time: start time + total duration
+        LocalDateTime appointmentEndTime = appointmentStartTime.plusMinutes(totalDurationMinutes);
+
+        log.info("Appointment scheduled for {} from {} to {} ({} minutes)",
+                request.getAppointmentDate(),
+                appointmentStartTime.toLocalTime(),
+                appointmentEndTime.toLocalTime(),
+                totalDurationMinutes);
 
         Appointment appointment = Appointment.builder()
                 .customer(customer)
@@ -191,6 +228,8 @@ public class AppointmentService {
                 .appointmentDate(request.getAppointmentDate())
                 .sessionType(request.getSessionType())
                 .totalCost(totalCost)
+                .appointmentStartTime(appointmentStartTime)
+                .appointmentEndTime(appointmentEndTime)
                 .status(AppointmentStatus.NEW)
                 .build();
 
@@ -219,7 +258,6 @@ public class AppointmentService {
         for (ServiceItem item : serviceItems) {
             int newJobDuration = item.getEstimatedDuration();
 
-            // ⭐ Use modified getNextEmployee method
             Employee nextEmployee = getNextEmployee(
                     lastEmployeeId,
                     request.getAppointmentDate(),
@@ -281,7 +319,7 @@ public class AppointmentService {
 
             return AppointmentHistoryResponse.builder()
                     .appointmentId(appointment.getAppointmentId())
-                    .createdAt(appointment.getCreatedAt()) // ✅ sorted by this now
+                    .createdAt(appointment.getCreatedAt())
                     .appointmentDate(appointment.getAppointmentDate())
                     .sessionType(appointment.getSessionType())
                     .status(appointment.getStatus())
@@ -291,7 +329,4 @@ public class AppointmentService {
                     .build();
         }).toList();
     }
-
-
-
 }

@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "services and modifications")
+@Table(name = "service_items")
 public class ServiceItem {
 
     @Id
@@ -41,3 +41,4 @@ public class ServiceItem {
     @OneToMany(mappedBy = "serviceItem")
     @JsonIgnore  // Add this line to prevent circular reference
     private Set<AppointmentJob> bookedItems;
+}
