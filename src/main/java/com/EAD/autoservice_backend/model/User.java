@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 /**
  * User entity that implements UserDetails for Spring Security integration.

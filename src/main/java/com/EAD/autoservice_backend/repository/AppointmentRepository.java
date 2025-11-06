@@ -1,5 +1,6 @@
 package com.EAD.autoservice_backend.repository;
 
+import com.EAD.autoservice_backend.dto.reports.RevenueOverTime;
 import com.EAD.autoservice_backend.model.Appointment;
 import com.EAD.autoservice_backend.model.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,8 +38,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      * Find appointment by ID and customer ID (for authorization)
      */
     @Query("SELECT a FROM Appointment a WHERE a.appointmentId = :appointmentId AND a.vehicle.customer.id = :customerId")
-    Optional<Appointment> findByAppointmentIdAndCustomerId(@Param("appointmentId") Long appointmentId, 
-                                                            @Param("customerId") Long customerId);
+    Optional<Appointment> findByAppointmentIdAndCustomerId(@Param("appointmentId") Long appointmentId,
+                                                           @Param("customerId") Long customerId);
 
     /**
      * Count total appointments by customer ID
@@ -63,4 +64,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      */
     @Query("SELECT a FROM Appointment a WHERE a.vehicle.customer.id = :customerId AND a.status IN :statuses ORDER BY a.appointmentDate DESC")
     List<Appointment> findActiveAppointmentsByCustomerId(@Param("customerId") Long customerId, @Param("statuses") List<Status> statuses);
+
+    /**
+     * Report Query: Revenue Over Time
+     * Gets the sum of totalCost from COMPLETED appointments, grouped by date,
+     * within a specified date range, and sorted by date.
+     */
+    @Query("SELECT new com.EAD.autoservice_backend.dto.reports.RevenueOverTime(a.appointmentDate, SUM(a.totalCost)) " +
+            "FROM Appointment a " +
+            "WHERE a.status = 'COMPLETED' " +
+            "AND a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY a.appointmentDate " +
+            "ORDER BY a.appointmentDate ASC")
+    List<RevenueOverTime> getRevenueOverTime(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
