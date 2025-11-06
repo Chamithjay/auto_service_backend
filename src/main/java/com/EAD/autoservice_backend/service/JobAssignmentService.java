@@ -53,7 +53,7 @@ public class JobAssignmentService {
                 employeeUsername,
                 jobAssignment.getStartTime(),
                 jobAssignment.getEndTime(),
-                jobAssignment.getAdditional_cost(),
+                jobAssignment.getAdditionalCost(),
                 jobAssignment.getCostNote()
         );
     }
@@ -125,7 +125,10 @@ public class JobAssignmentService {
                 return toDto(updatedJobAssignment);
             }
 
-        } catch (Exception e) {
+        }catch (JobAssignmentNotFoundException | FieldUpdatingException e) {
+            throw e;
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to log end time for Job Assignment: " + e.getMessage());
         }
     }
@@ -135,12 +138,12 @@ public class JobAssignmentService {
                 JobAssignment jobAssignment = jobAssignmentRepository.findById(jobAssignmentId)
                 .orElseThrow(() -> new JobAssignmentNotFoundException("Job Assignment not found"));
 
-        BigDecimal additionalCost = employeeJobAssignmentAddCostsRequest.getAdditional_cost() != null ? employeeJobAssignmentAddCostsRequest.getAdditional_cost() : BigDecimal.ZERO;
+        BigDecimal additionalCost = employeeJobAssignmentAddCostsRequest.getAdditionalcost();
         JobAssignment updatedJobAssignment;
 
-        if (jobAssignment.getAdditional_cost() == null) {
-            jobAssignment.setAdditional_cost(additionalCost);
-            jobAssignment.setCostNote(employeeJobAssignmentAddCostsRequest.getCost_note());
+        if (jobAssignment.getAdditionalCost() == null) {
+            jobAssignment.setAdditionalCost(additionalCost);
+            jobAssignment.setCostNote(employeeJobAssignmentAddCostsRequest.getCostNote());
             updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);
 
         }else{
@@ -151,8 +154,8 @@ public class JobAssignmentService {
 
         // Update the total additional cost in the AppointmentJob entity.
         AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();
-        BigDecimal totalJobCost = additionalCost.add(appointmentJob.getAdditional_cost() != null ? appointmentJob.getAdditional_cost() : BigDecimal.ZERO);
-        appointmentJob.setAdditional_cost(totalJobCost);
+        BigDecimal totalJobCost = additionalCost.add(appointmentJob.getAdditionalCost() != null ? appointmentJob.getAdditionalCost() : BigDecimal.ZERO);
+        appointmentJob.setAdditionalCost(totalJobCost);
         appointmentJobRepository.save(appointmentJob);
 
         //Update the total cost in appointment entity.
