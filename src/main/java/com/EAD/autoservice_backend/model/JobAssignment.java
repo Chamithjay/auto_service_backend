@@ -3,18 +3,19 @@ package com.EAD.autoservice_backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+import java.math.BigDecimal;
 import java.time.LocalTime;
 
-@Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "job assignments")
 public class JobAssignment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private Long jobAssignmentId;
 
     @ManyToOne
     @JoinColumn(name = "appointment_job_id", nullable = false)
@@ -29,4 +30,11 @@ public class JobAssignment {
 
     @Column(name = "end_time")
     private LocalTime endTime;
+
+    @Column(precision = 17, scale = 2)
+    private BigDecimal additional_cost;
+
+    @Column
+    private String costNote;
+
 }

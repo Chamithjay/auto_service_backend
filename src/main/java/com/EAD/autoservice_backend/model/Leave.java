@@ -18,10 +18,9 @@ public class Leave {
     private Long leaveId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, updatable = false)
     private LeaveType leaveType;
 
-    @Column(nullable = false, updatable = false) // 2025-10-24
+    @Column(nullable = false) // 2025-10-24
     private LocalDate leaveDate;
 
     private String leaveReason;

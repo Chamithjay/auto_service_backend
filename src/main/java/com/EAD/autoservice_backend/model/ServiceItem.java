@@ -1,20 +1,17 @@
 package com.EAD.autoservice_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.AllArgsConstructor;
-
+import lombok.*;
 import java.math.BigDecimal;
 import java.util.Set;
 
-@Entity
-@Table(name = "services_and_modifications") // ✅ fixed invalid table name (no spaces)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "services and modifications")
 public class ServiceItem {
 
     @Id
@@ -42,5 +39,5 @@ public class ServiceItem {
     private Integer estimatedDuration;
 
     @OneToMany(mappedBy = "serviceItem")
+    @JsonIgnore  // Add this line to prevent circular reference
     private Set<AppointmentJob> bookedItems;
-}
