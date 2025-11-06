@@ -14,6 +14,7 @@ import java.time.LocalTime;
 public class JobAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private Long jobAssignmentId;
 
     @ManyToOne

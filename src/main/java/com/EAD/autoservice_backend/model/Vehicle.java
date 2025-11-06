@@ -1,14 +1,20 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "vehicles")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vehicle {
 
     @Id
@@ -21,8 +27,8 @@ public class Vehicle {
     @Column(nullable = false, length = 255)
     private String registrationNo;
 
-    @Column(nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 255)
     private VehicleType vehicleType;
 
     @Column(length = 255)
