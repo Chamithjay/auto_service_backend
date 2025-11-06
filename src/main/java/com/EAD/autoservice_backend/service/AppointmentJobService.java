@@ -69,7 +69,7 @@ public class AppointmentJobService {
            return new EmployeeAppointmentJobResponse(
                    appointmentJob.getId(),
                    appointmentJob.getJobNote(),
-                   appointmentJob.getAdditional_cost(),
+                   appointmentJob.getAdditionalCost(),
                    appointmentJob.getItemStatus().name(),
                    vehicleDetails,
                    serviceItemDetails,
