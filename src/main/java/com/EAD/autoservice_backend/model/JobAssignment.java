@@ -7,14 +7,15 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 
+@Entity
+@Table(name = "job_assignments")
 @Getter
 @Setter
-@Entity
-@Table(name = "job assignments")
 public class JobAssignment {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long jobAssignmentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "appointment_job_id", nullable = false)
@@ -24,7 +25,7 @@ public class JobAssignment {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "start_time") //18:50:00
+    @Column(name = "start_time")
     private LocalTime startTime;
 
     @Column(name = "end_time")
@@ -35,5 +36,4 @@ public class JobAssignment {
 
     @Column
     private String costNote;
-
 }

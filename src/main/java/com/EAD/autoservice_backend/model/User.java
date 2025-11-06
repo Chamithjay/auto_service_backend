@@ -37,6 +37,10 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "requires_password_change", nullable = false)
+    private boolean requiresPasswordChange = true;
+
+
     // Constructors
     public User() {}
 
@@ -46,6 +50,14 @@ public class User implements UserDetails {
         this.password = password;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isRequiresPasswordChange() {
+        return requiresPasswordChange;
+    }
+
+    public void setRequiresPasswordChange(boolean requiresPasswordChange) {
+        this.requiresPasswordChange = requiresPasswordChange;
     }
 
     @Override
