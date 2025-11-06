@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.time.LocalDate;
@@ -30,46 +31,8 @@ public class AppointmentService {
     private final AppointmentJobRepository appointmentJobRepository;
     private final JobAssignmentRepository jobAssignmentRepository;
 
-    public UserInfoResponse getLoggedUserInfo(String token) {
-        // Remove "Bearer " prefix if present
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-        // Extract user ID from JWT
-        Long userId = jwtUtil.extractUserId(token);
-        if (userId == null) {
-            throw new RuntimeException("Invalid token: user ID not found");
-        }
-
-        // Retrieve the customer using the extracted user ID
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        // Build and return response
-        return UserInfoResponse.builder()
-                .userId(customer.getId())
-                .fullName(customer.getFullName())
-                .email(customer.getEmail())
-                .build();
-    }
-
     public List<VehicleResponse> getVehiclesForUser(Long userId) {
-        // Remove "Bearer " prefix if present
-//        if (token.startsWith("Bearer ")) {
-//            token = token.substring(7);
-//        }
-//
-//        // Extract user ID from JWT
-//        Long userId = jwtUtil.extractUserId(token);
-//        if (userId == null) {
-//            throw new RuntimeException("Invalid token: user ID not found");
-//        }
-
-        // Retrieve all vehicles for the user
         List<Vehicle> vehicles = vehicleRepository.findByCustomerId(userId);
-
-        // Convert to response DTOs
         return vehicles.stream()
                 .map(v -> new VehicleResponse(
                         v.getVehicleId(),
@@ -78,6 +41,7 @@ public class AppointmentService {
                 ))
                 .toList();
     }
+
     private ServiceItemDTO mapToServiceItemDTO(ServiceItem item) {
         return ServiceItemDTO.builder()
                 .id(item.getServiceItemId())
@@ -106,10 +70,7 @@ public class AppointmentService {
                 .services(services)
                 .modifications(modifications)
                 .build();
-
-
     }
-
 
     public AppointmentCalculationResponse calculateAppointmentDetails(AppointmentCalculationRequest request) {
 
@@ -148,7 +109,6 @@ public class AppointmentService {
                 .map(WorkSession::getDurationHours)
                 .orElse(5.0) * 60);
 
-        // ✅ Check each service item individually
         for (ServiceItem item : selectedItems) {
             int serviceDuration = item.getEstimatedDuration();
 
@@ -171,8 +131,6 @@ public class AppointmentService {
                 .message("Slot available for the selected session.")
                 .build();
     }
-
-
 
     private Employee getNextEmployee(
             Long lastEmployeeId,
@@ -215,14 +173,6 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentResponse createAppointment(AppointmentCreateRequest request,@RequestParam Long userId ) {
-//        if (token.startsWith("Bearer ")) {
-//            token = token.substring(7);
-//        }
-//
-//        Long userId = jwtUtil.extractUserId(token);
-//        if (userId == null) {
-//            throw new RuntimeException("Invalid token: user ID not found");
-//        }
 
         Customer customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -234,10 +184,6 @@ public class AppointmentService {
                 .map(ServiceItem::getServiceItemCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        int totalDuration = serviceItems.stream()
-                .mapToInt(ServiceItem::getEstimatedDuration)
-                .sum();
-
         Appointment appointment = Appointment.builder()
                 .customer(customer)
                 .vehicle(vehicle)
@@ -245,7 +191,6 @@ public class AppointmentService {
                 .appointmentDate(request.getAppointmentDate())
                 .sessionType(request.getSessionType())
                 .totalCost(totalCost)
-                .totalApproximatedDuration(totalDuration)
                 .status(AppointmentStatus.NEW)
                 .build();
 
@@ -307,50 +252,25 @@ public class AppointmentService {
                 .appointmentDate(appointment.getAppointmentDate())
                 .sessionType(appointment.getSessionType())
                 .totalCost(appointment.getTotalCost())
-                .totalApproximatedDuration(totalDuration)
                 .status(appointment.getStatus().name())
                 .message("Appointment created successfully.")
                 .build();
     }
 
+    public List<AppointmentHistoryResponse> getCustomerAppointments(Long customerId, LocalDate startDate, LocalDate endDate) {
+        List<Appointment> appointments;
 
+        if (startDate == null || endDate == null) {
+            appointments = appointmentRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)
+                    .stream()
+                    .limit(15)
+                    .toList();
+        } else {
+            LocalDateTime from = startDate.atStartOfDay();
+            LocalDateTime to = endDate.atTime(23, 59, 59);
 
-//    public List<AppointmentHistoryResponse> getCustomerAppointments(HttpServletRequest request) {
-//        String authHeader = request.getHeader("Authorization");
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            throw new RuntimeException("Missing or invalid Authorization header");
-//        }
-//
-//        String token = authHeader.substring(7);
-//        Long customerId = jwtUtil.extractUserId(token);
-//
-//        // 1️⃣ Fetch all appointments for the logged-in customer
-//        List<Appointment> appointments = appointmentRepository.findByCustomerId(customerId);
-//
-//        // 2️⃣ Build response list
-//        return appointments.stream().map(appointment -> {
-//            // Fetch all AppointmentJobs related to this appointment
-//            List<AppointmentJob> jobs = appointmentJobRepository.findByAppointment(appointment);
-//
-//            // For each job, get the service/modification name
-//            List<String> serviceNames = jobs.stream()
-//                    .map(job -> job.getServiceItem().getServiceItemName())
-//                    .toList();
-//
-//            return AppointmentHistoryResponse.builder()
-//                    .appointmentId(appointment.getAppointmentId())
-//                    .appointmentDate(appointment.getAppointmentDate())
-//                    .sessionType(appointment.getSessionType())
-//                    .status(appointment.getStatus())
-//                    .totalCost(appointment.getTotalCost())
-//                    .vehicleName(appointment.getVehicleName())
-//                    .selectedServices(serviceNames)
-//                    .build();
-//        }).toList();
-//    }
-
-    public List<AppointmentHistoryResponse> getCustomerAppointments(Long customerId) {
-        List<Appointment> appointments = appointmentRepository.findByCustomerId(customerId);
+            appointments = appointmentRepository.findByCustomerIdAndDateRange(customerId, from, to);
+        }
 
         return appointments.stream().map(appointment -> {
             List<AppointmentJob> jobs = appointmentJobRepository.findByAppointment(appointment);
@@ -361,6 +281,7 @@ public class AppointmentService {
 
             return AppointmentHistoryResponse.builder()
                     .appointmentId(appointment.getAppointmentId())
+                    .createdAt(appointment.getCreatedAt()) // ✅ sorted by this now
                     .appointmentDate(appointment.getAppointmentDate())
                     .sessionType(appointment.getSessionType())
                     .status(appointment.getStatus())
@@ -370,6 +291,7 @@ public class AppointmentService {
                     .build();
         }).toList();
     }
+
 
 
 }

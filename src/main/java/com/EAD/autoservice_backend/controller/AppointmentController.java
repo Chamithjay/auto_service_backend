@@ -2,11 +2,12 @@ package com.EAD.autoservice_backend.controller;
 
 import com.EAD.autoservice_backend.dto.*;
 import com.EAD.autoservice_backend.service.AppointmentService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.EAD.autoservice_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -15,29 +16,19 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final JwtUtil jwtUtil;
 
-    // ✅ STEP 1: Get logged-in user info from JWT
-    @GetMapping("/me")
-    public ResponseEntity<UserInfoResponse> getLoggedUserInfo(
-            @RequestHeader("Authorization") String authHeader
-    ) {
-        UserInfoResponse response = appointmentService.getLoggedUserInfo(authHeader);
-        return ResponseEntity.ok(response);
-    }
-
-
-    // ✅ STEP 2: Get vehicles for logged-in user
     @GetMapping("/vehicles")
     public ResponseEntity<List<VehicleResponse>> getUserVehicles(
-            //@RequestHeader("Authorization") String authHeader
-            @RequestParam Long userId
+            @RequestHeader("Authorization") String authHeader
     ) {
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
+
         List<VehicleResponse> response = appointmentService.getVehiclesForUser(userId);
         return ResponseEntity.ok(response);
     }
 
-
-    // ✅ STEP 3: Get services & modifications for selected vehicle
     @PostMapping("/services")
     public ResponseEntity<ServiceAndModificationResponse> getServicesAndModifications(
             @RequestBody VehicleSelectionRequest request
@@ -55,8 +46,6 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-
-    // ✅ STEP 4: Calculate total cost and end time (preview before submit)
     @PostMapping("/calculate")
     public ResponseEntity<AppointmentCalculationResponse> calculateAppointmentDetails(
             @RequestBody AppointmentCalculationRequest request
@@ -66,30 +55,30 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-     //✅ STEP 5: Submit the final appointment
-     @PostMapping("/create")
-     public ResponseEntity<AppointmentResponse> createAppointment(
-             @RequestBody AppointmentCreateRequest request,
-             @RequestParam Long userId // 🔹 temporary for testing
-     ) {
-         AppointmentResponse response = appointmentService.createAppointment(request, userId); // pass userId directly
-         return ResponseEntity.ok(response);
-     }
+    @PostMapping("/create")
+    public ResponseEntity<AppointmentResponse> createAppointment(
+            @RequestBody AppointmentCreateRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
-//}
-
-//    @GetMapping("/my-appointments")
-//    public ResponseEntity<List<AppointmentHistoryResponse>> getCustomerAppointments(HttpServletRequest request) {
-//        List<AppointmentHistoryResponse> response = appointmentService.getCustomerAppointments(request);
-//        return ResponseEntity.ok(response);
-//    }
-
-    @GetMapping("/my-appointments")
-    public ResponseEntity<List<AppointmentHistoryResponse>> getCustomerAppointments(
-            @RequestParam Long userId) {
-        List<AppointmentHistoryResponse> response = appointmentService.getCustomerAppointments(userId);
+        AppointmentResponse response = appointmentService.createAppointment(request, userId);
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<List<AppointmentHistoryResponse>> getCustomerAppointmentHistory(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtil.extractUserId(token);
 
+        List<AppointmentHistoryResponse> response =
+                appointmentService.getCustomerAppointments(userId, startDate, endDate);
+
+        return ResponseEntity.ok(response);
+    }
 }

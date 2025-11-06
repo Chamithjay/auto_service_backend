@@ -37,7 +37,7 @@ public class AppointmentJob {
     @Column(nullable = false)
     private AppointmentStatus itemStatus = AppointmentStatus.NEW;
 
-    private String description;
+    private String jobNote;
 
     @Column(precision = 17, scale = 2)
     private BigDecimal additional_cost;

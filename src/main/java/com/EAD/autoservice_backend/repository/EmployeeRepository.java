@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findAll();
-    Optional<Employee> findByNic(String nic);
     List<Employee> findAllByOrderByIdAsc();
 }
 

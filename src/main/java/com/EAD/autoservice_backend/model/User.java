@@ -1,8 +1,6 @@
 package com.EAD.autoservice_backend.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
@@ -14,11 +12,8 @@ import java.util.Collections;
  * This represents a user in the database with authentication capabilities.
  */
 @Entity
-@Getter
-@Setter
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,9 +22,6 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false, length = 50)
     private String username;
 
-    @Column(unique = true, length = 100)
-    private String fullName;
-
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
@@ -37,7 +29,7 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    private Role role = Role.CUSTOMER;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

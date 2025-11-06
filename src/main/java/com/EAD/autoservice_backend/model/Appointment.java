@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointments")
@@ -32,7 +33,6 @@ public class Appointment {
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
 
-    // 🕗 New: Session (Morning or Evening)
     @Enumerated(EnumType.STRING)
     @Column(name = "session_type", nullable = false, length = 20)
     private SessionType sessionType;
@@ -44,6 +44,11 @@ public class Appointment {
     @Column(precision = 17, scale = 2)
     private BigDecimal totalCost;
 
-    @Column(name = "total_approximated_duration", nullable = false) //this should be removed
-    private Integer totalApproximatedDuration;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

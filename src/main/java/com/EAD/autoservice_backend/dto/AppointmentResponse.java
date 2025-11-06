@@ -21,7 +21,6 @@ public class AppointmentResponse {
     private LocalTime startTime;
     private LocalTime endTime;
     private BigDecimal totalCost;
-    private Integer totalApproximatedDuration;   // 🆕 Added
     private String status;
     private String message;                      // 🆕 Added
     private List<ServiceItemDTO> selectedItems;
