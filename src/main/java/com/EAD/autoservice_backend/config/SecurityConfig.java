@@ -97,15 +97,15 @@ public class SecurityConfig {
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/register",
-                                "/api/v1/auth/login",
-                                "/api/v1/auth/password/**", // for forgot/reset password
-                                "/api/v1/appointment-jobs/**",
-                                "/api/v1/leaves/**"
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/password/**", // for forgot/reset password
+                                "/api/appointment-jobs/**",
+                                "/api/leaves/**"
                         ).permitAll()
 
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/profile/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/profile/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

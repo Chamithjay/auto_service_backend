@@ -19,7 +19,7 @@ import java.util.Map;
  * REST Controller for Authentication operations
  */
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;

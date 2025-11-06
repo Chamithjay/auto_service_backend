@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "service_items")
+@Table(name = "services and modifications")
 public class ServiceItem {
 
     @Id
@@ -21,18 +21,18 @@ public class ServiceItem {
     @Column(nullable = false, length = 255)
     private String serviceItemName;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 255)
+    @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
 
     @Column(nullable = false)
     private Integer requiredEmployeeCount;
 
-    @Column(precision = 17, scale = 2)
+    @Column(precision = 17, scale = 2, nullable = false)
     private BigDecimal serviceItemCost;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "service_item_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private ServiceItemType serviceItemType;
 
     @Column(name = "estimated_duration_minutes", nullable = false)
@@ -41,4 +41,5 @@ public class ServiceItem {
     @OneToMany(mappedBy = "serviceItem")
     @JsonIgnore  // Add this line to prevent circular reference
     private Set<AppointmentJob> bookedItems;
+
 }

@@ -6,7 +6,7 @@ import jakarta.persistence.*;
  * Customer entity extending User with customer-specific attributes
  */
 @Entity
-@Table(name = "customers")
+@DiscriminatorValue("CUSTOMER")
 public class Customer extends User {
 
     @Column(name = "phone_number", length = 20)

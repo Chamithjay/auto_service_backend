@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.service;
 
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
+import com.EAD.autoservice_backend.dto.ServiceItemResponse;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
@@ -41,27 +42,32 @@ public class AdminService {
 
     // --- Service CRUD Logic ---
 
-    public ServiceItem createServiceItem(ServiceItemRequest request) {
+    public ServiceItemResponse createServiceItem(ServiceItemRequest request) {
         ServiceItem newItem = new ServiceItem();
         mapRequestToServiceItem(request, newItem);
-        return serviceItemRepository.save(newItem);
+        return mapServiceItemToResponse(serviceItemRepository.save(newItem));
     }
 
     @Transactional(readOnly = true)
-    public ServiceItem getServiceById(Long id) {
-        return serviceItemRepository.findById(id)
+    public ServiceItemResponse getServiceById(Long id) {
+        ServiceItem item = serviceItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
+        return mapServiceItemToResponse(item);
     }
 
     @Transactional(readOnly = true)
-    public List<ServiceItem> getAllServices() {
-        return serviceItemRepository.findAll();
+    public List<ServiceItemResponse> getAllServices() {
+        return serviceItemRepository.findAll()
+                .stream()
+                .map(this::mapServiceItemToResponse)
+                .collect(Collectors.toList());
     }
 
-    public ServiceItem updateService(Long id, ServiceItemRequest request) {
-        ServiceItem existingService = getServiceById(id);
+    public ServiceItemResponse updateService(Long id, ServiceItemRequest request) {
+        ServiceItem existingService = serviceItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
         mapRequestToServiceItem(request, existingService);
-        return serviceItemRepository.save(existingService);
+        return mapServiceItemToResponse(serviceItemRepository.save(existingService));
     }
 
     public void deleteService(Long id) {
@@ -109,6 +115,8 @@ public class AdminService {
     public List<UserCreateResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
+                // Only include employees and admins for this admin endpoint
+                .filter(u -> (u instanceof Employee) || (u instanceof Admin))
                 .map(this::mapUserToResponse)
                 .collect(Collectors.toList());
     }
@@ -152,6 +160,19 @@ public class AdminService {
         }
     }
 
+    private ServiceItemResponse mapServiceItemToResponse(ServiceItem item) {
+        if (item == null) return null;
+        return new ServiceItemResponse(
+                item.getServiceItemId(),
+                item.getServiceItemName(),
+                item.getVehicleType(),
+                item.getRequiredEmployeeCount(),
+                item.getServiceItemCost(),
+                item.getServiceItemType(),
+                item.getEstimatedDuration()
+        );
+    }
+
     private void validateUserUniqueness(String username, String email, Long currentUserId) {
         Optional.ofNullable(username).map(String::trim).ifPresent(u -> {
             if (u.isBlank()) throw new BadRequestException("Username cannot be blank");
@@ -173,16 +194,26 @@ public class AdminService {
     }
 
     private UserCreateResponse mapUserToResponse(User user) {
+        // If the user object itself is null, or has no ID, return null
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+
         String role = "USER"; // Default
         if (user instanceof Admin) {
             role = "ADMIN";
         } else if (user instanceof Employee) {
             role = "EMPLOYEE";
         }
+
+        // Safely handle potentially null fields
+        String username = (user.getUsername() != null) ? user.getUsername() : "N/A";
+        String email = (user.getEmail() != null) ? user.getEmail() : "N/A";
+
         return new UserCreateResponse(
                 user.getId(),
-                user.getUsername(),
-                user.getEmail(),
+                username,
+                email,
                 role,
                 user.isRequiresPasswordChange()
         );

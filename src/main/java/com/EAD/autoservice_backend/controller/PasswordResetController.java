@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/v1/password")
+@RequestMapping("/api/auth/password")
 public class PasswordResetController {
 
     @Autowired

@@ -21,7 +21,7 @@ import java.util.Map;
  * REST Controller for Profile Management
  */
 @RestController
-@RequestMapping("/api/v1/profile")
+@RequestMapping("/api/profile")
 public class ProfileController {
 
     private final ProfileService profileService;

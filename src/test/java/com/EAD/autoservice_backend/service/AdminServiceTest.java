@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.service;
 
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
+import com.EAD.autoservice_backend.dto.ServiceItemResponse;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
@@ -44,65 +45,41 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        // This method runs before each test, setting up common objects.
         serviceItem = new ServiceItem();
         serviceItem.setServiceItemId(1L);
         serviceItem.setServiceItemName("Oil Change");
         serviceItem.setServiceItemCost(BigDecimal.valueOf(50.0));
+        serviceItem.setVehicleType(VehicleType.CAR);
+        serviceItem.setRequiredEmployeeCount(1);
+        serviceItem.setServiceItemType(ServiceItemType.SERVICE);
+        serviceItem.setEstimatedDuration(45);
     }
 
-    /**
-     * Test case for the "happy path" of getServiceById.
-     * It verifies that the service returns the correct ServiceItem when a valid ID is provided.
-     */
     @Test
     void testGetServiceById_Success() {
-        // Arrange: Define the behavior of the mock repository.
-        // When findById(1L) is called on the repository, return our sample serviceItem.
         when(serviceItemRepository.findById(1L)).thenReturn(Optional.of(serviceItem));
 
-        // Act: Call the method we are testing.
-        ServiceItem foundService = adminService.getServiceById(1L);
+        ServiceItemResponse foundService = adminService.getServiceById(1L);
 
-        // Assert: Verify the results.
-        // Check that the returned service is not null and has the correct properties.
         assertNotNull(foundService);
-        assertEquals("Oil Change", foundService.getServiceItemName());
-        assertEquals(1L, foundService.getServiceItemId());
+        assertEquals("Oil Change", foundService.serviceItemName());
+        assertEquals(1L, foundService.serviceItemId());
+        assertEquals(VehicleType.CAR, foundService.vehicleType());
 
-        // Verify that the findById method was called exactly once on the repository.
         verify(serviceItemRepository, times(1)).findById(1L);
     }
 
-    /**
-     * Test case for the "unhappy path" of getServiceById.
-     * It verifies that the service throws a ResourceNotFoundException when an invalid ID is provided.
-     */
     @Test
     void testGetServiceById_NotFound() {
-        // Arrange: Define the mock behavior for a non-existent ID.
-        // When findById is called with any Long, return an empty Optional.
         when(serviceItemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert: Verify that executing the method throws the expected exception.
-        // We use assertThrows to confirm that the correct exception type is thrown.
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            adminService.getServiceById(99L);
-        });
-
-        // Optionally, you can assert the exception message.
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> adminService.getServiceById(99L));
         assertEquals("ServiceItem not found with id: 99", exception.getMessage());
-
-        // Verify that the findById method was called exactly once.
         verify(serviceItemRepository, times(1)).findById(99L);
     }
 
-    /**
-     * Test case for creating a new service item.
-     */
     @Test
     void testCreateServiceItem() {
-        // Arrange
         ServiceItemRequest request = new ServiceItemRequest(
                 "Tire Rotation",
                 "CAR",
@@ -112,30 +89,29 @@ class AdminServiceTest {
                 60
         );
 
-        // This will be the object returned by the save method.
         ServiceItem savedItem = new ServiceItem();
         savedItem.setServiceItemId(2L);
         savedItem.setServiceItemName("Tire Rotation");
+        savedItem.setVehicleType(VehicleType.CAR);
+        savedItem.setRequiredEmployeeCount(1);
+        savedItem.setServiceItemType(ServiceItemType.SERVICE);
+        savedItem.setEstimatedDuration(60);
+        savedItem.setServiceItemCost(BigDecimal.valueOf(45.0));
 
-        // When the repository's save method is called with any ServiceItem,
-        // return our predefined savedItem.
         when(serviceItemRepository.save(any(ServiceItem.class))).thenReturn(savedItem);
 
-        // Act
-        ServiceItem createdItem = adminService.createServiceItem(request);
+        ServiceItemResponse createdItem = adminService.createServiceItem(request);
 
-        // Assert
         assertNotNull(createdItem);
-        assertEquals(2L, createdItem.getServiceItemId());
-        assertEquals("Tire Rotation", createdItem.getServiceItemName());
+        assertEquals(2L, createdItem.serviceItemId());
+        assertEquals("Tire Rotation", createdItem.serviceItemName());
+        assertEquals(60, createdItem.estimatedDuration());
 
-        // Verify that save was called once.
         verify(serviceItemRepository, times(1)).save(any(ServiceItem.class));
     }
 
     @Test
     void testUpdateService_Success() {
-        // Arrange
         Long id = 10L;
         ServiceItem existing = new ServiceItem();
         existing.setServiceItemId(id);
@@ -158,16 +134,14 @@ class AdminServiceTest {
                 45
         );
 
-        // Act
-        ServiceItem updated = adminService.updateService(id, request);
+        ServiceItemResponse updated = adminService.updateService(id, request);
 
-        // Assert
-        assertEquals("New Name", updated.getServiceItemName());
-        assertEquals(VehicleType.CAR, updated.getVehicleType());
-        assertEquals(3, updated.getRequiredEmployeeCount());
-        assertEquals(BigDecimal.valueOf(150), updated.getServiceItemCost());
-        assertEquals(ServiceItemType.MODIFICATION, updated.getServiceItemType());
-        assertEquals(45, updated.getEstimatedDuration());
+        assertEquals("New Name", updated.serviceItemName());
+        assertEquals(VehicleType.CAR, updated.vehicleType());
+        assertEquals(3, updated.requiredEmployeeCount());
+        assertEquals(BigDecimal.valueOf(150), updated.serviceItemCost());
+        assertEquals(ServiceItemType.MODIFICATION, updated.serviceItemType());
+        assertEquals(45, updated.estimatedDuration());
 
         verify(serviceItemRepository).findById(id);
         verify(serviceItemRepository).save(any(ServiceItem.class));
@@ -197,7 +171,6 @@ class AdminServiceTest {
 
     @Test
     void testCreateUser_Admin_Success() {
-        // Arrange
         UserCreateRequest req = new UserCreateRequest("alice", "pass123", "a@b.com", "ADMIN");
         when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("a@b.com")).thenReturn(Optional.empty());
@@ -211,10 +184,8 @@ class AdminServiceTest {
         saved.setPassword("ENC(pass123)");
         when(userRepository.save(any(User.class))).thenReturn(saved);
 
-        // Act
         UserCreateResponse resp = adminService.createUser(req);
 
-        // Assert
         assertEquals(1L, resp.id());
         assertEquals("alice", resp.username());
         assertEquals("a@b.com", resp.email());
@@ -266,7 +237,6 @@ class AdminServiceTest {
 
     @Test
     void testUpdateUser_Success() {
-        // Existing Admin
         Admin existing = new Admin();
         existing.setId(5L);
         existing.setUsername("old");
@@ -282,7 +252,7 @@ class AdminServiceTest {
         assertEquals(5L, resp.id());
         assertEquals("new", resp.username());
         assertEquals("new@x.com", resp.email());
-        assertEquals("ADMIN", resp.role()); // role unchanged and mapped by instance
+        assertEquals("ADMIN", resp.role());
         assertTrue(resp.requiresPasswordChange());
 
         verify(userRepository).save(any(User.class));
