@@ -18,7 +18,7 @@ public class EmployeeLeaveRequest {
     @NotNull(message = "Leave date cannot be null")
     LocalDate leaveDate;
 
-    @NotBlank(message = "Status is required")
+    @NotBlank(message = "Leave type is required")
     @Pattern(regexp = "^(HALFDAY_MORNING|HALFDAY_EVENING|FULLDAY)$", message = "Invalid leave type ")
     private final String leaveType;
 

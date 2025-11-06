@@ -32,7 +32,7 @@ public class JobAssignment {
     private LocalTime endTime;
 
     @Column(precision = 17, scale = 2)
-    private BigDecimal additional_cost;
+    private BigDecimal additionalCost;
 
     @Column
     private String costNote;

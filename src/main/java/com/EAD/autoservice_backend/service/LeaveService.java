@@ -43,13 +43,15 @@ public class LeaveService {
                     savedLeave.getLeaveType().toString(),
                     savedLeave.getLeaveDate(),
                     savedLeave.getLeaveReason(),
-                    savedLeave.getLeaveStatus().toString(),
-                    savedLeave.getApprovedTime(),
-                    savedLeave.getApprovedDate(),
-                    savedLeave.getAdmin() != null ? savedLeave.getAdmin().getUsername() : null
-            );
-        }catch (Exception e){
+                    savedLeave.getLeaveStatus().toString()
+                     );
+        }catch (EmployeeNotFoundException e){
+            throw e;
+        }
+        catch (Exception e){
             throw new RuntimeException("Failed to request leave: " + e.getMessage());
         }
     }
+
+
 }
