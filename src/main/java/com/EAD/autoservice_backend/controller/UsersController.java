@@ -1,6 +1,6 @@
 package com.EAD.autoservice_backend.controller;
 
-import com.EAD.autoservice_backend.dto.UsersDTO;
+import com.EAD.autoservice_backend.dto.UserDTO;
 import com.EAD.autoservice_backend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -18,7 +18,7 @@ public class UsersController {
 
     // ✅ GET all customer emails, phone numbers, and IDs
     @GetMapping("/customers")
-    public List<UsersDTO> getAllCustomerInfo() {
+    public List<UserDTO> getAllCustomerInfo() {
         return userService.getAllCustomersBasicInfo();
     }
 }
