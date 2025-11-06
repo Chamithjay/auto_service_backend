@@ -1,5 +1,6 @@
 package com.EAD.autoservice_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ public class ServiceItem {
     private Integer estimatedDuration;
 
     @OneToMany(mappedBy = "serviceItem")
+    @JsonIgnore  // Add this line to prevent circular reference
     private Set<AppointmentJob> bookedItems;
 
 }
