@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for user management.
+ * Handles password reset operations for employees.
+ */
 @RestController
 @RequestMapping("/api/v1/employees")
 public class UserController {
@@ -22,6 +26,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * Forces a password reset for the currently authenticated user.
+     *
+     * @param request the password reset request containing the new password
+     * @return ResponseEntity containing a success message
+     */
     @PostMapping("/me/force-reset-password")
     public ResponseEntity<MessageResponse> forceResetPassword(@Valid @RequestBody InitialPasswordResetRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

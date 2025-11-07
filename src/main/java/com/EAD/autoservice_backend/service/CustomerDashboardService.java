@@ -144,15 +144,31 @@ public class CustomerDashboardService {
                     appointment.getAppointmentId(), AppointmentStatus.COMPLETED
             );
 
-            Vehicle vehicle = appointment.getVehicle();
+            Vehicle vehicle = null;
             AppointmentSummaryResponse.VehicleBasicInfo vehicleInfo;
+
+            // Try to get vehicle from appointment's vehicle_id
+            try {
+                vehicle = appointment.getVehicle();
+            } catch (Exception e) {
+                logger.debug("Could not load vehicle from appointment relationship: {}", e.getMessage());
+            }
+
+            // If vehicle is still null, try to load it directly using vehicle_id
+            if (vehicle == null && appointment.getVehicleId() != null) {
+                try {
+                    vehicle = vehicleRepository.findById(appointment.getVehicleId()).orElse(null);
+                } catch (Exception e) {
+                    logger.debug("Could not load vehicle by ID {}: {}", appointment.getVehicleId(), e.getMessage());
+                }
+            }
 
             if (vehicle == null) {
                 logger.warn("No vehicle found for appointment ID: {}. Using fallback vehicle data from appointment.",
                            appointment.getAppointmentId());
                 // Use vehicle data stored in the appointment itself as fallback
                 vehicleInfo = new AppointmentSummaryResponse.VehicleBasicInfo(
-                        null,  // No vehicle ID available
+                        appointment.getVehicleId(),  // Use the stored vehicle_id
                         appointment.getVehicleName() != null ? appointment.getVehicleName() : "Unknown Vehicle",
                         "N/A"  // No registration number available
                 );

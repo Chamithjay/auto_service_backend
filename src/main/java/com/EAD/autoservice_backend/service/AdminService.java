@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for administrative operations.
+ * Handles CRUD operations for service items and user management (Employees and Admins).
+ */
 @Service
 @Transactional
 public class AdminService {
@@ -34,9 +38,13 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
+    /**
+     * Constructs an AdminService with the required dependencies.
+     *
+     * @param serviceItemRepository repository for service item operations
+     * @param userRepository repository for user operations
+     * @param passwordEncoder encoder for password hashing
+     */
     public AdminService(ServiceItemRepository serviceItemRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder) {
@@ -45,14 +53,26 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // --- Service CRUD Logic ---
-
-    public ServiceItemResponse createServiceItem(ServiceItemRequest request) {
+    /**
+     * Creates a new service item.
+     *
+     * @param request the service item creation request
+     * @return the created service item
+     * @throws BadRequestException if request contains invalid data
+     */
+    public ServiceItem createServiceItem(ServiceItemRequest request) {
         ServiceItem newItem = new ServiceItem();
         mapRequestToServiceItem(request, newItem);
         return mapServiceItemToResponse(serviceItemRepository.save(newItem));
     }
 
+    /**
+     * Retrieves a service item by its ID.
+     *
+     * @param id the service item ID
+     * @return the service item
+     * @throws ResourceNotFoundException if service item is not found
+     */
     @Transactional(readOnly = true)
     public ServiceItemResponse getServiceById(Long id) {
         ServiceItem item = serviceItemRepository.findById(id)
@@ -60,6 +80,11 @@ public class AdminService {
         return mapServiceItemToResponse(item);
     }
 
+    /**
+     * Retrieves all service items.
+     *
+     * @return list of all service items
+     */
     @Transactional(readOnly = true)
     public List<ServiceItemResponse> getAllServices() {
         return serviceItemRepository.findAll()
@@ -68,13 +93,27 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-    public ServiceItemResponse updateService(Long id, ServiceItemRequest request) {
-        ServiceItem existingService = serviceItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
+    /**
+     * Updates an existing service item.
+     *
+     * @param id the service item ID to update
+     * @param request the update request containing new data
+     * @return the updated service item
+     * @throws ResourceNotFoundException if service item is not found
+     * @throws BadRequestException if request contains invalid data
+     */
+    public ServiceItem updateService(Long id, ServiceItemRequest request) {
+        ServiceItem existingService = getServiceById(id);
         mapRequestToServiceItem(request, existingService);
         return mapServiceItemToResponse(serviceItemRepository.save(existingService));
     }
 
+    /**
+     * Deletes a service item by its ID.
+     *
+     * @param id the service item ID to delete
+     * @throws ResourceNotFoundException if service item is not found
+     */
     public void deleteService(Long id) {
         if (!serviceItemRepository.existsById(id)) {
             throw new ResourceNotFoundException("ServiceItem not found with id: " + id);
@@ -82,8 +121,14 @@ public class AdminService {
         serviceItemRepository.deleteById(id);
     }
 
-    // --- User (Employee/Admin) CRUD Logic ---
-
+    /**
+     * Creates a new user (Employee or Admin).
+     *
+     * @param request the user creation request
+     * @return the created user response
+     * @throws BadRequestException if request contains invalid data
+     * @throws ResourceConflictException if username or email already exists
+     */
     public UserCreateResponse createUser(UserCreateRequest request) {
         validateUserUniqueness(request.username(), request.email(), null);
 
@@ -103,12 +148,18 @@ public class AdminService {
         newUser.setUsername(request.username().trim());
         newUser.setEmail(request.email().trim());
         newUser.setPassword(passwordEncoder.encode(request.password()));
-        // requiresPasswordChange is true by default from the entity definition
 
         User savedUser = userRepository.save(newUser);
         return mapUserToResponse(savedUser);
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id the user ID
+     * @return the user response
+     * @throws ResourceNotFoundException if user is not found
+     */
     @Transactional(readOnly = true)
     public UserCreateResponse getUserById(Long id) {
         User user = userRepository.findById(id)
@@ -116,6 +167,11 @@ public class AdminService {
         return mapUserToResponse(user);
     }
 
+    /**
+     * Retrieves all users.
+     *
+     * @return list of all user responses
+     */
     @Transactional(readOnly = true)
     public List<UserCreateResponse> getAllUsers() {
         return userRepository.findAll()
@@ -126,6 +182,16 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates an existing user.
+     * Note: This implementation does not allow changing the role to prevent accidental privilege escalation.
+     *
+     * @param id the user ID to update
+     * @param request the update request containing new data
+     * @return the updated user response
+     * @throws ResourceNotFoundException if user is not found
+     * @throws ResourceConflictException if new username or email already exists
+     */
     public UserCreateResponse updateUser(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -135,35 +201,16 @@ public class AdminService {
         Optional.ofNullable(request.username()).map(String::trim).ifPresent(user::setUsername);
         Optional.ofNullable(request.email()).map(String::trim).ifPresent(user::setEmail);
 
-        // Allow changing the role between ADMIN and EMPLOYEE only
-        if (request.role() != null && !request.role().isBlank()) {
-            String newRoleStr = request.role().trim().toUpperCase();
-
-            String currentType = (user instanceof Admin) ? "ADMIN"
-                    : (user instanceof Employee) ? "EMPLOYEE" : user.getRole().name();
-            if (!currentType.equals(newRoleStr)) {
-                // Persist any changes to username/email first
-                userRepository.save(user);
-                // Flush to ensure pending changes are stored before native update
-                entityManager.flush();
-
-                // Update discriminator and role atomically
-                int updated = userRepository.updateUserTypeAndRole(id, newRoleStr, newRoleStr);
-                if (updated != 1) {
-                    throw new ResourceConflictException("Failed to update user role");
-                }
-
-                // Detach and reload to the correct subclass type
-                entityManager.clear();
-                user = userRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("User not found after role change"));
-            }
-        }
-
         User updatedUser = userRepository.save(user);
         return mapUserToResponse(updatedUser);
     }
 
+    /**
+     * Deletes a user by their ID.
+     *
+     * @param id the user ID to delete
+     * @throws ResourceNotFoundException if user is not found
+     */
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found with id: " + id);
@@ -171,8 +218,13 @@ public class AdminService {
         userRepository.deleteById(id);
     }
 
-    // --- Helper Methods ---
-
+    /**
+     * Maps a service item request to a service item entity.
+     *
+     * @param request the service item request
+     * @param serviceItem the service item entity to populate
+     * @throws BadRequestException if enum values are invalid
+     */
     private void mapRequestToServiceItem(ServiceItemRequest request, ServiceItem serviceItem) {
         serviceItem.setServiceItemName(request.serviceItemName());
         serviceItem.setServiceItemCost(request.serviceItemCost());
@@ -187,19 +239,15 @@ public class AdminService {
         }
     }
 
-    private ServiceItemResponse mapServiceItemToResponse(ServiceItem item) {
-        if (item == null)
-            return null;
-        return new ServiceItemResponse(
-                item.getServiceItemId(),
-                item.getServiceItemName(),
-                item.getVehicleType(),
-                item.getRequiredEmployeeCount(),
-                item.getServiceItemCost(),
-                item.getServiceItemType(),
-                item.getEstimatedDuration());
-    }
-
+    /**
+     * Validates that username and email are unique.
+     *
+     * @param username the username to validate
+     * @param email the email to validate
+     * @param currentUserId the current user ID (for updates) or null (for creation)
+     * @throws BadRequestException if username or email is blank
+     * @throws ResourceConflictException if username or email already exists
+     */
     private void validateUserUniqueness(String username, String email, Long currentUserId) {
         Optional.ofNullable(username).map(String::trim).ifPresent(u -> {
             if (u.isBlank())
@@ -222,13 +270,14 @@ public class AdminService {
         });
     }
 
+    /**
+     * Maps a user entity to a user response DTO.
+     *
+     * @param user the user entity
+     * @return the user response DTO
+     */
     private UserCreateResponse mapUserToResponse(User user) {
-        // If the user object itself is null, or has no ID, return null
-        if (user == null || user.getId() == null) {
-            return null;
-        }
-
-        String role = "USER"; // Default
+        String role = "USER";
         if (user instanceof Admin) {
             role = "ADMIN";
         } else if (user instanceof Employee) {

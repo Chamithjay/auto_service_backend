@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * REST Controller for customer dashboard operations
+ * REST controller for customer dashboard operations.
+ * Provides endpoints for dashboard statistics, appointments overview, and progress tracking.
  */
 @RestController
 @RequestMapping("/api/v1/customer/dashboard")
@@ -30,8 +31,10 @@ public class CustomerDashboardController {
     }
 
     /**
-     * Get dashboard statistics
-     * GET /api/v1/customer/dashboard/stats
+     * Retrieves dashboard statistics for the authenticated customer.
+     *
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing dashboard statistics
      */
     @GetMapping("/stats")
     public ResponseEntity<?> getDashboardStats(Authentication authentication) {
@@ -51,8 +54,10 @@ public class CustomerDashboardController {
     }
 
     /**
-     * Get all appointments for the customer
-     * GET /api/v1/customer/dashboard/appointments
+     * Retrieves all appointments for the authenticated customer.
+     *
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing list of all appointments
      */
     @GetMapping("/appointments")
     public ResponseEntity<?> getAllAppointments(Authentication authentication) {
@@ -72,8 +77,10 @@ public class CustomerDashboardController {
     }
 
     /**
-     * Get active appointments only (NEW or ONGOING)
-     * GET /api/v1/customer/dashboard/appointments/active
+     * Retrieves active appointments (NEW or ONGOING status) for the authenticated customer.
+     *
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing list of active appointments
      */
     @GetMapping("/appointments/active")
     public ResponseEntity<?> getActiveAppointments(Authentication authentication) {
@@ -93,8 +100,11 @@ public class CustomerDashboardController {
     }
 
     /**
-     * Get detailed progress for a specific appointment
-     * GET /api/v1/customer/dashboard/appointments/{id}/progress
+     * Retrieves detailed progress information for a specific appointment.
+     *
+     * @param appointmentId the appointment ID
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing appointment progress details
      */
     @GetMapping("/appointments/{id}/progress")
     public ResponseEntity<?> getAppointmentProgress(@PathVariable("id") Long appointmentId,

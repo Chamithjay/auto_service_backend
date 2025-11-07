@@ -5,9 +5,9 @@ import com.EAD.autoservice_backend.dto.LoginResponse;
 import com.EAD.autoservice_backend.dto.RegisterRequest;
 import com.EAD.autoservice_backend.dto.RegisterResponse;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
-import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.repository.UserRepository;
 import com.EAD.autoservice_backend.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,20 +75,16 @@ class AuthServiceTest {
         assertEquals(Role.CUSTOMER, saved.getRole());
     }
 
-    // java
     @Test
     void registerUser_usernameTaken_throws() {
         RegisterRequest req = mock(RegisterRequest.class);
         when(req.getUsername()).thenReturn("alice");
-        // Removed unused stub:
-        // when(req.getEmail()).thenReturn("alice@example.com");
 
         when(userRepository.existsByUsername("alice")).thenReturn(true);
 
         assertThrows(UserAlreadyExistsException.class, () -> authService.registerUser(req));
         verify(userRepository, never()).save(any());
     }
-
 
     @Test
     void registerUser_emailTaken_throws() {
@@ -112,16 +108,19 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
 
-        UserDetails ud = org.springframework.security.core.userdetails.User
-                .withUsername("bob").password("enc").authorities(Collections.emptyList()).build();
-        when(userDetailsService.loadUserByUsername("bob")).thenReturn(ud);
-        when(jwtUtil.generateToken("bob")).thenReturn("jwt-token");
+        // Unnecessary stub removed
+        // UserDetails ud = ...
+        // when(userDetailsService.loadUserByUsername("bob")).thenReturn(ud);
+
+        when(jwtUtil.generateToken(anyString(), anyLong(), anyString(), anyString()))
+                .thenReturn("jwt-token");
 
         User user = mock(User.class);
         when(user.getUsername()).thenReturn("bob");
         when(user.getEmail()).thenReturn("bob@example.com");
         when(user.getRole()).thenReturn(Role.CUSTOMER);
         when(user.isRequiresPasswordChange()).thenReturn(false);
+        when(user.getId()).thenReturn(0L);
         when(userRepository.findByUsername("bob")).thenReturn(Optional.of(user));
 
         LoginResponse res = authService.loginUser(req);

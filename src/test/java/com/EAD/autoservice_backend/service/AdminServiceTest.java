@@ -55,6 +55,8 @@ class AdminServiceTest {
         serviceItem.setEstimatedDuration(45);
     }
 
+    // ----------------- ServiceItem Tests -----------------
+
     @Test
     void testGetServiceById_Success() {
         when(serviceItemRepository.findById(1L)).thenReturn(Optional.of(serviceItem));

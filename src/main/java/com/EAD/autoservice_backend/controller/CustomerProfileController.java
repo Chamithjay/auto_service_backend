@@ -16,7 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * REST Controller for customer profile operations
+ * REST controller for customer profile operations.
+ * Provides endpoints for viewing and updating customer profile information.
  */
 @RestController
 @RequestMapping("/api/v1/customer/profile")
@@ -30,8 +31,10 @@ public class CustomerProfileController {
     }
 
     /**
-     * Get current customer profile
-     * GET /api/v1/customer/profile
+     * Retrieves the current customer's profile.
+     *
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing the customer profile
      */
     @GetMapping
     public ResponseEntity<?> getProfile(Authentication authentication) {
@@ -51,8 +54,11 @@ public class CustomerProfileController {
     }
 
     /**
-     * Update customer profile
-     * PUT /api/v1/customer/profile
+     * Updates the current customer's profile.
+     *
+     * @param request the profile update request containing new information
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing the updated customer profile
      */
     @PutMapping
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequest request,

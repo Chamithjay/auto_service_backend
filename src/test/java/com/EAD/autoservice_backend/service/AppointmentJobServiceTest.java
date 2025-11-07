@@ -104,7 +104,7 @@ class AppointmentJobServiceTest {
     void getAppointmentJobById_success() {
         AppointmentJob job = buildJob(1L);
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
         when(jobAssignmentService.getJobAssignmentListByAppointmentJobId(1L))
                 .thenReturn(List.of(new EmployeeJobAssignmentResponse(1L, "Tech A", null, null, null, null)));
 
@@ -132,13 +132,15 @@ class AppointmentJobServiceTest {
 
         assertEquals(1, resp.getJobAssignments().size());
 
-        verify(appointmentJobRepository).findById(1L);
+        verify(appointmentJobRepository).findByIdWithDetails(1L);
         verify(jobAssignmentService).getJobAssignmentListByAppointmentJobId(1L);
     }
 
+
     @Test
     void getAppointmentJobById_notFound_throws() {
-        when(appointmentJobRepository.findById(999L)).thenReturn(Optional.empty());
+        when(appointmentJobRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
+
         AppointmentJobNotFoundException ex = assertThrows(
                 AppointmentJobNotFoundException.class,
                 () -> appointmentJobService.getAppointmentJobById(999L)
@@ -152,7 +154,7 @@ class AppointmentJobServiceTest {
         AppointmentJob job = buildJob(1L);
         job.setAppointment(null);
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
 
         DetailsMissingException ex = assertThrows(
                 DetailsMissingException.class,
@@ -165,10 +167,10 @@ class AppointmentJobServiceTest {
     void getAppointmentJobById_missingVehicle_throws() {
         AppointmentJob job = buildJob(1L);
         Appointment appt = appointment;
-        appt.setVehicle(null); // break vehicle
+        appt.setVehicle(null);
         job.setAppointment(appt);
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
 
         DetailsMissingException ex = assertThrows(
                 DetailsMissingException.class,
@@ -180,9 +182,9 @@ class AppointmentJobServiceTest {
     @Test
     void getAppointmentJobById_missingServiceItem_throws() {
         AppointmentJob job = buildJob(1L);
-        job.setServiceItem(null);
+        job.setServiceItem(null); // simulate missing service item
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
 
         DetailsMissingException ex = assertThrows(
                 DetailsMissingException.class,
@@ -191,12 +193,14 @@ class AppointmentJobServiceTest {
         assertEquals("Service Item not found for Appointment Job ID: 1", ex.getMessage());
     }
 
+
     @Test
     void getAppointmentJobById_missingCustomer_throws() {
         AppointmentJob job = buildJob(1L);
-        vehicle.setCustomer(null); // remove customer from vehicle
+        vehicle.setCustomer(null); // simulate missing customer
+        job.getAppointment().setVehicle(vehicle);
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
 
         DetailsMissingException ex = assertThrows(
                 DetailsMissingException.class,
@@ -265,13 +269,14 @@ class AppointmentJobServiceTest {
         AppointmentJob job = buildJob(1L);
         job.setJobNote(null);
 
-        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        // Mock repository calls
+        when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job)); // optional, if still called
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
         when(appointmentJobRepository.save(job)).thenReturn(job);
         when(jobAssignmentService.getJobAssignmentListByAppointmentJobId(1L))
-                .thenReturn(List.of()); // the service calls getAppointmentJobById at the end
+                .thenReturn(List.of()); // required because getAppointmentJobById is called
 
         EmployeeJobNoteRequest req = new EmployeeJobNoteRequest("Initial note");
-
 
         EmployeeAppointmentJobResponse resp = appointmentJobService.saveJobNoteForAppointmentJob(1L, req);
 
@@ -280,18 +285,20 @@ class AppointmentJobServiceTest {
         verify(appointmentJobRepository).save(job);
     }
 
+
     @Test
     void saveJobNote_existingNote_appendsWithNewLineAndPeriod() {
         AppointmentJob job = buildJob(1L);
         job.setJobNote("Old note.");
 
+        // Stub both repository calls
         when(appointmentJobRepository.findById(1L)).thenReturn(Optional.of(job));
+        when(appointmentJobRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(job));
         when(appointmentJobRepository.save(job)).thenReturn(job);
         when(jobAssignmentService.getJobAssignmentListByAppointmentJobId(1L))
                 .thenReturn(List.of());
 
         EmployeeJobNoteRequest req = new EmployeeJobNoteRequest("New info");
-
 
         EmployeeAppointmentJobResponse resp = appointmentJobService.saveJobNoteForAppointmentJob(1L, req);
 

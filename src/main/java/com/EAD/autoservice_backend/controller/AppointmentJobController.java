@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing appointment jobs.
+ * Provides endpoints for retrieving job details, updating status, and saving notes.
+ */
 @RestController
 @RequestMapping("/api/v1/appointment-jobs")
 public class AppointmentJobController {
@@ -20,8 +24,12 @@ public class AppointmentJobController {
         this.appointmentJobService = appointmentJobService;
     }
 
-
-    // Get appointment job information by id.
+    /**
+     * Retrieves appointment job information by ID.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @return ResponseEntity containing the appointment job details
+     */
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeAppointmentJobResponse> getAppointmentJobById(@PathVariable("id") Long appointmentJobId){
         try{
@@ -35,7 +43,13 @@ public class AppointmentJobController {
         }
     }
 
-    // Save job note for an appointment job.
+    /**
+     * Saves a job note for an appointment job.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @param employeeJobNoteRequest the job note request
+     * @return ResponseEntity containing the updated appointment job details
+     */
     @PatchMapping("/save-job-note/{id}")
     public ResponseEntity<EmployeeAppointmentJobResponse> saveJobNoteForAppointmentJob(@PathVariable("id") Long appointmentJobId, @Valid @RequestBody EmployeeJobNoteRequest employeeJobNoteRequest){
         try {
@@ -48,7 +62,13 @@ public class AppointmentJobController {
         }
     }
 
-    // Update job status for an appointment job.
+    /**
+     * Updates the job status for an appointment job.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @param statusUpdateRequest the status update request
+     * @return ResponseEntity containing the status update message
+     */
     @PatchMapping("/update-job-status/{id}")
     public ResponseEntity<String> updateJobStatusForAppointmentJob(@PathVariable("id") Long appointmentJobId, @Valid @RequestBody EmployeeAppointmentJobStatusUpdateRequest statusUpdateRequest){
         try {

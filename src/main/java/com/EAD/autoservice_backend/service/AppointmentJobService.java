@@ -10,24 +10,39 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class for managing appointment jobs.
+ * Handles operations related to appointment jobs including retrieval, status updates, and job notes.
+ */
 @Service
 public class AppointmentJobService {
 
     private final AppointmentJobRepository appointmentJobRepository;
     private final JobAssignmentService jobAssignmentService;
 
-
+    /**
+     * Constructs an AppointmentJobService with the required dependencies.
+     *
+     * @param appointmentJobRepository repository for appointment job operations
+     * @param jobAssignmentService service for job assignment operations
+     */
     public AppointmentJobService(AppointmentJobRepository appointmentJobRepository, JobAssignmentService jobAssignmentService) {
         this.appointmentJobRepository = appointmentJobRepository;
         this.jobAssignmentService = jobAssignmentService;
     }
 
-
-    // Get appointment job by appointment job id.
+    /**
+     * Retrieves an appointment job by its ID with all related details.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @return the appointment job response with vehicle, service item, customer, and assignment details
+     * @throws AppointmentJobNotFoundException if appointment job is not found
+     * @throws DetailsMissingException if required related data is missing
+     * @throws RuntimeException if an unexpected error occurs
+     */
     public EmployeeAppointmentJobResponse getAppointmentJobById(Long appointmentJobId)  {
-
        try{
-           AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)
+           AppointmentJob appointmentJob = appointmentJobRepository.findByIdWithDetails(appointmentJobId)
                    .orElseThrow(() -> new AppointmentJobNotFoundException("Appointment Job Not Found. Job ID: " + appointmentJobId));
 
            Appointment appointment = appointmentJob.getAppointment();
@@ -46,7 +61,6 @@ public class AppointmentJobService {
            if (customer == null) {
                throw new DetailsMissingException("Customer details not found for the vehicle: " + vehicle.getVehicleId());
            }
-
 
            List<EmployeeJobAssignmentResponse> jobAssignmentList = jobAssignmentService.getJobAssignmentListByAppointmentJobId(appointmentJobId);
 
@@ -84,7 +98,16 @@ public class AppointmentJobService {
        }
     }
 
-    // Update appointment job status.
+    /**
+     * Updates the status of an appointment job.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @param jobStatus the new status to set
+     * @return success message with the new status
+     * @throws AppointmentJobNotFoundException if appointment job is not found
+     * @throws IllegalArgumentException if job status is invalid
+     * @throws RuntimeException if an unexpected error occurs
+     */
     public String updateAppointmentJobStatus(Long appointmentJobId, String jobStatus) {
         AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)
                 .orElseThrow(() -> new AppointmentJobNotFoundException("Appointment Job Not Found. Job ID: " + appointmentJobId));
@@ -113,7 +136,17 @@ public class AppointmentJobService {
         }
     }
 
-    // Save job note for an appointment job.
+    /**
+     * Saves a job note for an appointment job.
+     * Appends the new note to existing notes if any.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @param employeeJobNoteRequest the job note request containing the note text
+     * @return the updated appointment job response
+     * @throws AppointmentJobNotFoundException if appointment job is not found
+     * @throws IllegalArgumentException if job note is empty or blank
+     * @throws RuntimeException if an unexpected error occurs
+     */
     public EmployeeAppointmentJobResponse saveJobNoteForAppointmentJob(Long appointmentJobId, EmployeeJobNoteRequest employeeJobNoteRequest) {
         try {
             AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)

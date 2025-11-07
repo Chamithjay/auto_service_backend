@@ -53,6 +53,16 @@ public interface AppointmentJobRepository extends JpaRepository<AppointmentJob, 
      * Count jobs by appointment ID and job status
      */
     @Query("SELECT COUNT(aj) FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId AND aj.itemStatus = :status")
-    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId,
-            @Param("status") AppointmentStatus status);
+    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId, @Param("status") AppointmentStatus status);
+
+    /**
+     * Find appointment job by ID with all related entities eagerly fetched
+     */
+    @Query("SELECT aj FROM AppointmentJob aj " +
+           "LEFT JOIN FETCH aj.appointment a " +
+           "LEFT JOIN FETCH a.vehicle v " +
+           "LEFT JOIN FETCH v.customer " +
+           "LEFT JOIN FETCH aj.serviceItem " +
+           "WHERE aj.id = :appointmentJobId")
+    java.util.Optional<AppointmentJob> findByIdWithDetails(@Param("appointmentJobId") Long appointmentJobId);
 }

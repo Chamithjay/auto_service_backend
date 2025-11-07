@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing job assignments.
+ * Provides endpoints for retrieving assignments, logging time, and adding costs.
+ */
 @RestController
 @RequestMapping("/api/v1/job-assignments")
 public class JobAssignmentController {
@@ -24,7 +28,12 @@ public class JobAssignmentController {
 
     }
 
-    // Find all employee records assigned to an appointment job.
+    /**
+     * Retrieves all employee job assignments for an appointment job.
+     *
+     * @param appointmentJobId the appointment job ID
+     * @return ResponseEntity containing list of job assignments
+     */
     @GetMapping("/{id}")
     public ResponseEntity<List<EmployeeJobAssignmentResponse>> getJobAssignments(@PathVariable("id") Long appointmentJobId) {
         try {
@@ -37,7 +46,13 @@ public class JobAssignmentController {
         }
     }
 
-    // Log employee start time for a job assignment.
+    /**
+     * Logs employee start time for a job assignment.
+     *
+     * @param jobAssignmentId the job assignment ID
+     * @param employeeJobAssignmentLogStartTimeRequest the start time request
+     * @return ResponseEntity containing updated job assignment
+     */
     @PatchMapping("/log-start-time/{id}")
     public ResponseEntity<EmployeeJobAssignmentResponse> logTimeForJobAssignment(@PathVariable("id") Long jobAssignmentId, @Valid @RequestBody EmployeeJobAssignmentLogStartTimeRequest employeeJobAssignmentLogStartTimeRequest) {
         try{
@@ -50,7 +65,13 @@ public class JobAssignmentController {
         }
     }
 
-    // Log employee end time for a job assignment.
+    /**
+     * Logs employee end time for a job assignment.
+     *
+     * @param jobAssignmentId the job assignment ID
+     * @param employeeJobAssignmentLogEndTimeRequest the end time request
+     * @return ResponseEntity containing updated job assignment
+     */
     @PatchMapping("/log-end-time/{id}")
     public ResponseEntity<EmployeeJobAssignmentResponse> logEndTimeForJobAssignment(@PathVariable("id") Long jobAssignmentId, @Valid @RequestBody EmployeeJobAssignmentLogEndTimeRequest employeeJobAssignmentLogEndTimeRequest) {
         try{
@@ -63,7 +84,13 @@ public class JobAssignmentController {
         }
     }
 
-    // Add additional costs to an appointment job.
+    /**
+     * Adds additional costs to a job assignment.
+     *
+     * @param JobAssignmentId the job assignment ID
+     * @param employeeJobAssignmentAddCostsRequest the cost addition request
+     * @return ResponseEntity containing updated job assignment
+     */
     @PatchMapping("/add-costs/{id}")
     public ResponseEntity<EmployeeJobAssignmentResponse> addAdditionalCostsToAnAppointmentJob(@PathVariable("id") Long JobAssignmentId, @Valid @RequestBody EmployeeJobAssignmentAddCostsRequest employeeJobAssignmentAddCostsRequest) {
         try {
