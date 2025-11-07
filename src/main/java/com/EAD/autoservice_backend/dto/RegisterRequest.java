@@ -27,12 +27,13 @@ public class RegisterRequest {
     // Constructors
     public RegisterRequest() {}
 
-    public RegisterRequest(String username, String email, String password) {
+    public RegisterRequest(String username, String email, String password, String phoneNumber) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
     }
+
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
