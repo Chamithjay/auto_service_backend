@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.List;
 import com.EAD.autoservice_backend.model.Role;
+import org.springframework.data.jpa.repository.Modifying;
+
 /**
  * Repository interface for User entity
  * Provides database operations for user management
@@ -47,4 +49,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.role = :role")
     Long countByRole(@Param("role") Role role);
+
+    // Allow changing discriminator (user_type) and role in a single native update
+    @Modifying
+    @Query(value = "UPDATE users SET user_type = :userType, role = :role WHERE id = :id", nativeQuery = true)
+    int updateUserTypeAndRole(@Param("id") Long id,
+                              @Param("userType") String userType,
+                              @Param("role") String role);
 }

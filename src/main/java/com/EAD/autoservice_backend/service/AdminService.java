@@ -16,6 +16,8 @@ import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.model.VehicleType;
 import com.EAD.autoservice_backend.repository.ServiceItemRepository;
 import com.EAD.autoservice_backend.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,9 @@ public class AdminService {
     private final ServiceItemRepository serviceItemRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public AdminService(ServiceItemRepository serviceItemRepository,
                         UserRepository userRepository,
@@ -130,8 +135,28 @@ public class AdminService {
         Optional.ofNullable(request.username()).map(String::trim).ifPresent(user::setUsername);
         Optional.ofNullable(request.email()).map(String::trim).ifPresent(user::setEmail);
 
-        // Note: This implementation does not allow changing the role of an existing user.
-        // This is often a good security practice to prevent accidental privilege escalation.
+        // Allow changing the role between ADMIN and EMPLOYEE only
+        if (request.role() != null && !request.role().isBlank()) {
+            String newRoleStr = request.role().trim().toUpperCase();
+
+            String currentType = (user instanceof Admin) ? "ADMIN" : (user instanceof Employee) ? "EMPLOYEE" : user.getRole().name();
+            if (!currentType.equals(newRoleStr)) {
+                // Persist any changes to username/email first
+                userRepository.save(user);
+                // Flush to ensure pending changes are stored before native update
+                entityManager.flush();
+
+                // Update discriminator and role atomically
+                int updated = userRepository.updateUserTypeAndRole(id, newRoleStr, newRoleStr);
+                if (updated != 1) {
+                    throw new ResourceConflictException("Failed to update user role");
+                }
+
+                // Detach and reload to the correct subclass type
+                entityManager.clear();
+                user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found after role change"));
+            }
+        }
 
         User updatedUser = userRepository.save(user);
         return mapUserToResponse(updatedUser);
