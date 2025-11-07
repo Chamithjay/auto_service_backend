@@ -67,10 +67,10 @@ public class AppointmentJobService {
            );
 
            return new EmployeeAppointmentJobResponse(
-                   appointmentJob.getAppointmentJobId(),
+                   appointmentJob.getId(),
                    appointmentJob.getJobNote(),
-                   appointmentJob.getAdditionalCost(),
-                   appointmentJob.getJobStatus().name(),
+                   appointmentJob.getAdditional_cost(),
+                   appointmentJob.getItemStatus().name(),
                    vehicleDetails,
                    serviceItemDetails,
                    customerDetails,
@@ -93,8 +93,8 @@ public class AppointmentJobService {
             if (jobStatus == null) {
                 throw new IllegalArgumentException();
             }
-            Status newStatus = Status.valueOf(jobStatus.toUpperCase());
-            appointmentJob.setJobStatus(newStatus);
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(jobStatus.toUpperCase());
+            appointmentJob.setItemStatus(newStatus);
 
             appointmentJobRepository.save(appointmentJob);
 
@@ -102,8 +102,8 @@ public class AppointmentJobService {
 
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid Job Status: " + jobStatus
-                    + ". Valid values are: "
-                    + java.util.Arrays.stream(Status.values())
+                + ". Valid values are: "
+                + java.util.Arrays.stream(AppointmentStatus.values())
                     .map(Enum::name)
                     .reduce((a, b) -> a + ", " + b).orElse(""));
         }catch (AppointmentJobNotFoundException e) {
