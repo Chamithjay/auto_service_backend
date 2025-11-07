@@ -5,16 +5,32 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for handling email operations.
+ * Provides functionality for sending various types of emails including OTP and general emails.
+ */
 @Service
 public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
+    /**
+     * Constructs an EmailService with the specified JavaMailSender.
+     *
+     * @param mailSender the mail sender to be used for sending emails
+     */
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
+    /**
+     * Sends an OTP email to the specified recipient for password reset.
+     *
+     * @param toEmail the recipient's email address
+     * @param otp the one-time password to be sent
+     * @throws RuntimeException if email sending fails
+     */
     public void sendOTPEmail(String toEmail, String otp) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -32,6 +48,14 @@ public class EmailService {
             throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
+
+    /**
+     * Sends a general email with the specified subject and content.
+     *
+     * @param to the recipient's email address
+     * @param subject the email subject
+     * @param text the email body content
+     */
     public void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("mbuni2021@gmail.com");

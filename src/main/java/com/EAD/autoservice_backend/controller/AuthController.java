@@ -16,7 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * REST Controller for Authentication operations
+ * REST controller for authentication operations.
+ * Handles user registration and login.
  */
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,7 +31,10 @@ public class AuthController {
     }
 
     /**
-     * User Registration Endpoint
+     * Registers a new customer user.
+     *
+     * @param request the registration request containing user details
+     * @return ResponseEntity containing the registration response or error
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
@@ -49,7 +53,10 @@ public class AuthController {
     }
 
     /**
-     * User Login Endpoint
+     * Authenticates a user and returns JWT token.
+     *
+     * @param request the login request containing credentials
+     * @return ResponseEntity containing the login response with JWT token
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {

@@ -16,6 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.time.LocalDate;
 
+/**
+ * Service class for managing appointments.
+ * Handles appointment creation, calculation, employee assignment, and appointment history.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,12 @@ public class AppointmentService {
     private final AppointmentJobRepository appointmentJobRepository;
     private final JobAssignmentRepository jobAssignmentRepository;
 
+    /**
+     * Retrieves all vehicles for a specific user.
+     *
+     * @param userId the user ID
+     * @return list of vehicle responses
+     */
     public List<VehicleResponse> getVehiclesForUser(Long userId) {
         log.info("Fetching vehicles for user ID: {}", userId);
         List<Vehicle> vehicles = vehicleRepository.findByCustomerId(userId);
@@ -51,15 +61,27 @@ public class AppointmentService {
         return response;
     }
 
+    /**
+     * Maps a ServiceItem entity to a ServiceItemDTO.
+     *
+     * @param item the service item entity
+     * @return the service item DTO
+     */
     private ServiceItemDTO mapToServiceItemDTO(ServiceItem item) {
         return ServiceItemDTO.builder()
                 .id(item.getServiceItemId())
                 .name(item.getServiceItemName())
-                .type(item.getServiceItemType().name()) // Enum -> String
+                .type(item.getServiceItemType().name())
                 .build();
     }
 
-
+    /**
+     * Retrieves available services and modifications for a specific vehicle.
+     *
+     * @param request the vehicle selection request
+     * @return response containing services and modifications
+     * @throws RuntimeException if vehicle is not found
+     */
     public ServiceAndModificationResponse getServicesAndModificationsForVehicle(VehicleSelectionRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
@@ -82,6 +104,13 @@ public class AppointmentService {
                 .build();
     }
 
+    /**
+     * Calculates appointment details including total cost and employee availability.
+     * Validates if there are enough available employees for the selected services.
+     *
+     * @param request the appointment calculation request
+     * @return calculation response with cost and availability message
+     */
     public AppointmentCalculationResponse calculateAppointmentDetails(AppointmentCalculationRequest request) {
 
         List<ServiceItem> selectedItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());
@@ -142,6 +171,19 @@ public class AppointmentService {
                 .build();
     }
 
+    /**
+     * Finds the next available employee for a job assignment using round-robin selection.
+     * Ensures fair distribution of work among available employees.
+     *
+     * @param lastEmployeeId the ID of the last assigned employee
+     * @param date the appointment date
+     * @param newJobDuration the duration of the new job in minutes
+     * @param sessionType the session type (MORNING or EVENING)
+     * @param availableEmployees list of available employees
+     * @return the next available employee
+     * @throws NoAvailableEmployeeException if no employee is available
+     * @throws RuntimeException if work session is not configured
+     */
     private Employee getNextEmployee(
             Long lastEmployeeId,
             LocalDate date,
@@ -161,11 +203,9 @@ public class AppointmentService {
         for (int offset = 1; offset <= availableEmployees.size(); offset++) {
             Employee candidate = availableEmployees.get((lastIndex + offset) % availableEmployees.size());
 
-            // Total minutes already assigned to this employee in this session
             int totalMinutes = jobAssignmentRepository
                     .sumTotalDurationByDateAndEmployeeAndSession(candidate.getId(), date, sessionType);
 
-            // Available minutes in session
             WorkSession session = workSessionRepository
                     .findBySessionType(sessionType)
                     .orElseThrow(() -> new RuntimeException("Work session not configured"));
@@ -180,7 +220,16 @@ public class AppointmentService {
         throw new NoAvailableEmployeeException("No available employee for the session.");
     }
 
-
+    /**
+     * Creates a new appointment with automatic employee assignment.
+     * Calculates appointment times, creates appointment jobs, and assigns employees using round-robin.
+     *
+     * @param request the appointment creation request
+     * @param userId the customer user ID
+     * @return appointment response with details
+     * @throws RuntimeException if customer, vehicle, or work session is not found
+     * @throws NoAvailableEmployeeException if no employees are available
+     */
     @Transactional
     public AppointmentResponse createAppointment(AppointmentCreateRequest request,@RequestParam Long userId ) {
 
@@ -195,24 +244,20 @@ public class AppointmentService {
                 .map(ServiceItem::getServiceItemCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Calculate total duration in minutes
         int totalDurationMinutes = serviceItems.stream()
                 .mapToInt(ServiceItem::getEstimatedDuration)
                 .sum();
 
         log.info("Total service duration: {} minutes for {} items", totalDurationMinutes, serviceItems.size());
 
-        // Get work session to determine start time
         WorkSession workSession = workSessionRepository.findBySessionType(request.getSessionType())
                 .orElseThrow(() -> new RuntimeException("Work session not configured for " + request.getSessionType()));
 
-        // Calculate appointment start time: appointment date + work session start time
         LocalDateTime appointmentStartTime = LocalDateTime.of(
                 request.getAppointmentDate(),
                 workSession.getStartTime()
         );
 
-        // Calculate appointment end time: start time + total duration
         LocalDateTime appointmentEndTime = appointmentStartTime.plusMinutes(totalDurationMinutes);
 
         log.info("Appointment scheduled for {} from {} to {} ({} minutes)",
@@ -295,6 +340,15 @@ public class AppointmentService {
                 .build();
     }
 
+    /**
+     * Retrieves appointment history for a customer.
+     * If date range is not provided, returns the 15 most recent appointments.
+     *
+     * @param customerId the customer ID
+     * @param startDate the start date for filtering (optional)
+     * @param endDate the end date for filtering (optional)
+     * @return list of appointment history responses
+     */
     public List<AppointmentHistoryResponse> getCustomerAppointments(Long customerId, LocalDate startDate, LocalDate endDate) {
         List<Appointment> appointments;
 
