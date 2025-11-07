@@ -17,28 +17,23 @@ public class LeaveReqController {
     @Autowired
     private LeaveReqService leaveService;
 
-   //  Fetch all leaves
+    //get all leaves
     @GetMapping
-    public java.util.List<Leave> getAllLeaves() {
+    public List<LeaveReqDTO> getAllLeaves() {
         return leaveService.getAllLeaves();
     }
-//    @GetMapping("/allleaves")
-//    public List<LeaveReqDTO> getAllLeaves() {
-//        return leaveService.getAllLeaves();
-//    }
 
-
-    // ✅ Approve a leave
+    //approve a leave
     @PutMapping("/{leaveId}/approve")
-    public Leave approveLeave(@PathVariable Long leaveId, @RequestParam Long adminId) {
-        return leaveService.updateLeaveStatus(leaveId, LeaveStatus.APPROVED, adminId);
+    public Leave approveLeave(@PathVariable Long leaveId) {
+        return leaveService.updateLeaveStatus(leaveId, LeaveStatus.APPROVED);
     }
 
-
-    // ✅ Reject a leave (fixed)
+    //reject a leave
     @PutMapping("/{leaveId}/reject")
-    public Leave rejectLeave(@PathVariable Long leaveId, @RequestParam Long adminId) {
-        return leaveService.updateLeaveStatus(leaveId, LeaveStatus.REJECTED, adminId);
+    public Leave rejectLeave(@PathVariable Long leaveId) {
+        return leaveService.updateLeaveStatus(leaveId, LeaveStatus.REJECTED);
     }
+
 }
 

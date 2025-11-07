@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UserDTO {
-    private Long customerId;       // instead of id
+    private Long customerId;
     private String email;
-    private String mobile;         // instead of phoneNumber
+    private String mobile;
 
     public UserDTO(Long id, String email, String phoneNumber) {
         this.customerId = id;

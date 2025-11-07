@@ -35,7 +35,7 @@ public class Leave {
     private LeaveStatus leaveStatus = LeaveStatus.NEW;
 
     @ManyToOne
-    @JoinColumn(name = "employee_user_id", nullable = true)
+    @JoinColumn(name = "employee_id", nullable = true)
     private User employee;
 
     @ManyToOne
