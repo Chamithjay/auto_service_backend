@@ -36,7 +36,7 @@ public List<LeaveReqDTO> getAllLeaves() {
         dto.setApprovedTime(leave.getApprovedTime());
         dto.setLeaveStatus(leave.getLeaveStatus());
 
-        // ✅ Include employee ID and username
+        // Include employee ID and username
         if (leave.getEmployee() != null) {
             dto.setEmployeeId(leave.getEmployee().getId().toString());
             dto.setUsername(leave.getEmployee().getUsername());

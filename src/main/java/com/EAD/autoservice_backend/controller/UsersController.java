@@ -16,7 +16,7 @@ public class UsersController {
         this.userService = userService;
     }
 
-    // ✅ GET all customer emails, phone numbers, and IDs
+    //  GET all customer emails, phone numbers, and IDs
     @GetMapping("/customers")
     public List<UserDTO> getAllCustomerInfo() {
         return userService.getAllCustomersBasicInfo();
