@@ -119,13 +119,13 @@ class DashboardServiceIntegrationTest {
                 testVehicle1,
                 LocalDate.now().minusDays(5),
                 new BigDecimal("150.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         );
         Appointment appointment2 = createAppointment(
                 testVehicle2,
                 LocalDate.now().minusDays(2),
                 new BigDecimal("200.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         );
         appointmentRepository.save(appointment1);
         appointmentRepository.save(appointment2);
@@ -168,13 +168,13 @@ class DashboardServiceIntegrationTest {
     void testGetDashboardStats_RevenueCalculation_Integration() {
         // Arrange
         appointmentRepository.save(createAppointment(
-                testVehicle1, LocalDate.now(), new BigDecimal("100.00"), Status.COMPLETED
+                testVehicle1, LocalDate.now(), new BigDecimal("100.00"), AppointmentStatus.COMPLETED
         ));
         appointmentRepository.save(createAppointment(
-                testVehicle1, LocalDate.now(), new BigDecimal("200.00"), Status.NEW
+                testVehicle1, LocalDate.now(), new BigDecimal("200.00"), AppointmentStatus.NEW
         ));
         appointmentRepository.save(createAppointment(
-                testVehicle1, LocalDate.now(), new BigDecimal("150.00"), Status.COMPLETED
+                testVehicle1, LocalDate.now(), new BigDecimal("150.00"), AppointmentStatus.COMPLETED
         ));
 
         // Act
@@ -194,10 +194,10 @@ class DashboardServiceIntegrationTest {
     void testGetRecentActivities_WithAppointments_Integration() {
         // Arrange
         appointmentRepository.save(createAppointment(
-                testVehicle1, LocalDate.now(), new BigDecimal("150.00"), Status.NEW
+                testVehicle1, LocalDate.now(), new BigDecimal("150.00"), AppointmentStatus.NEW
         ));
         appointmentRepository.save(createAppointment(
-                testVehicle2, LocalDate.now().minusDays(1), new BigDecimal("200.00"), Status.COMPLETED
+                testVehicle2, LocalDate.now().minusDays(1), new BigDecimal("200.00"), AppointmentStatus.COMPLETED
         ));
 
         // Act
@@ -264,7 +264,7 @@ class DashboardServiceIntegrationTest {
                     testVehicle1,
                     LocalDate.now().minusDays(i),
                     new BigDecimal("100.00"),
-                    Status.NEW
+                    AppointmentStatus.NEW
             ));
         }
 
@@ -305,19 +305,19 @@ class DashboardServiceIntegrationTest {
                 testVehicle1,
                 LocalDate.of(currentYear, 1, 15),
                 new BigDecimal("100.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         ));
         appointmentRepository.save(createAppointment(
                 testVehicle1,
                 LocalDate.of(currentYear, 1, 20),
                 new BigDecimal("150.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         ));
         appointmentRepository.save(createAppointment(
                 testVehicle2,
                 LocalDate.of(currentYear, 3, 10),
                 new BigDecimal("200.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         ));
 
         // Act
@@ -366,13 +366,13 @@ class DashboardServiceIntegrationTest {
                 testVehicle1,
                 LocalDate.of(currentYear, 6, 15),
                 new BigDecimal("500.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         ));
         appointmentRepository.save(createAppointment(
                 testVehicle1,
                 LocalDate.of(currentYear - 1, 6, 15),
                 new BigDecimal("1000.00"),
-                Status.COMPLETED
+                AppointmentStatus.COMPLETED
         ));
 
         // Act
@@ -483,11 +483,11 @@ class DashboardServiceIntegrationTest {
         // Add more appointments
         appointmentRepository.save(createAppointment(
                 testVehicle1, LocalDate.now().minusDays(1),
-                new BigDecimal("300.00"), Status.COMPLETED
-        ));
+                new BigDecimal("300.00"), AppointmentStatus.COMPLETED
+                ));
         appointmentRepository.save(createAppointment(
                 testVehicle2, LocalDate.now(),
-                new BigDecimal("400.00"), Status.NEW
+                new BigDecimal("400.00"), AppointmentStatus.NEW
         ));
 
         // Add leave
@@ -522,15 +522,30 @@ class DashboardServiceIntegrationTest {
 
     // ==================== Helper Methods ====================
 
-    private Appointment createAppointment(Vehicle vehicle, LocalDate date,
-                                          BigDecimal cost, Status status) {
+    private Appointment createAppointment(
+            Vehicle vehicle,
+            LocalDate date,
+            BigDecimal cost,
+            AppointmentStatus status
+    ) {
         Appointment appointment = new Appointment();
         appointment.setVehicle(vehicle);
+        appointment.setCustomer(vehicle.getCustomer());
+        appointment.setVehicleName(vehicle.getVehicleName());
         appointment.setAppointmentDate(date);
-        appointment.setStartTime(LocalTime.of(9, 0));
-        appointment.setEndTime(LocalTime.of(11, 0));
+
+        appointment.setAppointmentStartTime(LocalDateTime.of(
+                date.getYear(), date.getMonth(), date.getDayOfMonth(), 9, 0
+        ));
+
+        appointment.setAppointmentEndTime(LocalDateTime.of(
+                date.getYear(), date.getMonth(), date.getDayOfMonth(), 11, 0
+        ));
+
         appointment.setTotalCost(cost);
         appointment.setStatus(status);
+
         return appointment;
     }
+
 }

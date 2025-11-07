@@ -24,14 +24,14 @@ public class AssignmentDTO {
 
     // Constructor from JobAssignment
     public AssignmentDTO(JobAssignment jobAssignment) {
-        this.assignmentId = jobAssignment.getJobAssignmentId();
+        this.assignmentId = jobAssignment.getId();
         this.customerName = jobAssignment.getAppointmentJob().getAppointment().getVehicle().getCustomer().getUsername();
         this.vehicleInfo = jobAssignment.getAppointmentJob().getAppointment().getVehicle().getModel();
         this.serviceName = jobAssignment.getAppointmentJob().getServiceItem().getServiceItemName();
         this.appointmentDate = jobAssignment.getAppointmentJob().getAppointment().getAppointmentDate();
         this.startTime = jobAssignment.getAppointmentJob().getStartTime();
         this.endTime = jobAssignment.getAppointmentJob().getEndTime();
-        this.jobStatus = jobAssignment.getAppointmentJob().getJobStatus();
+        this.jobStatus = Status.valueOf(jobAssignment.getAppointmentJob().getItemStatus().name());
         this.jobNote = jobAssignment.getAppointmentJob().getJobNote();
     }
 

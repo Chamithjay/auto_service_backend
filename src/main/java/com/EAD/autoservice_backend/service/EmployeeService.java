@@ -1,11 +1,14 @@
 package com.EAD.autoservice_backend.service;
 
-import com.EAD.autoservice_backend.model.*;
-import com.EAD.autoservice_backend.repository.*;
+import com.EAD.autoservice_backend.model.Employee;
+import com.EAD.autoservice_backend.model.JobAssignment;
 import com.EAD.autoservice_backend.dto.AssignmentDTO;
+import com.EAD.autoservice_backend.repository.EmployeeRepository;
+import com.EAD.autoservice_backend.repository.JobAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +41,19 @@ public class EmployeeService {
 
     public Map<String, Object> getEmployeeDashboard(Long employeeId) {
         Map<String, Object> dashboardData = new HashMap<>();
+        LocalDate today = LocalDate.now();
 
-        // Get today's job assignments and convert to DTO
-        List<JobAssignment> todayAssignments = jobAssignmentRepository.findTodayAssignmentsByEmployee(employeeId);
+        // Today's assignments
+        List<JobAssignment> todayAssignments =
+                jobAssignmentRepository.findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDate(employeeId, today);
         List<AssignmentDTO> todayDTOs = todayAssignments.stream()
                 .map(AssignmentDTO::new)
                 .collect(Collectors.toList());
         dashboardData.put("todayAssignments", todayDTOs);
 
-        // Get upcoming job assignments and convert to DTO
-        List<JobAssignment> upcomingAssignments = jobAssignmentRepository.findUpcomingAssignmentsByEmployee(employeeId);
+        // Upcoming assignments
+        List<JobAssignment> upcomingAssignments =
+                jobAssignmentRepository.findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDateAfter(employeeId, today);
         List<AssignmentDTO> upcomingDTOs = upcomingAssignments.stream()
                 .map(AssignmentDTO::new)
                 .collect(Collectors.toList());
