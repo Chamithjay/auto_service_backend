@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST Controller for Dashboard data
+ * REST controller for admin dashboard operations.
+ * Provides endpoints for dashboard statistics, recent activities, revenue data, and vehicle distribution.
+ * All endpoints require ADMIN role.
  */
 @RestController
 @RequestMapping("/api/v1/admin/dashboard")
@@ -30,7 +32,9 @@ public class DashboardController {
     }
 
     /**
-     * Get main dashboard statistics
+     * Retrieves main dashboard statistics.
+     *
+     * @return ResponseEntity containing dashboard statistics
      */
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
@@ -39,7 +43,9 @@ public class DashboardController {
     }
 
     /**
-     * Get recent activities
+     * Retrieves recent system activities.
+     *
+     * @return ResponseEntity containing list of recent activities
      */
     @GetMapping("/recent-activities")
     public ResponseEntity<List<RecentActivityResponse>> getRecentActivities() {
@@ -48,7 +54,9 @@ public class DashboardController {
     }
 
     /**
-     * Get monthly revenue chart data
+     * Retrieves monthly revenue chart data.
+     *
+     * @return ResponseEntity containing monthly revenue data
      */
     @GetMapping("/monthly-revenue")
     public ResponseEntity<List<MonthlyRevenueResponse>> getMonthlyRevenue() {
@@ -57,7 +65,9 @@ public class DashboardController {
     }
 
     /**
-     * Get vehicle type distribution
+     * Retrieves vehicle type distribution statistics.
+     *
+     * @return ResponseEntity containing vehicle type distribution data
      */
     @GetMapping("/vehicle-distribution")
     public ResponseEntity<List<VehicleTypeDistributionResponse>> getVehicleDistribution() {

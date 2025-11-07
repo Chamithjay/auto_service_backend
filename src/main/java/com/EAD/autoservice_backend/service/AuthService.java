@@ -24,6 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service class for handling authentication and user registration.
+ * Manages user login, registration, and JWT token generation.
+ */
 @Service
 @Transactional
 public class AuthService {
@@ -34,6 +38,15 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
 
+    /**
+     * Constructs an AuthService with required dependencies.
+     *
+     * @param userRepository repository for user operations
+     * @param passwordEncoder encoder for password hashing
+     * @param authenticationManager manager for authentication
+     * @param userDetailsService service for loading user details
+     * @param jwtUtil utility for JWT token operations
+     */
     @Autowired
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
@@ -48,7 +61,12 @@ public class AuthService {
     }
 
     /**
-     * Register a new user (defaults to CUSTOMER)
+     * Registers a new user with customer role.
+     * Validates username and email uniqueness before creating the user.
+     *
+     * @param request the registration request containing user details
+     * @return registration response with success message and user info
+     * @throws UserAlreadyExistsException if username or email already exists
      */
     public RegisterResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -68,7 +86,6 @@ public class AuthService {
         customer.setUpdatedAt(LocalDateTime.now());
         customer.setRole(Role.CUSTOMER);
 
-
         User savedUser = userRepository.save(customer);
 
         return new RegisterResponse(
@@ -79,7 +96,11 @@ public class AuthService {
     }
 
     /**
-     * Authenticate user and generate JWT token
+     * Authenticates a user and generates a JWT token.
+     *
+     * @param request the login request containing username and password
+     * @return login response with JWT token and user details
+     * @throws BadCredentialsException if credentials are invalid
      */
     public LoginResponse loginUser(LoginRequest request) {
         try {
@@ -90,7 +111,6 @@ public class AuthService {
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("User not found"));
 
-            // Generate token with user ID, email, and role claims
             String token = jwtUtil.generateToken(
                     user.getUsername(),
                     user.getId(),

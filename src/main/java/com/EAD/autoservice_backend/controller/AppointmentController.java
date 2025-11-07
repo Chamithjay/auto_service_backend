@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * REST controller for appointment management.
+ * Handles vehicle retrieval, service selection, appointment calculation and creation.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/appointments")
@@ -20,6 +24,12 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final JwtUtil jwtUtil;
 
+    /**
+     * Retrieves all vehicles for the authenticated user.
+     *
+     * @param authHeader the authorization header containing JWT token
+     * @return ResponseEntity containing list of user's vehicles
+     */
     @GetMapping("/vehicles")
     public ResponseEntity<List<VehicleResponse>> getUserVehicles(
             @RequestHeader("Authorization") String authHeader
@@ -33,6 +43,12 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Retrieves available services and modifications for a selected vehicle.
+     *
+     * @param request the vehicle selection request
+     * @return ResponseEntity containing available services and modifications
+     */
     @PostMapping("/services")
     public ResponseEntity<ServiceAndModificationResponse> getServicesAndModifications(
             @RequestBody VehicleSelectionRequest request
@@ -42,6 +58,12 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Checks availability for appointment time slots.
+     *
+     * @param request the appointment calculation request
+     * @return ResponseEntity containing availability information
+     */
     @PostMapping("/availability")
     public ResponseEntity<AppointmentCalculationResponse> getAvailableTimes(
             @RequestBody AppointmentCalculationRequest request
@@ -50,6 +72,12 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Calculates appointment details including total cost and duration.
+     *
+     * @param request the appointment calculation request
+     * @return ResponseEntity containing calculation results
+     */
     @PostMapping("/calculate")
     public ResponseEntity<AppointmentCalculationResponse> calculateAppointmentDetails(
             @RequestBody AppointmentCalculationRequest request
@@ -59,6 +87,13 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Creates a new appointment for the authenticated user.
+     *
+     * @param request the appointment creation request
+     * @param authHeader the authorization header containing JWT token
+     * @return ResponseEntity containing the created appointment details
+     */
     @PostMapping("/create")
     public ResponseEntity<AppointmentResponse> createAppointment(
             @RequestBody AppointmentCreateRequest request,
@@ -71,6 +106,14 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Retrieves appointment history for the authenticated customer.
+     *
+     * @param authHeader the authorization header containing JWT token
+     * @param startDate optional start date for filtering
+     * @param endDate optional end date for filtering
+     * @return ResponseEntity containing list of appointment history
+     */
     @GetMapping("/history")
     public ResponseEntity<List<AppointmentHistoryResponse>> getCustomerAppointmentHistory(
             @RequestHeader("Authorization") String authHeader,

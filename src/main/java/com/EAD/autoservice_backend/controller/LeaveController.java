@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for employee leave management.
+ * Handles leave request submission.
+ */
 @RestController
 @RequestMapping("/api/v1/leaves")
 public class LeaveController {
@@ -22,7 +26,12 @@ public class LeaveController {
         this.leaveService = leaveService;
     }
 
-    // Save a new leave request from employee.
+    /**
+     * Submits a new leave request from an employee.
+     *
+     * @param employeeLeaveRequest the leave request details
+     * @return ResponseEntity containing the created leave request
+     */
     @PostMapping("/request")
     public ResponseEntity<EmployeeLeaveResponse> requestLeave(@Valid @RequestBody EmployeeLeaveRequest employeeLeaveRequest) {
         try {

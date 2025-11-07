@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * REST Controller for vehicle management operations
+ * REST controller for customer vehicle management.
+ * Provides endpoints for CRUD operations on customer vehicles.
  */
 @RestController
 @RequestMapping("/api/v1/customer/vehicles")
@@ -31,8 +32,11 @@ public class VehicleController {
     }
 
     /**
-     * Add a new vehicle
-     * POST /api/v1/customer/vehicles
+     * Adds a new vehicle for the authenticated customer.
+     *
+     * @param request the vehicle creation request
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing the created vehicle
      */
     @PostMapping
     public ResponseEntity<?> addVehicle(@Valid @RequestBody VehicleRequest request,
@@ -57,8 +61,10 @@ public class VehicleController {
     }
 
     /**
-     * Get all vehicles for the current customer
-     * GET /api/v1/customer/vehicles
+     * Retrieves all vehicles for the authenticated customer.
+     *
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing list of customer vehicles
      */
     @GetMapping
     public ResponseEntity<?> getAllVehicles(Authentication authentication) {
@@ -78,8 +84,11 @@ public class VehicleController {
     }
 
     /**
-     * Get a specific vehicle by ID
-     * GET /api/v1/customer/vehicles/{id}
+     * Retrieves a specific vehicle by its ID.
+     *
+     * @param vehicleId the vehicle ID
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing the vehicle details
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getVehicleById(@PathVariable("id") Long vehicleId,
@@ -100,8 +109,12 @@ public class VehicleController {
     }
 
     /**
-     * Update vehicle information
-     * PUT /api/v1/customer/vehicles/{id}
+     * Updates vehicle information for the authenticated customer.
+     *
+     * @param vehicleId the vehicle ID
+     * @param request the vehicle update request
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing the updated vehicle
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateVehicle(@PathVariable("id") Long vehicleId,
@@ -127,8 +140,11 @@ public class VehicleController {
     }
 
     /**
-     * Delete a vehicle
-     * DELETE /api/v1/customer/vehicles/{id}
+     * Deletes a vehicle for the authenticated customer.
+     *
+     * @param vehicleId the vehicle ID
+     * @param authentication the authentication object containing user details
+     * @return ResponseEntity containing success message
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteVehicle(@PathVariable("id") Long vehicleId,

@@ -19,7 +19,8 @@ import java.util.Map;
 
 
 /**
- * REST Controller for Profile Management
+ * REST controller for user profile management.
+ * Handles profile retrieval, updates, and password changes for authenticated users.
  */
 @RestController
 @RequestMapping("/api/v1/profile")
@@ -33,7 +34,9 @@ public class ProfileController {
     }
 
     /**
-     * Get current user's profile
+     * Retrieves the current authenticated user's profile.
+     *
+     * @return ResponseEntity containing the user's profile information
      */
     @GetMapping
     public ResponseEntity<ProfileResponse> getProfile() {
@@ -45,7 +48,10 @@ public class ProfileController {
     }
 
     /**
-     * Update user profile (username and email)
+     * Updates the current user's profile information (username and email).
+     *
+     * @param request the profile update request containing new information
+     * @return ResponseEntity containing the updated profile or error message
      */
     @PutMapping
     public ResponseEntity<?> updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
@@ -67,7 +73,10 @@ public class ProfileController {
     }
 
     /**
-     * Change password
+     * Changes the current user's password.
+     *
+     * @param request the password change request containing old and new passwords
+     * @return ResponseEntity containing success message or error
      */
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody PasswordChangeRequest request) {

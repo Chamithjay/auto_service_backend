@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * REST controller for password reset operations.
+ * Handles forgot password, OTP verification, and password reset functionality.
+ */
 @RestController
 @RequestMapping("/api/v1/auth/password")
 public class PasswordResetController {
@@ -17,6 +21,12 @@ public class PasswordResetController {
     @Autowired
     private PasswordResetService passwordResetService;
 
+    /**
+     * Initiates password reset process by sending OTP to user's email.
+     *
+     * @param request the forgot password request containing user's email
+     * @return ResponseEntity containing success message or error
+     */
     @PostMapping("/forgot")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         try {
@@ -28,6 +38,12 @@ public class PasswordResetController {
         }
     }
 
+    /**
+     * Verifies the OTP sent to user's email.
+     *
+     * @param request the OTP verification request containing email and OTP
+     * @return ResponseEntity containing verification result
+     */
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOTP(@RequestBody VerifyOTPRequest request) {
         boolean isValid = passwordResetService.verifyOTP(
@@ -43,6 +59,12 @@ public class PasswordResetController {
         }
     }
 
+    /**
+     * Resets the user's password after OTP verification.
+     *
+     * @param request the password reset request containing email, OTP, and new password
+     * @return ResponseEntity containing success message or error
+     */
     @PostMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         try {

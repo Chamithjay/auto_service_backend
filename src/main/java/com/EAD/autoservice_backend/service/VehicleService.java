@@ -18,9 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 /**
- * Service for vehicle management operations
+ * Service class for vehicle management operations.
+ * Handles CRUD operations for customer vehicles including validation and duplicate checks.
  */
 @Service
 @Transactional
@@ -30,6 +30,12 @@ public class VehicleService {
     private final CustomerRepository customerRepository;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /**
+     * Constructs a VehicleService with the required dependencies.
+     *
+     * @param vehicleRepository repository for vehicle operations
+     * @param customerRepository repository for customer operations
+     */
     @Autowired
     public VehicleService(VehicleRepository vehicleRepository, CustomerRepository customerRepository) {
         this.vehicleRepository = vehicleRepository;
@@ -37,13 +43,19 @@ public class VehicleService {
     }
 
     /**
-     * Add a new vehicle for a customer
+     * Adds a new vehicle for a customer.
+     * Validates that the registration number is unique for this customer.
+     *
+     * @param username the customer username
+     * @param request the vehicle creation request
+     * @return the created vehicle response
+     * @throws ResourceNotFoundException if customer is not found
+     * @throws UserAlreadyExistsException if registration number already exists for this customer
      */
     public CustomerVehicleResponse addVehicle(String username, VehicleRequest request) {
         Customer customer = customerRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with username: " + username));
 
-        // Check if registration number already exists for this customer
         if (vehicleRepository.existsByRegistrationNoAndCustomerId(request.getRegistrationNo(), customer.getId())) {
             throw new UserAlreadyExistsException("Vehicle with registration number '" +
                     request.getRegistrationNo() + "' already exists for this customer");
@@ -63,7 +75,11 @@ public class VehicleService {
     }
 
     /**
-     * Get all vehicles for a customer
+     * Retrieves all vehicles for a customer.
+     *
+     * @param username the customer username
+     * @return list of customer vehicle responses
+     * @throws ResourceNotFoundException if customer is not found
      */
     public List<CustomerVehicleResponse> getCustomerVehicles(String username) {
         Customer customer = customerRepository.findByUsername(username)
@@ -76,7 +92,12 @@ public class VehicleService {
     }
 
     /**
-     * Get a specific vehicle by ID
+     * Retrieves a specific vehicle by its ID for a customer.
+     *
+     * @param username the customer username
+     * @param vehicleId the vehicle ID
+     * @return the vehicle response
+     * @throws ResourceNotFoundException if customer or vehicle is not found
      */
     public CustomerVehicleResponse getVehicleById(String username, Long vehicleId) {
         Customer customer = customerRepository.findByUsername(username)
@@ -89,7 +110,15 @@ public class VehicleService {
     }
 
     /**
-     * Update vehicle information
+     * Updates vehicle information.
+     * Validates that the new registration number (if changed) is unique for this customer.
+     *
+     * @param username the customer username
+     * @param vehicleId the vehicle ID to update
+     * @param request the vehicle update request
+     * @return the updated vehicle response
+     * @throws ResourceNotFoundException if customer or vehicle is not found
+     * @throws UserAlreadyExistsException if new registration number already exists for this customer
      */
     public CustomerVehicleResponse updateVehicle(String username, Long vehicleId, VehicleRequest request) {
         Customer customer = customerRepository.findByUsername(username)
@@ -98,7 +127,6 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findByVehicleIdAndCustomerId(vehicleId, customer.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
 
-        // Check if registration number is being changed and if it already exists
         if (!vehicle.getRegistrationNo().equals(request.getRegistrationNo())) {
             if (vehicleRepository.existsByRegistrationNoAndCustomerIdAndVehicleIdNot(
                     request.getRegistrationNo(), customer.getId(), vehicleId)) {
@@ -118,7 +146,11 @@ public class VehicleService {
     }
 
     /**
-     * Delete a vehicle
+     * Deletes a vehicle.
+     *
+     * @param username the customer username
+     * @param vehicleId the vehicle ID to delete
+     * @throws ResourceNotFoundException if customer or vehicle is not found
      */
     public void deleteVehicle(String username, Long vehicleId) {
         Customer customer = customerRepository.findByUsername(username)
@@ -131,7 +163,10 @@ public class VehicleService {
     }
 
     /**
-     * Map Vehicle entity to VehicleResponse DTO
+     * Maps a Vehicle entity to a CustomerVehicleResponse DTO.
+     *
+     * @param vehicle the vehicle entity
+     * @return the vehicle response DTO
      */
     private CustomerVehicleResponse mapToVehicleResponse(Vehicle vehicle) {
         return new CustomerVehicleResponse(
@@ -145,14 +180,23 @@ public class VehicleService {
         );
     }
 
-    // Get all vehicles as DTOs
+    /**
+     * Retrieves all vehicles as DTOs.
+     *
+     * @return list of all vehicles as DTOs
+     */
     public List<VehiclesDTO> getAllVehicles() {
         return vehicleRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Convert Vehicle entity to VehiclesDTO
+    /**
+     * Converts a Vehicle entity to a VehiclesDTO.
+     *
+     * @param vehicle the vehicle entity
+     * @return the vehicles DTO
+     */
     private VehiclesDTO convertToDTO(Vehicle vehicle) {
         return VehiclesDTO.builder()
                 .vehicleId(vehicle.getVehicleId())
