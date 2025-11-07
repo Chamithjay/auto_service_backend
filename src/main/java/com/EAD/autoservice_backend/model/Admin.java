@@ -55,4 +55,3 @@ public class Admin extends User {
         this.accessLevel = accessLevel;
     }
 }
-

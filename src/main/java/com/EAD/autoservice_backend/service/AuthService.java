@@ -5,8 +5,10 @@ import com.EAD.autoservice_backend.dto.LoginResponse;
 import com.EAD.autoservice_backend.dto.RegisterRequest;
 import com.EAD.autoservice_backend.dto.RegisterResponse;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
+import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.repository.UserRepository;
 import com.EAD.autoservice_backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-/**
- * Service layer for authentication operations
- * Contains business logic for registration and login
- */
 @Service
 @Transactional
 public class AuthService {
@@ -50,8 +48,7 @@ public class AuthService {
     }
 
     /**
-     * Register a new user
-     * NO JWT TOKEN GENERATION - user must login after registration
+     * Register a new user (defaults to CUSTOMER)
      */
     public RegisterResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -62,15 +59,17 @@ public class AuthService {
             throw new UserAlreadyExistsException("Email '" + request.getEmail() + "' is already registered");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setRole(Role.valueOf("USER"));
+        Customer customer = new Customer();
+        customer.setUsername(request.getUsername());
+        customer.setEmail(request.getEmail());
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setPhoneNumber(request.getPhoneNumber());
+        customer.setCreatedAt(LocalDateTime.now());
+        customer.setUpdatedAt(LocalDateTime.now());
+        customer.setRole(Role.CUSTOMER);
 
-        User savedUser = userRepository.save(user);
+
+        User savedUser = userRepository.save(customer);
 
         return new RegisterResponse(
                 "User registered successfully. Please login to continue.",
@@ -84,22 +83,29 @@ public class AuthService {
      */
     public LoginResponse loginUser(LoginRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            String token = jwtUtil.generateToken(userDetails.getUsername());
-
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+            // Generate token with user ID, email, and role claims
+            String token = jwtUtil.generateToken(
+                    user.getUsername(),
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole().name()
+            );
 
             return new LoginResponse(
                     token,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole()
+                    user.getRole().name(),
+                    user.isRequiresPasswordChange()
             );
+
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
