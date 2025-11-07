@@ -1,7 +1,7 @@
 package com.EAD.autoservice_backend.controller;
 
 import com.EAD.autoservice_backend.dto.VehicleRequest;
-import com.EAD.autoservice_backend.dto.VehicleResponse;
+import com.EAD.autoservice_backend.dto.CustomerVehicleResponse;
 import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
 import com.EAD.autoservice_backend.service.VehicleService;
@@ -36,10 +36,10 @@ public class VehicleController {
      */
     @PostMapping
     public ResponseEntity<?> addVehicle(@Valid @RequestBody VehicleRequest request,
-                                       Authentication authentication) {
+                                        Authentication authentication) {
         try {
             String username = authentication.getName();
-            VehicleResponse vehicle = vehicleService.addVehicle(username, request);
+            CustomerVehicleResponse vehicle = vehicleService.addVehicle(username, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(vehicle);
         } catch (ResourceNotFoundException e) {
             Map<String, String> error = new HashMap<>();
@@ -64,7 +64,7 @@ public class VehicleController {
     public ResponseEntity<?> getAllVehicles(Authentication authentication) {
         try {
             String username = authentication.getName();
-            List<VehicleResponse> vehicles = vehicleService.getCustomerVehicles(username);
+            List<CustomerVehicleResponse> vehicles = vehicleService.getCustomerVehicles(username);
             return ResponseEntity.ok(vehicles);
         } catch (ResourceNotFoundException e) {
             Map<String, String> error = new HashMap<>();
@@ -83,10 +83,10 @@ public class VehicleController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getVehicleById(@PathVariable("id") Long vehicleId,
-                                           Authentication authentication) {
+                                            Authentication authentication) {
         try {
             String username = authentication.getName();
-            VehicleResponse vehicle = vehicleService.getVehicleById(username, vehicleId);
+            CustomerVehicleResponse vehicle = vehicleService.getVehicleById(username, vehicleId);
             return ResponseEntity.ok(vehicle);
         } catch (ResourceNotFoundException e) {
             Map<String, String> error = new HashMap<>();
@@ -105,11 +105,11 @@ public class VehicleController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateVehicle(@PathVariable("id") Long vehicleId,
-                                          @Valid @RequestBody VehicleRequest request,
-                                          Authentication authentication) {
+                                           @Valid @RequestBody VehicleRequest request,
+                                           Authentication authentication) {
         try {
             String username = authentication.getName();
-            VehicleResponse updatedVehicle = vehicleService.updateVehicle(username, vehicleId, request);
+            CustomerVehicleResponse updatedVehicle = vehicleService.updateVehicle(username, vehicleId, request);
             return ResponseEntity.ok(updatedVehicle);
         } catch (ResourceNotFoundException e) {
             Map<String, String> error = new HashMap<>();
@@ -132,7 +132,7 @@ public class VehicleController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteVehicle(@PathVariable("id") Long vehicleId,
-                                          Authentication authentication) {
+                                           Authentication authentication) {
         try {
             String username = authentication.getName();
             vehicleService.deleteVehicle(username, vehicleId);

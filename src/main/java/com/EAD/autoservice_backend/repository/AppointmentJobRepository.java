@@ -3,7 +3,7 @@ package com.EAD.autoservice_backend.repository;
 import com.EAD.autoservice_backend.dto.ServicePopularity;
 import com.EAD.autoservice_backend.model.Appointment;
 import com.EAD.autoservice_backend.model.AppointmentJob;
-import com.EAD.autoservice_backend.model.Status;
+import com.EAD.autoservice_backend.model.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,9 +33,12 @@ public interface AppointmentJobRepository extends JpaRepository<AppointmentJob, 
     List<ServicePopularity> getServicePopularity(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     /**
-     * Find jobs by appointment ID
+     * Find jobs by appointment ID with ServiceItem and EmployeeAssignments eagerly fetched
      */
-    @Query("SELECT aj FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId")
+    @Query("SELECT DISTINCT aj FROM AppointmentJob aj " +
+           "LEFT JOIN FETCH aj.serviceItem " +
+           "LEFT JOIN FETCH aj.employeeAssignments " +
+           "WHERE aj.appointment.appointmentId = :appointmentId")
     List<AppointmentJob> findByAppointmentId(@Param("appointmentId") Long appointmentId);
 
     /**
@@ -48,5 +51,5 @@ public interface AppointmentJobRepository extends JpaRepository<AppointmentJob, 
      * Count jobs by appointment ID and job status
      */
     @Query("SELECT COUNT(aj) FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId AND aj.itemStatus = :status")
-    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId, @Param("status") Status status);
+    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId, @Param("status") AppointmentStatus status);
 }

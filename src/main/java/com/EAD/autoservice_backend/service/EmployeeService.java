@@ -1,8 +1,9 @@
 package com.EAD.autoservice_backend.service;
 
+import com.EAD.autoservice_backend.dto.AssignmentDTO;
+import com.EAD.autoservice_backend.dto.EmployeeProfileDTO;
 import com.EAD.autoservice_backend.model.Employee;
 import com.EAD.autoservice_backend.model.JobAssignment;
-import com.EAD.autoservice_backend.dto.AssignmentDTO;
 import com.EAD.autoservice_backend.repository.EmployeeRepository;
 import com.EAD.autoservice_backend.repository.JobAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +24,43 @@ public class EmployeeService {
     @Autowired
     private JobAssignmentRepository jobAssignmentRepository;
 
-    public Employee getEmployeeProfile(Long employeeId) {
-        return employeeRepository.findById(employeeId)
+    // Get employee profile as DTO
+    public EmployeeProfileDTO getEmployeeProfile(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        return new EmployeeProfileDTO(
+                employee.getEmployeeId(),
+                employee.getUsername(),
+                employee.getEmail(),
+                employee.getPosition(),
+                employee.getDepartment(),
+                employee.getPhoneNumber()
+        );
     }
 
-    public Employee updateEmployeeProfile(Long employeeId, Employee updatedEmployee) {
-        Employee existingEmployee = getEmployeeProfile(employeeId);
+    // Update profile and return DTO
+    public EmployeeProfileDTO updateEmployeeProfile(Long employeeId, EmployeeProfileDTO updatedDTO) {
+        Employee existingEmployee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        // Update only allowed fields
-        existingEmployee.setPhoneNumber(updatedEmployee.getPhoneNumber());
-        existingEmployee.setPosition(updatedEmployee.getPosition());
-        existingEmployee.setDepartment(updatedEmployee.getDepartment());
+        existingEmployee.setPhoneNumber(updatedDTO.phoneNumber());
+        existingEmployee.setPosition(updatedDTO.position());
+        existingEmployee.setDepartment(updatedDTO.department());
 
-        return employeeRepository.save(existingEmployee);
+        Employee saved = employeeRepository.save(existingEmployee);
+
+        return new EmployeeProfileDTO(
+                saved.getEmployeeId(),
+                saved.getUsername(),
+                saved.getEmail(),
+                saved.getPosition(),
+                saved.getDepartment(),
+                saved.getPhoneNumber()
+        );
     }
 
+    // Dashboard
     public Map<String, Object> getEmployeeDashboard(Long employeeId) {
         Map<String, Object> dashboardData = new HashMap<>();
         LocalDate today = LocalDate.now();

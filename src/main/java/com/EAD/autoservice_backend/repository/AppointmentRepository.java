@@ -2,7 +2,7 @@ package com.EAD.autoservice_backend.repository;
 
 import com.EAD.autoservice_backend.dto.RevenueOverTime;
 import com.EAD.autoservice_backend.model.Appointment;
-import com.EAD.autoservice_backend.model.Status;
+import com.EAD.autoservice_backend.model.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +17,12 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // Find appointments by customer
-    List<Appointment> findByCustomerId(Long customerId);
+    // Find appointments by customer with vehicle eagerly fetched
+    @Query("SELECT DISTINCT a FROM Appointment a " +
+           "LEFT JOIN FETCH a.vehicle v " +
+           "WHERE a.customer.id = :customerId " +
+           "ORDER BY a.appointmentDate DESC")
+    List<Appointment> findByCustomerId(@Param("customerId") Long customerId);
 
     List<Appointment> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
 
@@ -28,7 +32,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Find by status
     @Query("SELECT a FROM Appointment a WHERE a.status = :status ORDER BY a.appointmentDate DESC")
-    List<Appointment> findByStatusOrderByDateDesc(@Param("status") Status status);
+    List<Appointment> findByStatusOrderByDateDesc(@Param("status") AppointmentStatus status);
 
     // Find by customer and date range
     @Query("""
@@ -51,31 +55,34 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllByCurrentYear();
 
     // Find all appointments for a specific customer ordered by appointment date
-    @Query("SELECT a FROM Appointment a WHERE a.vehicle.customer.id = :customerId ORDER BY a.appointmentDate DESC")
+    @Query("SELECT a FROM Appointment a WHERE a.customer.id = :customerId ORDER BY a.appointmentDate DESC")
     List<Appointment> findByCustomerIdOrderByAppointmentDateDesc(@Param("customerId") Long customerId);
 
     // Find appointment by ID and customer ID (for authorization)
-    @Query("SELECT a FROM Appointment a WHERE a.appointmentId = :appointmentId AND a.vehicle.customer.id = :customerId")
+    @Query("SELECT a FROM Appointment a WHERE a.appointmentId = :appointmentId AND a.customer.id = :customerId")
     Optional<Appointment> findByAppointmentIdAndCustomerId(
             @Param("appointmentId") Long appointmentId,
             @Param("customerId") Long customerId
     );
 
     // Count total appointments by customer ID
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.vehicle.customer.id = :customerId")
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId")
     Integer countByCustomerId(@Param("customerId") Long customerId);
 
     // Count active appointments (NEW or ONGOING) by customer ID
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.vehicle.customer.id = :customerId AND a.status IN :statuses")
-    Integer countByCustomerIdAndStatusIn(@Param("customerId") Long customerId, @Param("statuses") List<Status> statuses);
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId AND a.status IN :statuses")
+    Integer countByCustomerIdAndStatusIn(@Param("customerId") Long customerId, @Param("statuses") List<AppointmentStatus> statuses);
 
     // Count completed appointments by customer ID
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.vehicle.customer.id = :customerId AND a.status = :status")
-    Integer countByCustomerIdAndStatus(@Param("customerId") Long customerId, @Param("status") Status status);
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId AND a.status = :status")
+    Integer countByCustomerIdAndStatus(@Param("customerId") Long customerId, @Param("status") AppointmentStatus status);
 
-    // Find active appointments for a customer (NEW or ONGOING)
-    @Query("SELECT a FROM Appointment a WHERE a.vehicle.customer.id = :customerId AND a.status IN :statuses ORDER BY a.appointmentDate DESC")
-    List<Appointment> findActiveAppointmentsByCustomerId(@Param("customerId") Long customerId, @Param("statuses") List<Status> statuses);
+    // Find active appointments for a customer (NEW or ONGOING) with vehicle eagerly fetched
+    @Query("SELECT DISTINCT a FROM Appointment a " +
+           "LEFT JOIN FETCH a.vehicle v " +
+           "WHERE a.customer.id = :customerId AND a.status IN :statuses " +
+           "ORDER BY a.appointmentDate DESC")
+    List<Appointment> findActiveAppointmentsByCustomerId(@Param("customerId") Long customerId, @Param("statuses") List<AppointmentStatus> statuses);
 
     // --- Revenue Report ---
     @Query("SELECT new com.EAD.autoservice_backend.dto.RevenueOverTime(a.appointmentDate, SUM(a.totalCost)) " +
