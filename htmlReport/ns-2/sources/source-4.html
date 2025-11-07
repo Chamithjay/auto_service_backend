@@ -1,0 +1,410 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SecurityConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.config</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityConfig (com.EAD.autoservice_backend.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (38/38)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (38/38)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;//package com.EAD.autoservice_backend.config;
+&nbsp;//
+&nbsp;//import com.EAD.autoservice_backend.service.CustomUserDetailsService;
+&nbsp;//import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;//import org.springframework.context.annotation.Bean;
+&nbsp;//import org.springframework.context.annotation.Configuration;
+&nbsp;//import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+&nbsp;//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+&nbsp;//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+&nbsp;//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+&nbsp;//import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+&nbsp;//import org.springframework.security.config.http.SessionCreationPolicy;
+&nbsp;//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;//import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;//import org.springframework.security.web.SecurityFilterChain;
+&nbsp;//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+&nbsp;//import org.springframework.web.cors.CorsConfiguration;
+&nbsp;//import org.springframework.web.cors.CorsConfigurationSource;
+&nbsp;//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+&nbsp;//import java.util.Arrays;
+&nbsp;//import java.util.List;
+&nbsp;//import org.springframework.http.HttpMethod;
+&nbsp;//
+&nbsp;///**
+&nbsp;// * Security Configuration for JWT Authentication
+&nbsp;// * Configures Spring Security for stateless JWT authentication with React frontend
+&nbsp;// */
+&nbsp;//@Configuration
+&nbsp;//@EnableWebSecurity
+&nbsp;//@EnableMethodSecurity(prePostEnabled = true)
+&nbsp;//public class SecurityConfig {
+&nbsp;//
+&nbsp;//    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+&nbsp;//    private final CustomUserDetailsService userDetailsService;
+&nbsp;//
+&nbsp;//    @Autowired
+&nbsp;//    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+&nbsp;//                          CustomUserDetailsService userDetailsService) {
+&nbsp;//        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+&nbsp;//        this.userDetailsService = userDetailsService;
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    /**
+&nbsp;//     * Password encoder bean for secure password hashing
+&nbsp;//     */
+&nbsp;//    @Bean
+&nbsp;//    public PasswordEncoder passwordEncoder() {
+&nbsp;//        return new BCryptPasswordEncoder(12);
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    /**
+&nbsp;//     * Authentication manager bean for handling login
+&nbsp;//     */
+&nbsp;//    @Bean
+&nbsp;//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+&nbsp;//        return config.getAuthenticationManager();
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    /**
+&nbsp;//     * DAO Authentication Provider for database authentication
+&nbsp;//     */
+&nbsp;//    @Bean
+&nbsp;//    public DaoAuthenticationProvider authenticationProvider() {
+&nbsp;//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+&nbsp;//        authProvider.setUserDetailsService(userDetailsService);
+&nbsp;//        authProvider.setPasswordEncoder(passwordEncoder());
+&nbsp;//        return authProvider;
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    /**
+&nbsp;//     * CORS configuration for React frontend
+&nbsp;//     */
+&nbsp;//    @Bean
+&nbsp;//    public CorsConfigurationSource corsConfigurationSource() {
+&nbsp;//        CorsConfiguration configuration = new CorsConfiguration();
+&nbsp;//        configuration.setAllowedOriginPatterns(List.of(&quot;http://localhost:5173&quot;));
+&nbsp;//        configuration.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));
+&nbsp;//        configuration.setAllowedHeaders(List.of(&quot;*&quot;));
+&nbsp;//        configuration.setAllowCredentials(true);
+&nbsp;//
+&nbsp;//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+&nbsp;//        source.registerCorsConfiguration(&quot;/**&quot;, configuration);
+&nbsp;//        return source;
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    /**
+&nbsp;//     * Main security filter chain configuration
+&nbsp;//     */
+&nbsp;//    @Bean
+&nbsp;//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+&nbsp;//        http
+&nbsp;//                .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))
+&nbsp;//                // Disable CSRF for Postman / React
+&nbsp;//                .csrf(AbstractHttpConfigurer::disable)
+&nbsp;//
+&nbsp;//                // Authorize requests
+&nbsp;//                .authorizeHttpRequests(auth -&gt; auth
+&nbsp;//                        // Public endpoints
+&nbsp;//                        .requestMatchers(
+&nbsp;//                                &quot;/api/auth/register&quot;,
+&nbsp;//                                &quot;/api/auth/login&quot;,
+&nbsp;//                                &quot;/api/auth/password/**&quot; // for forgot/reset password
+&nbsp;//                        ).permitAll()
+&nbsp;//
+&nbsp;//                        // Swagger endpoints (for testing)
+&nbsp;//                        .requestMatchers(
+&nbsp;//                                &quot;/swagger-ui/**&quot;,
+&nbsp;//                                &quot;/v3/api-docs/**&quot;,
+&nbsp;//                                &quot;/swagger-resources/**&quot;,
+&nbsp;//                                &quot;/webjars/**&quot;
+&nbsp;//                        ).permitAll()
+&nbsp;//
+&nbsp;//                        // Notification endpoints - ROLE-BASED ACCESS
+&nbsp;//                        // All authenticated users can READ and UPDATE notifications
+&nbsp;//                        .requestMatchers(HttpMethod.GET, &quot;/api/notifications/**&quot;).authenticated()
+&nbsp;//                        .requestMatchers(HttpMethod.PUT, &quot;/api/notifications/**&quot;).authenticated()
+&nbsp;//
+&nbsp;//                        // Only ADMIN can CREATE and DELETE notifications
+&nbsp;//                        .requestMatchers(HttpMethod.POST, &quot;/api/notifications/**&quot;).hasRole(&quot;ADMIN&quot;)
+&nbsp;//                        .requestMatchers(HttpMethod.DELETE, &quot;/api/notifications/**&quot;).hasRole(&quot;ADMIN&quot;)
+&nbsp;//
+&nbsp;//                        // Admin endpoints
+&nbsp;//                        .requestMatchers(&quot;/api/admin/**&quot;).hasRole(&quot;ADMIN&quot;)
+&nbsp;//
+&nbsp;//                        // Profile endpoints
+&nbsp;//                        .requestMatchers(&quot;/api/profile/**&quot;).authenticated()
+&nbsp;//
+&nbsp;//                        .anyRequest().authenticated()
+&nbsp;//                )
+&nbsp;//
+&nbsp;//                .formLogin(AbstractHttpConfigurer::disable)
+&nbsp;//
+&nbsp;//                .sessionManagement(session -&gt; session
+&nbsp;//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+&nbsp;//                )
+&nbsp;//
+&nbsp;//                // ADD: JWT filter chain integration
+&nbsp;//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+&nbsp;//
+&nbsp;//        return http.build();
+&nbsp;//    }
+&nbsp;//
+&nbsp;//
+&nbsp;//}
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;package com.EAD.autoservice_backend.config;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.service.CustomUserDetailsService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+&nbsp;import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+&nbsp;import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+&nbsp;import org.springframework.security.config.http.SessionCreationPolicy;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.security.web.SecurityFilterChain;
+&nbsp;import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+&nbsp;import org.springframework.web.cors.CorsConfiguration;
+&nbsp;import org.springframework.web.cors.CorsConfigurationSource;
+&nbsp;import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import org.springframework.http.HttpMethod;
+&nbsp;
+&nbsp;/**
+&nbsp; * Security Configuration for JWT Authentication
+&nbsp; * Configures Spring Security for stateless JWT authentication with React frontend
+&nbsp; */
+&nbsp;@Configuration
+&nbsp;@EnableWebSecurity
+&nbsp;@EnableMethodSecurity(prePostEnabled = true)
+&nbsp;public class SecurityConfig {
+&nbsp;
+&nbsp;    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+&nbsp;    private final CustomUserDetailsService userDetailsService;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+<b class="fc">&nbsp;                          CustomUserDetailsService userDetailsService) {</b>
+<b class="fc">&nbsp;        this.jwtAuthenticationFilter = jwtAuthenticationFilter;</b>
+<b class="fc">&nbsp;        this.userDetailsService = userDetailsService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Password encoder bean for secure password hashing
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public PasswordEncoder passwordEncoder() {
+<b class="fc">&nbsp;        return new BCryptPasswordEncoder(12);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Authentication manager bean for handling login
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+<b class="fc">&nbsp;        return config.getAuthenticationManager();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * DAO Authentication Provider for database authentication
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public DaoAuthenticationProvider authenticationProvider() {
+<b class="fc">&nbsp;        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();</b>
+<b class="fc">&nbsp;        authProvider.setUserDetailsService(userDetailsService);</b>
+<b class="fc">&nbsp;        authProvider.setPasswordEncoder(passwordEncoder());</b>
+<b class="fc">&nbsp;        return authProvider;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * CORS configuration for React frontend
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public CorsConfigurationSource corsConfigurationSource() {
+<b class="fc">&nbsp;        CorsConfiguration configuration = new CorsConfiguration();</b>
+<b class="fc">&nbsp;        configuration.setAllowedOriginPatterns(Arrays.asList(&quot;http://localhost:5173&quot;));</b>
+<b class="fc">&nbsp;        configuration.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</b>
+<b class="fc">&nbsp;        configuration.setAllowedHeaders(Arrays.asList(&quot;*&quot;));</b>
+<b class="fc">&nbsp;        configuration.setAllowCredentials(true);</b>
+&nbsp;
+<b class="fc">&nbsp;        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</b>
+<b class="fc">&nbsp;        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</b>
+<b class="fc">&nbsp;        return source;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Main security filter chain configuration
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+<b class="fc">&nbsp;        http</b>
+<b class="fc">&nbsp;                .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</b>
+&nbsp;                // Disable CSRF for Postman / React
+<b class="fc">&nbsp;                .csrf(AbstractHttpConfigurer::disable)</b>
+&nbsp;
+&nbsp;                // Authorize requests
+<b class="fc">&nbsp;                .authorizeHttpRequests(auth -&gt; auth</b>
+&nbsp;                        // Swagger endpoints - MUST BE FIRST
+<b class="fc">&nbsp;                        .requestMatchers(</b>
+&nbsp;                                &quot;/swagger-ui/**&quot;,
+&nbsp;                                &quot;/swagger-ui.html&quot;,
+&nbsp;                                &quot;/v3/api-docs/**&quot;,
+&nbsp;                                &quot;/swagger-resources/**&quot;,
+&nbsp;                                &quot;/webjars/**&quot;,
+&nbsp;                                &quot;/api-docs/**&quot;
+<b class="fc">&nbsp;                        ).permitAll()</b>
+&nbsp;
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/api/chatbot/**&quot;).authenticated()</b>
+&nbsp;
+&nbsp;                        // Public endpoints
+<b class="fc">&nbsp;                        .requestMatchers(</b>
+&nbsp;                                &quot;/api/v1/auth/register&quot;,
+&nbsp;                                &quot;/api/v1/auth/login&quot;,
+&nbsp;                                &quot;/api/v1/auth/password/**&quot;, // for forgot/reset password
+&nbsp;                                &quot;/api/v1/appointment-jobs/**&quot;,
+&nbsp;                                &quot;/api/v1/leaves/**&quot;
+<b class="fc">&nbsp;                        ).permitAll()</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.GET, &quot;/api/notifications/**&quot;).authenticated()</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.PUT, &quot;/api/notifications/**&quot;).authenticated()</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.POST, &quot;/api/notifications/**&quot;).hasRole(&quot;ADMIN&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.DELETE, &quot;/api/notifications/**&quot;).hasRole(&quot;ADMIN&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/api/v1/admin/**&quot;).hasRole(&quot;ADMIN&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/api/v1/profile/**&quot;).authenticated()</b>
+&nbsp;
+<b class="fc">&nbsp;                        .anyRequest().authenticated()</b>
+&nbsp;                )
+&nbsp;
+<b class="fc">&nbsp;                .formLogin(AbstractHttpConfigurer::disable)</b>
+&nbsp;
+<b class="fc">&nbsp;                .sessionManagement(session -&gt; session</b>
+<b class="fc">&nbsp;                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</b>
+&nbsp;                )
+&nbsp;
+&nbsp;                // JWT filter - but ignore for Swagger paths
+<b class="fc">&nbsp;                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);</b>
+&nbsp;
+<b class="fc">&nbsp;        return http.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

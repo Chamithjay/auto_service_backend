@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EmployeeService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.service</a>
+</div>
+
+<h1>Coverage Summary for Class: EmployeeService (com.EAD.autoservice_backend.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EmployeeService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2.6%
+  </span>
+  <span class="absValue">
+    (1/38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.service;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.AssignmentDTO;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeProfileDTO;
+&nbsp;import com.EAD.autoservice_backend.model.Employee;
+&nbsp;import com.EAD.autoservice_backend.model.JobAssignment;
+&nbsp;import com.EAD.autoservice_backend.repository.EmployeeRepository;
+&nbsp;import com.EAD.autoservice_backend.repository.JobAssignmentRepository;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;public class EmployeeService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private EmployeeRepository employeeRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private JobAssignmentRepository jobAssignmentRepository;
+&nbsp;
+&nbsp;    // Get employee profile as DTO
+&nbsp;    public EmployeeProfileDTO getEmployeeProfile(Long employeeId) {
+<b class="nc">&nbsp;        Employee employee = employeeRepository.findById(employeeId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Employee not found&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        return new EmployeeProfileDTO(</b>
+<b class="nc">&nbsp;                employee.getEmployeeId(),</b>
+<b class="nc">&nbsp;                employee.getUsername(),</b>
+<b class="nc">&nbsp;                employee.getEmail(),</b>
+<b class="nc">&nbsp;                employee.getPosition(),</b>
+<b class="nc">&nbsp;                employee.getDepartment(),</b>
+<b class="nc">&nbsp;                employee.getPhoneNumber()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    // Update profile and return DTO
+&nbsp;    public EmployeeProfileDTO updateEmployeeProfile(Long employeeId, EmployeeProfileDTO updatedDTO) {
+<b class="nc">&nbsp;        Employee existingEmployee = employeeRepository.findById(employeeId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Employee not found&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        existingEmployee.setPhoneNumber(updatedDTO.phoneNumber());</b>
+<b class="nc">&nbsp;        existingEmployee.setPosition(updatedDTO.position());</b>
+<b class="nc">&nbsp;        existingEmployee.setDepartment(updatedDTO.department());</b>
+&nbsp;
+<b class="nc">&nbsp;        Employee saved = employeeRepository.save(existingEmployee);</b>
+&nbsp;
+<b class="nc">&nbsp;        return new EmployeeProfileDTO(</b>
+<b class="nc">&nbsp;                saved.getEmployeeId(),</b>
+<b class="nc">&nbsp;                saved.getUsername(),</b>
+<b class="nc">&nbsp;                saved.getEmail(),</b>
+<b class="nc">&nbsp;                saved.getPosition(),</b>
+<b class="nc">&nbsp;                saved.getDepartment(),</b>
+<b class="nc">&nbsp;                saved.getPhoneNumber()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    // Dashboard
+&nbsp;    public Map&lt;String, Object&gt; getEmployeeDashboard(Long employeeId) {
+<b class="nc">&nbsp;        Map&lt;String, Object&gt; dashboardData = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        LocalDate today = LocalDate.now();</b>
+&nbsp;
+&nbsp;        // Today&#39;s assignments
+<b class="nc">&nbsp;        List&lt;JobAssignment&gt; todayAssignments =</b>
+<b class="nc">&nbsp;                jobAssignmentRepository.findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDate(employeeId, today);</b>
+<b class="nc">&nbsp;        List&lt;AssignmentDTO&gt; todayDTOs = todayAssignments.stream()</b>
+<b class="nc">&nbsp;                .map(AssignmentDTO::new)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        dashboardData.put(&quot;todayAssignments&quot;, todayDTOs);</b>
+&nbsp;
+&nbsp;        // Upcoming assignments
+<b class="nc">&nbsp;        List&lt;JobAssignment&gt; upcomingAssignments =</b>
+<b class="nc">&nbsp;                jobAssignmentRepository.findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDateAfter(employeeId, today);</b>
+<b class="nc">&nbsp;        List&lt;AssignmentDTO&gt; upcomingDTOs = upcomingAssignments.stream()</b>
+<b class="nc">&nbsp;                .map(AssignmentDTO::new)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        dashboardData.put(&quot;upcomingAssignments&quot;, upcomingDTOs);</b>
+&nbsp;
+<b class="nc">&nbsp;        return dashboardData;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

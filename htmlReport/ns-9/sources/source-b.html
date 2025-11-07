@@ -1,0 +1,152 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobAssignmentRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: JobAssignmentRepository (com.EAD.autoservice_backend.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JobAssignmentRepository$MockitoMock$m467tJ6o</td>
+  </tr>
+  <tr>
+    <td class="name">JobAssignmentRepository$MockitoMock$m467tJ6o$auxiliary$IhoQurks</td>
+  </tr>
+  <tr>
+    <td class="name">JobAssignmentRepository$MockitoMock$m467tJ6o$auxiliary$QObJtywA</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.repository;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeePerformance;
+&nbsp;import com.EAD.autoservice_backend.model.JobAssignment;
+&nbsp;import com.EAD.autoservice_backend.model.SessionType;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface JobAssignmentRepository extends JpaRepository&lt;JobAssignment, Long&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Report Query: Employee Performance
+&nbsp;     * Native PostgreSQL query for calculating total jobs and hours per employee
+&nbsp;     */
+&nbsp;    @Query(value = &quot;SELECT e.username AS employeeName, &quot; +
+&nbsp;            &quot;COUNT(ja.job_assignment_id) AS totalJobs, &quot; +
+&nbsp;            &quot;SUM(EXTRACT(EPOCH FROM (ja.end_time - ja.start_time)) / 3600.0) AS totalHours &quot; +
+&nbsp;            &quot;FROM \&quot;job assignments\&quot; ja &quot; +
+&nbsp;            &quot;JOIN users e ON ja.employee_id = e.id &quot; +
+&nbsp;            &quot;JOIN \&quot;appointment jobs\&quot; aj ON ja.appointment_job_id = aj.appointment_job_id &quot; +
+&nbsp;            &quot;JOIN appointments a ON aj.appointment_id = a.appointment_id &quot; +
+&nbsp;            &quot;WHERE a.appointment_date BETWEEN :startDate AND :endDate &quot; +
+&nbsp;            &quot;GROUP BY e.username&quot;,
+&nbsp;            nativeQuery = true)
+&nbsp;    List&lt;EmployeePerformance&gt; getEmployeePerformance(@Param(&quot;startDate&quot;) LocalDate startDate, @Param(&quot;endDate&quot;) LocalDate endDate);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sum total duration of services for a given employee on a date and session
+&nbsp;     */
+&nbsp;    @Query(&quot;&quot;&quot;
+&nbsp;        SELECT COALESCE(SUM(si.estimatedDuration), 0)
+&nbsp;        FROM JobAssignment ja
+&nbsp;        JOIN ja.appointmentJob aj
+&nbsp;        JOIN aj.appointment a
+&nbsp;        JOIN aj.serviceItem si
+&nbsp;        WHERE ja.employee.id = :employeeId
+&nbsp;        AND a.appointmentDate = :date
+&nbsp;        AND a.sessionType = :sessionType
+&nbsp;    &quot;&quot;&quot;)
+&nbsp;    int sumTotalDurationByDateAndEmployeeAndSession(
+&nbsp;            @Param(&quot;employeeId&quot;) Long employeeId,
+&nbsp;            @Param(&quot;date&quot;) LocalDate date,
+&nbsp;            @Param(&quot;sessionType&quot;) SessionType sessionType
+&nbsp;    );
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the last assigned employee ID
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT ja.employee.id FROM JobAssignment ja ORDER BY ja.id DESC LIMIT 1&quot;)
+&nbsp;    Optional&lt;Long&gt; findLastAssignedEmployeeId();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find assignments by appointment job ID
+&nbsp;     */
+&nbsp;    List&lt;JobAssignment&gt; findByAppointmentJobId(Long appointmentJobId);
+&nbsp;
+&nbsp;    List&lt;JobAssignment&gt; findByAppointmentJob_Id(Long appointmentJobId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fetch today&#39;s assignments for a given employee
+&nbsp;     */
+&nbsp;    List&lt;JobAssignment&gt; findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDate(Long employeeId, LocalDate date);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fetch upcoming assignments (after today) for a given employee
+&nbsp;     */
+&nbsp;    List&lt;JobAssignment&gt; findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDateAfter(Long employeeId, LocalDate date);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

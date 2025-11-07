@@ -1,0 +1,199 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProfileController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ProfileController (com.EAD.autoservice_backend.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProfileController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.1%
+  </span>
+  <span class="absValue">
+    (2/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.controller;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.PasswordChangeRequest;
+&nbsp;import com.EAD.autoservice_backend.dto.ProfileResponse;
+&nbsp;import com.EAD.autoservice_backend.dto.ProfileUpdateRequest;
+&nbsp;import com.EAD.autoservice_backend.exception.InvalidPasswordException;
+&nbsp;import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+&nbsp;import com.EAD.autoservice_backend.service.ProfileService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * REST Controller for Profile Management
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/v1/profile&quot;)
+&nbsp;public class ProfileController {
+&nbsp;
+&nbsp;    private final ProfileService profileService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public ProfileController(ProfileService profileService) {</b>
+<b class="fc">&nbsp;        this.profileService = profileService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current user&#39;s profile
+&nbsp;     */
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;ProfileResponse&gt; getProfile() {
+<b class="nc">&nbsp;        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;        String username = authentication.getName();</b>
+&nbsp;
+<b class="nc">&nbsp;        ProfileResponse profile = profileService.getUserProfile(username);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(profile);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update user profile (username and email)
+&nbsp;     */
+&nbsp;    @PutMapping
+&nbsp;    public ResponseEntity&lt;?&gt; updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;            String currentUsername = authentication.getName();</b>
+&nbsp;
+<b class="nc">&nbsp;            ProfileResponse updatedProfile = profileService.updateProfile(currentUsername, request);</b>
+<b class="nc">&nbsp;            return ResponseEntity.ok(updatedProfile);</b>
+&nbsp;        } catch (UserAlreadyExistsException e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, &quot;Profile update failed. Please try again.&quot;);</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Change password
+&nbsp;     */
+&nbsp;    @PutMapping(&quot;/change-password&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; changePassword(@Valid @RequestBody PasswordChangeRequest request) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;            String username = authentication.getName();</b>
+&nbsp;
+<b class="nc">&nbsp;            profileService.changePassword(username, request);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            response.put(&quot;message&quot;, &quot;Password changed successfully&quot;);</b>
+<b class="nc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;        } catch (InvalidPasswordException e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, &quot;Password change failed. Please try again.&quot;);</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+&nbsp;
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

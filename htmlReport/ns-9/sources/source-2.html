@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppointmentRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: AppointmentRepository (com.EAD.autoservice_backend.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">AppointmentRepository$MockitoMock$IHKO4ZJm</td>
+  </tr>
+  <tr>
+    <td class="name">AppointmentRepository$MockitoMock$IHKO4ZJm$auxiliary$n1ZXDbln</td>
+  </tr>
+  <tr>
+    <td class="name">AppointmentRepository$MockitoMock$IHKO4ZJm$auxiliary$U1FRRflg</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.repository;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.RevenueOverTime;
+&nbsp;import com.EAD.autoservice_backend.model.Appointment;
+&nbsp;import com.EAD.autoservice_backend.model.AppointmentStatus;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface AppointmentRepository extends JpaRepository&lt;Appointment, Long&gt; {
+&nbsp;
+&nbsp;    // Find appointments by customer with vehicle eagerly fetched
+&nbsp;    @Query(&quot;SELECT DISTINCT a FROM Appointment a &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH a.vehicle v &quot; +
+&nbsp;           &quot;WHERE a.customer.id = :customerId &quot; +
+&nbsp;           &quot;ORDER BY a.appointmentDate DESC&quot;)
+&nbsp;    List&lt;Appointment&gt; findByCustomerId(@Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    List&lt;Appointment&gt; findByCustomerIdOrderByCreatedAtDesc(Long customerId);
+&nbsp;
+&nbsp;    // Total revenue
+&nbsp;    @Query(&quot;SELECT COALESCE(SUM(a.totalCost), 0) FROM Appointment a&quot;)
+&nbsp;    BigDecimal getTotalRevenue();
+&nbsp;
+&nbsp;    // Find by status
+&nbsp;    @Query(&quot;SELECT a FROM Appointment a WHERE a.status = :status ORDER BY a.appointmentDate DESC&quot;)
+&nbsp;    List&lt;Appointment&gt; findByStatusOrderByDateDesc(@Param(&quot;status&quot;) AppointmentStatus status);
+&nbsp;
+&nbsp;    // Find by customer and date range
+&nbsp;    @Query(&quot;&quot;&quot;
+&nbsp;        SELECT a FROM Appointment a
+&nbsp;        WHERE a.customer.id = :customerId
+&nbsp;          AND a.createdAt BETWEEN :startDate AND :endDate
+&nbsp;        ORDER BY a.createdAt DESC
+&nbsp;        &quot;&quot;&quot;)
+&nbsp;    List&lt;Appointment&gt; findByCustomerIdAndDateRange(
+&nbsp;            @Param(&quot;customerId&quot;) Long customerId,
+&nbsp;            @Param(&quot;startDate&quot;) LocalDateTime startDate,
+&nbsp;            @Param(&quot;endDate&quot;) LocalDateTime endDate
+&nbsp;    );
+&nbsp;
+&nbsp;    // All appointments ordered by appointment date
+&nbsp;    @Query(&quot;SELECT a FROM Appointment a ORDER BY a.appointmentDate DESC&quot;)
+&nbsp;    List&lt;Appointment&gt; findAllOrderByDateDesc();
+&nbsp;
+&nbsp;    @Query(&quot;SELECT a FROM Appointment a WHERE YEAR(a.appointmentDate) = YEAR(CURRENT_DATE) ORDER BY a.appointmentDate&quot;)
+&nbsp;    List&lt;Appointment&gt; findAllByCurrentYear();
+&nbsp;
+&nbsp;    // Find all appointments for a specific customer ordered by appointment date
+&nbsp;    @Query(&quot;SELECT a FROM Appointment a WHERE a.customer.id = :customerId ORDER BY a.appointmentDate DESC&quot;)
+&nbsp;    List&lt;Appointment&gt; findByCustomerIdOrderByAppointmentDateDesc(@Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    // Find appointment by ID and customer ID (for authorization)
+&nbsp;    @Query(&quot;SELECT a FROM Appointment a WHERE a.appointmentId = :appointmentId AND a.customer.id = :customerId&quot;)
+&nbsp;    Optional&lt;Appointment&gt; findByAppointmentIdAndCustomerId(
+&nbsp;            @Param(&quot;appointmentId&quot;) Long appointmentId,
+&nbsp;            @Param(&quot;customerId&quot;) Long customerId
+&nbsp;    );
+&nbsp;
+&nbsp;    // Count total appointments by customer ID
+&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId&quot;)
+&nbsp;    Integer countByCustomerId(@Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    // Count active appointments (NEW or ONGOING) by customer ID
+&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId AND a.status IN :statuses&quot;)
+&nbsp;    Integer countByCustomerIdAndStatusIn(@Param(&quot;customerId&quot;) Long customerId, @Param(&quot;statuses&quot;) List&lt;AppointmentStatus&gt; statuses);
+&nbsp;
+&nbsp;    // Count completed appointments by customer ID
+&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Appointment a WHERE a.customer.id = :customerId AND a.status = :status&quot;)
+&nbsp;    Integer countByCustomerIdAndStatus(@Param(&quot;customerId&quot;) Long customerId, @Param(&quot;status&quot;) AppointmentStatus status);
+&nbsp;
+&nbsp;    // Find active appointments for a customer (NEW or ONGOING) with vehicle eagerly fetched
+&nbsp;    @Query(&quot;SELECT DISTINCT a FROM Appointment a &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH a.vehicle v &quot; +
+&nbsp;           &quot;WHERE a.customer.id = :customerId AND a.status IN :statuses &quot; +
+&nbsp;           &quot;ORDER BY a.appointmentDate DESC&quot;)
+&nbsp;    List&lt;Appointment&gt; findActiveAppointmentsByCustomerId(@Param(&quot;customerId&quot;) Long customerId, @Param(&quot;statuses&quot;) List&lt;AppointmentStatus&gt; statuses);
+&nbsp;
+&nbsp;    // --- Revenue Report ---
+&nbsp;    @Query(&quot;SELECT new com.EAD.autoservice_backend.dto.RevenueOverTime(a.appointmentDate, SUM(a.totalCost)) &quot; +
+&nbsp;            &quot;FROM Appointment a &quot; +
+&nbsp;            &quot;WHERE a.status = &#39;COMPLETED&#39; &quot; +
+&nbsp;            &quot;AND a.appointmentDate BETWEEN :startDate AND :endDate &quot; +
+&nbsp;            &quot;GROUP BY a.appointmentDate &quot; +
+&nbsp;            &quot;ORDER BY a.appointmentDate ASC&quot;)
+&nbsp;    List&lt;RevenueOverTime&gt; getRevenueOverTime(
+&nbsp;            @Param(&quot;startDate&quot;) LocalDate startDate,
+&nbsp;            @Param(&quot;endDate&quot;) LocalDate endDate
+&nbsp;    );
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

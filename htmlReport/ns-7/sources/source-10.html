@@ -1,0 +1,227 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotificationServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.service</a>
+</div>
+
+<h1>Coverage Summary for Class: NotificationServiceImpl (com.EAD.autoservice_backend.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NotificationServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">NotificationServiceImpl$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/33)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.service;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.model.Notification;
+&nbsp;import com.EAD.autoservice_backend.model.NotificationType;
+&nbsp;import com.EAD.autoservice_backend.model.Role;
+&nbsp;import com.EAD.autoservice_backend.repository.NotificationRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class NotificationServiceImpl implements NotificationService {
+&nbsp;
+&nbsp;    private final NotificationRepository notificationRepository;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    public Notification createNotification(Notification notification) {
+<b class="nc">&nbsp;        return notificationRepository.save(notification);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Notification&gt; getAllNotifications() {
+<b class="nc">&nbsp;        return notificationRepository.findAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Notification&gt; getNotificationsByRole(Role role) {
+<b class="nc">&nbsp;        return notificationRepository.findByTargetRole(role);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Notification&gt; getUnreadNotificationsByRole(Role role) {
+<b class="nc">&nbsp;        return notificationRepository.findByTargetRoleAndIsReadFalse(role);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Notification&gt; getNotificationsByUserId(Long userId) {
+<b class="nc">&nbsp;        return notificationRepository.findByUserId(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Notification&gt; getUnreadNotificationsByUserId(Long userId) {
+<b class="nc">&nbsp;        return notificationRepository.findByUserIdAndIsReadFalse(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    public Notification markAsRead(Long notificationId) {
+<b class="nc">&nbsp;        Notification notification = notificationRepository.findById(notificationId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Notification not found with id: &quot; + notificationId));</b>
+<b class="nc">&nbsp;        notification.setRead(true);</b>
+<b class="nc">&nbsp;        return notificationRepository.save(notification);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    public void markAllAsReadByRole(Role role) {
+<b class="nc">&nbsp;        List&lt;Notification&gt; notifications = notificationRepository.findByTargetRoleAndIsReadFalse(role);</b>
+<b class="nc">&nbsp;        notifications.forEach(notification -&gt; notification.setRead(true));</b>
+<b class="nc">&nbsp;        notificationRepository.saveAll(notifications);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    public void markAllAsReadByUserId(Long userId) {
+<b class="nc">&nbsp;        List&lt;Notification&gt; notifications = notificationRepository.findByUserIdAndIsReadFalse(userId);</b>
+<b class="nc">&nbsp;        notifications.forEach(notification -&gt; notification.setRead(true));</b>
+<b class="nc">&nbsp;        notificationRepository.saveAll(notifications);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    public void deleteNotification(Long notificationId) {
+<b class="nc">&nbsp;        notificationRepository.deleteById(notificationId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countUnreadByRole(Role role) {
+<b class="nc">&nbsp;        return notificationRepository.countByTargetRoleAndIsReadFalse(role);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Long countUnreadByUserId(Long userId) {
+<b class="nc">&nbsp;        return notificationRepository.countByUserIdAndIsReadFalse(userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Notification createNotificationForRole(String title, String message, Role role, NotificationType type) {
+<b class="nc">&nbsp;        Notification notification = new Notification();</b>
+<b class="nc">&nbsp;        notification.setTitle(title);</b>
+<b class="nc">&nbsp;        notification.setMessage(message);</b>
+<b class="nc">&nbsp;        notification.setTargetRole(role);</b>
+<b class="nc">&nbsp;        notification.setType(type);</b>
+<b class="nc">&nbsp;        notification.setRead(false);</b>
+<b class="nc">&nbsp;        return notificationRepository.save(notification);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Notification createNotificationForUser(String title, String message, Long userId, NotificationType type) {
+<b class="nc">&nbsp;        Notification notification = new Notification();</b>
+<b class="nc">&nbsp;        notification.setTitle(title);</b>
+<b class="nc">&nbsp;        notification.setMessage(message);</b>
+<b class="nc">&nbsp;        notification.setUserId(userId);</b>
+&nbsp;//        notification.setTargetRole(Role.ALL); // Use ALL for user-specific notifications
+<b class="nc">&nbsp;        notification.setType(type);</b>
+<b class="nc">&nbsp;        notification.setRead(false);</b>
+<b class="nc">&nbsp;        return notificationRepository.save(notification);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

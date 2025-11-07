@@ -1,0 +1,143 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppointmentJobRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: AppointmentJobRepository (com.EAD.autoservice_backend.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">AppointmentJobRepository$MockitoMock$MIMuzztB</td>
+  </tr>
+  <tr>
+    <td class="name">AppointmentJobRepository$MockitoMock$MIMuzztB$auxiliary$HUhkMmO4</td>
+  </tr>
+  <tr>
+    <td class="name">AppointmentJobRepository$MockitoMock$MIMuzztB$auxiliary$XbYlM6Kn</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.repository;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.ServicePopularity;
+&nbsp;import com.EAD.autoservice_backend.model.Appointment;
+&nbsp;import com.EAD.autoservice_backend.model.AppointmentJob;
+&nbsp;import com.EAD.autoservice_backend.model.AppointmentStatus;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface AppointmentJobRepository extends JpaRepository&lt;AppointmentJob, Long&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Derived query: Find all jobs for a given appointment
+&nbsp;     */
+&nbsp;    List&lt;AppointmentJob&gt; findByAppointment(Appointment appointment);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Report Query: Service Popularity
+&nbsp;     * Gets the count of all booked services, grouped by service name,
+&nbsp;     * within a specified date range.
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT new com.EAD.autoservice_backend.dto.ServicePopularity(s.serviceItemName, COUNT(aj)) &quot; +
+&nbsp;            &quot;FROM AppointmentJob aj JOIN aj.serviceItem s &quot; +
+&nbsp;            &quot;JOIN aj.appointment a &quot; +
+&nbsp;            &quot;WHERE a.appointmentDate BETWEEN :startDate AND :endDate &quot; +
+&nbsp;            &quot;GROUP BY s.serviceItemName&quot;)
+&nbsp;    List&lt;ServicePopularity&gt; getServicePopularity(@Param(&quot;startDate&quot;) LocalDate startDate, @Param(&quot;endDate&quot;) LocalDate endDate);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find jobs by appointment ID with ServiceItem and EmployeeAssignments eagerly fetched
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT DISTINCT aj FROM AppointmentJob aj &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH aj.serviceItem &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH aj.employeeAssignments &quot; +
+&nbsp;           &quot;WHERE aj.appointment.appointmentId = :appointmentId&quot;)
+&nbsp;    List&lt;AppointmentJob&gt; findByAppointmentId(@Param(&quot;appointmentId&quot;) Long appointmentId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count all jobs by appointment ID
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT COUNT(aj) FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId&quot;)
+&nbsp;    Integer countByAppointmentId(@Param(&quot;appointmentId&quot;) Long appointmentId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count jobs by appointment ID and job status
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT COUNT(aj) FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId AND aj.itemStatus = :status&quot;)
+&nbsp;    Integer countByAppointmentIdAndJobStatus(@Param(&quot;appointmentId&quot;) Long appointmentId, @Param(&quot;status&quot;) AppointmentStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find appointment job by ID with all related entities eagerly fetched
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT aj FROM AppointmentJob aj &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH aj.appointment a &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH a.vehicle v &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH v.customer &quot; +
+&nbsp;           &quot;LEFT JOIN FETCH aj.serviceItem &quot; +
+&nbsp;           &quot;WHERE aj.id = :appointmentJobId&quot;)
+&nbsp;    java.util.Optional&lt;AppointmentJob&gt; findByIdWithDetails(@Param(&quot;appointmentJobId&quot;) Long appointmentJobId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

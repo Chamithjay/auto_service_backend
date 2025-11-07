@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.*;
@@ -79,16 +80,19 @@ public class AppointmentJobServiceTest {
         testServiceItem = serviceItemRepository.save(testServiceItem);
 
         testAppointment = new Appointment();
+        testAppointment.setCustomer(testCustomer);
+        testAppointment.setVehicleName("Office car");
         testAppointment.setVehicle(testVehicle);
         testAppointment.setAppointmentDate(LocalDate.now().plusDays(2));
-        testAppointment.setStartTime(LocalTime.now());
-        testAppointment.setEndTime(LocalTime.now().plusHours(2));
-        testAppointment.setStatus(Status.NEW);
+        testAppointment.setAppointmentStartTime(LocalDateTime.now());
+        testAppointment.setAppointmentEndTime(LocalDateTime.now().plusHours(2));
+        testAppointment.setStatus(AppointmentStatus.NEW);
         testAppointment.setTotalCost(new BigDecimal(2000.00));
+        testAppointment.setSessionType(SessionType.MORNING);
         testAppointment = appointmentRepository.save(testAppointment);
 
         testAppointmentJob = new AppointmentJob();
-        testAppointmentJob.setJobStatus(Status.NEW);
+        testAppointmentJob.setItemStatus(AppointmentStatus.NEW);
         testAppointmentJob.setAppointment(testAppointment);
         testAppointmentJob.setServiceItem(testServiceItem);
         testAppointmentJob = appointmentJobRepository.save(testAppointmentJob);
@@ -100,11 +104,11 @@ public class AppointmentJobServiceTest {
     void shouldRetrieveAppointmentJobByIdSuccessfully() {
         // When
 
-        EmployeeAppointmentJobResponse response = appointmentJobService.getAppointmentJobById(testAppointmentJob.getAppointmentJobId());
+        EmployeeAppointmentJobResponse response = appointmentJobService.getAppointmentJobById(testAppointmentJob.getId());
 
         //Then
         assertThat(response).isNotNull();
-        assertThat(response.getAppointmentJobId()).isEqualTo(testAppointmentJob.getAppointmentJobId());
+        assertThat(response.getAppointmentJobId()).isEqualTo(testAppointmentJob.getId());
         assertThat(response.getJobNote()).isNull();
         assertThat(response.getJobStatus()).isEqualTo("NEW");
         assertThat(response.getAdditionalCost()).isNull();
@@ -145,7 +149,7 @@ public class AppointmentJobServiceTest {
                 .isInstanceOf(AppointmentJobNotFoundException.class)
                 .hasMessage("Appointment Job Not Found. Job ID: 9999");
 
-        assertThat(appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId())).isPresent();
+        assertThat(appointmentJobRepository.findById(testAppointmentJob.getId())).isPresent();
     }
 
 
@@ -155,15 +159,15 @@ public class AppointmentJobServiceTest {
     @DisplayName("Should update appointment job status to ONGOING successfully - integration test")
     void shouldUpdateAppointmentJobStatusToOngoingSuccessfully() {
         // When
-        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), "ONGOING");
+        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), "ONGOING");
 
         // Then
         assertThat(result).isEqualTo("Successfully updated Appointment Job to ONGOING");
 
         // Verify in database
-        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(updatedJob).isNotNull();
-        assertThat(updatedJob.getJobStatus()).isEqualTo(Status.ONGOING);
+        assertThat(updatedJob.getItemStatus()).isEqualTo(AppointmentStatus.ONGOING);
     }
 
 
@@ -171,45 +175,45 @@ public class AppointmentJobServiceTest {
     @DisplayName("Should update appointment job status to COMPLETED successfully - integration test")
     void shouldUpdateAppointmentJobStatusToCompletedSuccessfully() {
         // When
-        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), "COMPLETED");
+        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), "COMPLETED");
 
         // Then
         assertThat(result).isEqualTo("Successfully updated Appointment Job to COMPLETED");
 
         // Verify in database
-        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(updatedJob).isNotNull();
-        assertThat(updatedJob.getJobStatus()).isEqualTo(Status.COMPLETED);
+        assertThat(updatedJob.getItemStatus()).isEqualTo(AppointmentStatus.COMPLETED);
     }
 
     @Test
     @DisplayName("Should handle lowercase status input - integration test")
     void shouldHandleLowercaseStatusInput() {
         // When
-        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), "ongoing");
+        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), "ongoing");
 
         // Then
         assertThat(result).isEqualTo("Successfully updated Appointment Job to ONGOING");
 
         // Verify in database
-        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(updatedJob).isNotNull();
-        assertThat(updatedJob.getJobStatus()).isEqualTo(Status.ONGOING);
+        assertThat(updatedJob.getItemStatus()).isEqualTo(AppointmentStatus.ONGOING);
     }
 
     @Test
     @DisplayName("Should handle mixed case status input - integration test")
     void shouldHandleMixedCaseStatusInput() {
         // When
-        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), "CoMpLeTeD");
+        String result = appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), "CoMpLeTeD");
 
         // Then
         assertThat(result).isEqualTo("Successfully updated Appointment Job to COMPLETED");
 
         // Verify in database
-        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob updatedJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(updatedJob).isNotNull();
-        assertThat(updatedJob.getJobStatus()).isEqualTo(Status.COMPLETED);
+        assertThat(updatedJob.getItemStatus()).isEqualTo(AppointmentStatus.COMPLETED);
     }
 
 
@@ -225,9 +229,9 @@ public class AppointmentJobServiceTest {
                 .hasMessage("Appointment Job Not Found. Job ID: 99999");
 
         // Verify original job is unchanged
-        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(originalJob).isNotNull();
-        assertThat(originalJob.getJobStatus()).isEqualTo(Status.NEW);
+        assertThat(originalJob.getItemStatus()).isEqualTo(AppointmentStatus.NEW);
 
     }
 
@@ -239,15 +243,15 @@ public class AppointmentJobServiceTest {
         String invalidStatus = "INVALID_STATUS";
 
         // When & Then
-        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), invalidStatus))
+        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), invalidStatus))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid Job Status: INVALID_STATUS")
                 .hasMessageContaining("Valid values are: NEW, ONGOING, COMPLETED");
 
         // Verify original job is unchanged
-        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(originalJob).isNotNull();
-        assertThat(originalJob.getJobStatus()).isEqualTo(Status.NEW);
+        assertThat(originalJob.getItemStatus()).isEqualTo(AppointmentStatus.NEW);
 
     }
 
@@ -255,15 +259,15 @@ public class AppointmentJobServiceTest {
     @DisplayName("Should throw IllegalArgumentException for empty status - integration test")
     void shouldThrowExceptionForEmptyStatus() {
         // When & Then
-        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), ""))
+        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), ""))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid Job Status:")
                 .hasMessageContaining("Valid values are: NEW, ONGOING, COMPLETED");
 
         // Verify original job is unchanged
-        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(originalJob).isNotNull();
-        assertThat(originalJob.getJobStatus()).isEqualTo(Status.NEW);
+        assertThat(originalJob.getItemStatus()).isEqualTo(AppointmentStatus.NEW);
 
     }
 
@@ -271,14 +275,14 @@ public class AppointmentJobServiceTest {
     @DisplayName("Should throw IllegalArgumentException for null status - integration test")
     void shouldThrowExceptionForNullStatus() {
         // When & Then
-        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getAppointmentJobId(), null))
+        assertThatThrownBy(() -> appointmentJobService.updateAppointmentJobStatus(testAppointmentJob.getId(), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid Job Status: null")
                 .hasMessageContaining("Valid values are: NEW, ONGOING, COMPLETED");
 
         // Verify original job is unchanged
-        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getAppointmentJobId()).orElse(null);
+        AppointmentJob originalJob = appointmentJobRepository.findById(testAppointmentJob.getId()).orElse(null);
         assertThat(originalJob).isNotNull();
-        assertThat(originalJob.getJobStatus()).isEqualTo(Status.NEW);
+        assertThat(originalJob.getItemStatus()).isEqualTo(AppointmentStatus.NEW);
     }
 }

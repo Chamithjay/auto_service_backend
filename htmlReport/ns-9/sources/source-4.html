@@ -1,0 +1,136 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > VehicleRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: VehicleRepository (com.EAD.autoservice_backend.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">VehicleRepository$MockitoMock$gOU7n972</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleRepository$MockitoMock$gOU7n972$auxiliary$b0abicj2</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleRepository$MockitoMock$gOU7n972$auxiliary$f9YSRLrd</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.repository;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.model.Vehicle;
+&nbsp;import com.EAD.autoservice_backend.model.VehicleType;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface VehicleRepository extends JpaRepository&lt;Vehicle, Long&gt; {
+&nbsp;
+&nbsp;    @Query(&quot;SELECT v.vehicleType, COUNT(v) FROM Vehicle v GROUP BY v.vehicleType&quot;)
+&nbsp;    List&lt;Object[]&gt; countByVehicleType();
+&nbsp;
+&nbsp;    List&lt;Vehicle&gt; findAllByOrderByCreatedAtDesc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find all vehicles by customer ID
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT v FROM Vehicle v WHERE v.customer.id = :customerId ORDER BY v.createdAt DESC&quot;)
+&nbsp;    List&lt;Vehicle&gt; findByCustomerId(@Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Find vehicle by ID and customer ID (for authorization)
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT v FROM Vehicle v WHERE v.vehicleId = :vehicleId AND v.customer.id = :customerId&quot;)
+&nbsp;    Optional&lt;Vehicle&gt; findByVehicleIdAndCustomerId(@Param(&quot;vehicleId&quot;) Long vehicleId, 
+&nbsp;                                                    @Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    // Minimal addition to support service usage without changing service code.
+&nbsp;    Vehicle findByVehicleId(Long vehicleId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Count vehicles by customer ID
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT COUNT(v) FROM Vehicle v WHERE v.customer.id = :customerId&quot;)
+&nbsp;    Integer countByCustomerId(@Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if registration number exists for a customer
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT CASE WHEN COUNT(v) &gt; 0 THEN true ELSE false END FROM Vehicle v &quot; +
+&nbsp;           &quot;WHERE v.registrationNo = :registrationNo AND v.customer.id = :customerId&quot;)
+&nbsp;    boolean existsByRegistrationNoAndCustomerId(@Param(&quot;registrationNo&quot;) String registrationNo, 
+&nbsp;                                                @Param(&quot;customerId&quot;) Long customerId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check if registration number exists for a customer (excluding specific vehicle)
+&nbsp;     */
+&nbsp;    @Query(&quot;SELECT CASE WHEN COUNT(v) &gt; 0 THEN true ELSE false END FROM Vehicle v &quot; +
+&nbsp;           &quot;WHERE v.registrationNo = :registrationNo AND v.customer.id = :customerId AND v.vehicleId != :vehicleId&quot;)
+&nbsp;    boolean existsByRegistrationNoAndCustomerIdAndVehicleIdNot(@Param(&quot;registrationNo&quot;) String registrationNo, 
+&nbsp;                                                                @Param(&quot;customerId&quot;) Long customerId,
+&nbsp;                                                                @Param(&quot;vehicleId&quot;) Long vehicleId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

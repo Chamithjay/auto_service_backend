@@ -1,0 +1,96 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EmployeeLeaveRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: EmployeeLeaveRequest (com.EAD.autoservice_backend.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">EmployeeLeaveRequest</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.dto;
+&nbsp;
+&nbsp;import jakarta.validation.constraints.NotBlank;
+&nbsp;import jakarta.validation.constraints.NotNull;
+&nbsp;import jakarta.validation.constraints.Pattern;
+&nbsp;import jakarta.validation.constraints.Positive;
+&nbsp;import lombok.Value;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;
+&nbsp;@Value
+&nbsp;public class EmployeeLeaveRequest {
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Employee ID cannot be null&quot;)
+&nbsp;    @Positive(message = &quot;Employee ID must be positive&quot;)
+&nbsp;    Long employeeId;
+&nbsp;
+&nbsp;    @NotNull(message = &quot;Leave date cannot be null&quot;)
+&nbsp;    LocalDate leaveDate;
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;Leave type is required&quot;)
+&nbsp;    @Pattern(regexp = &quot;^(HALFDAY_MORNING|HALFDAY_EVENING|FULLDAY)$&quot;, message = &quot;Invalid leave type &quot;)
+&nbsp;    private final String leaveType;
+&nbsp;
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;Leave reason cannot be blank&quot;)
+&nbsp;    String leaveReason;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>
