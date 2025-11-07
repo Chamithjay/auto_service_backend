@@ -68,7 +68,8 @@ class JobAssignmentServiceTest {
         employee2.setId(2L);
 
         JobAssignment jobAssignment1 = new JobAssignment();
-        jobAssignment1.setJobAssignmentId(1L);
+        jobAssignment1.setId(1L);
+
         jobAssignment1.setEmployee(employee1);
         jobAssignment1.setStartTime(LocalTime.of(9, 0, 0));
         jobAssignment1.setEndTime(LocalTime.of(9, 30, 0));
@@ -76,7 +77,8 @@ class JobAssignmentServiceTest {
         jobAssignment1.setCostNote("New parts");
 
         JobAssignment jobAssignment2 = new JobAssignment();
-        jobAssignment2.setJobAssignmentId(2L);
+        jobAssignment1.setId(2L);
+        ;
         jobAssignment2.setEmployee(employee2);
         jobAssignment2.setStartTime(LocalTime.of(13, 0, 0));
         jobAssignment2.setEndTime(null);
@@ -161,7 +163,7 @@ class JobAssignmentServiceTest {
         employee.setId(3L);
 
         jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEmployee(employee);
         jobAssignment.setStartTime(LocalTime.of(15, 0, 0));
         jobAssignment.setEndTime(null);
@@ -169,7 +171,7 @@ class JobAssignmentServiceTest {
         jobAssignment.setCostNote("Additional parts");
 
         updatedJobAssignment = new JobAssignment();
-        updatedJobAssignment.setJobAssignmentId(jobAssignmentId);
+        updatedJobAssignment.setId(jobAssignmentId);
         updatedJobAssignment.setEmployee(employee);
         updatedJobAssignment.setStartTime(LocalTime.of(15, 0, 0));
         updatedJobAssignment.setEndTime(endTime);
@@ -226,7 +228,7 @@ class JobAssignmentServiceTest {
          endTimeRequest = new EmployeeJobAssignmentLogEndTimeRequest(newEndTime);
 
         jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEndTime(LocalTime.of(16, 0, 0));
 
         when(jobAssignmentRepository.findById(jobAssignmentId)).thenReturn(Optional.of(jobAssignment));
@@ -254,7 +256,7 @@ class JobAssignmentServiceTest {
 
 
         jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEndTime(null);
 
         when(jobAssignmentRepository.findById(jobAssignmentId)).thenReturn(Optional.of(jobAssignment));
@@ -300,7 +302,7 @@ class JobAssignmentServiceTest {
 
         // Setup job assignment
         JobAssignment jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEmployee(employee);
         jobAssignment.setAdditionalCost(null);
         jobAssignment.setCostNote(null);
@@ -308,7 +310,7 @@ class JobAssignmentServiceTest {
 
         // Setup updated job assignment
         updatedJobAssignment = new JobAssignment();
-        updatedJobAssignment.setJobAssignmentId(jobAssignmentId);
+        updatedJobAssignment.setId(jobAssignmentId);
         updatedJobAssignment.setEmployee(employee);
         updatedJobAssignment.setAdditionalCost(additionalCost);
         updatedJobAssignment.setCostNote(costNote);
@@ -367,13 +369,13 @@ class JobAssignmentServiceTest {
         appointmentJob.setAppointment(appointment);
 
         JobAssignment jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEmployee(employee);
         jobAssignment.setAdditionalCost(null);
         jobAssignment.setAppointmentJob(appointmentJob);
 
         JobAssignment updatedJobAssignment = new JobAssignment();
-        updatedJobAssignment.setJobAssignmentId(jobAssignmentId);
+        updatedJobAssignment.setId(jobAssignmentId);
         updatedJobAssignment.setEmployee(employee);
         updatedJobAssignment.setAdditionalCost(additionalCost);
         updatedJobAssignment.setCostNote(costNote);
@@ -432,7 +434,7 @@ class JobAssignmentServiceTest {
         addCostsRequest = new EmployeeJobAssignmentAddCostsRequest(newAdditionalCost, costNote);
 
         JobAssignment jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setAdditionalCost(BigDecimal.valueOf(200.00));
 
         when(jobAssignmentRepository.findById(jobAssignmentId)).thenReturn(Optional.of(jobAssignment));
@@ -468,13 +470,13 @@ class JobAssignmentServiceTest {
         appointmentJob.setAppointment(appointment);
 
         JobAssignment jobAssignment = new JobAssignment();
-        jobAssignment.setJobAssignmentId(jobAssignmentId);
+        jobAssignment.setId(jobAssignmentId);
         jobAssignment.setEmployee(employee);
         jobAssignment.setAdditionalCost(null);
         jobAssignment.setAppointmentJob(appointmentJob);
 
         JobAssignment updatedJobAssignment = new JobAssignment();
-        updatedJobAssignment.setJobAssignmentId(jobAssignmentId);
+        updatedJobAssignment.setId(jobAssignmentId);
         updatedJobAssignment.setEmployee(employee);
         updatedJobAssignment.setAdditionalCost(zeroCost);
         updatedJobAssignment.setCostNote(costNote);

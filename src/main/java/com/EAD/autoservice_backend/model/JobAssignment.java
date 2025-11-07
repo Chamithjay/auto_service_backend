@@ -31,9 +31,9 @@ public class JobAssignment {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    @Column(precision = 17, scale = 2)
+    @Column(name = "additional_cost", precision = 17, scale = 2)
     private BigDecimal additionalCost;
 
-    @Column
+    @Column(name = "cost_note")
     private String costNote;
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 
@@ -59,5 +58,12 @@ public class Appointment {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    /**
+     * Helper method to get vehicle ID safely
+     */
+    public Long getVehicleId() {
+        return vehicle != null ? vehicle.getVehicleId() : null;
     }
 }

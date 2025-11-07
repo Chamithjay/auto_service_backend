@@ -27,7 +27,7 @@ public class AppointmentJobService {
     public EmployeeAppointmentJobResponse getAppointmentJobById(Long appointmentJobId)  {
 
        try{
-           AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)
+           AppointmentJob appointmentJob = appointmentJobRepository.findByIdWithDetails(appointmentJobId)
                    .orElseThrow(() -> new AppointmentJobNotFoundException("Appointment Job Not Found. Job ID: " + appointmentJobId));
 
            Appointment appointment = appointmentJob.getAppointment();
@@ -69,7 +69,7 @@ public class AppointmentJobService {
            return new EmployeeAppointmentJobResponse(
                    appointmentJob.getId(),
                    appointmentJob.getJobNote(),
-                   appointmentJob.getAdditional_cost(),
+                   appointmentJob.getAdditionalCost(),
                    appointmentJob.getItemStatus().name(),
                    vehicleDetails,
                    serviceItemDetails,
