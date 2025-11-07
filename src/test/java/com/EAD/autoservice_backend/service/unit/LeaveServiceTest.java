@@ -1,4 +1,4 @@
-package com.EAD.autoservice_backend.service;
+package com.EAD.autoservice_backend.service.unit;
 
 import com.EAD.autoservice_backend.dto.EmployeeLeaveRequest;
 import com.EAD.autoservice_backend.dto.EmployeeLeaveResponse;
@@ -9,6 +9,7 @@ import com.EAD.autoservice_backend.model.LeaveStatus;
 import com.EAD.autoservice_backend.model.LeaveType;
 import com.EAD.autoservice_backend.repository.LeaveRepository;
 import com.EAD.autoservice_backend.repository.UserRepository;
+import com.EAD.autoservice_backend.service.LeaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
