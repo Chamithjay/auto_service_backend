@@ -9,6 +9,7 @@ import com.EAD.autoservice_backend.model.Admin;
 import com.EAD.autoservice_backend.model.Role;
 import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.repository.UserRepository;
+import com.EAD.autoservice_backend.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,10 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit Tests for ProfileService
- * Uses Mockito to mock dependencies
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProfileService Unit Tests")
 class ProfileServiceTest {
@@ -41,6 +38,9 @@ class ProfileServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtUtil jwtUtil; // Mock JwtUtil
+
     @InjectMocks
     private ProfileService profileService;
 
@@ -49,7 +49,7 @@ class ProfileServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Create test user
+        // Test user
         testUser = new User();
         testUser.setId(1L);
         testUser.setUsername("testuser");
@@ -59,7 +59,7 @@ class ProfileServiceTest {
         testUser.setCreatedAt(LocalDateTime.now());
         testUser.setUpdatedAt(LocalDateTime.now());
 
-        // Create test admin
+        // Test admin
         testAdmin = new Admin();
         testAdmin.setId(2L);
         testAdmin.setUsername("admin");
@@ -75,13 +75,10 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should get user profile successfully")
     void testGetUserProfile_Success() {
-        // Arrange
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
-        // Act
         ProfileResponse response = profileService.getUserProfile("testuser");
 
-        // Assert
         assertNotNull(response);
         assertEquals("testuser", response.getUsername());
         assertEquals("test@example.com", response.getEmail());
@@ -92,13 +89,9 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when user not found")
     void testGetUserProfile_UserNotFound() {
-        // Arrange
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
-            profileService.getUserProfile("nonexistent");
-        });
+        assertThrows(UsernameNotFoundException.class, () -> profileService.getUserProfile("nonexistent"));
         verify(userRepository, times(1)).findByUsername("nonexistent");
     }
 
@@ -107,7 +100,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should update profile successfully when changing email")
     void testUpdateProfile_ChangeEmail_Success() {
-        // Arrange
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setUsername("testuser");
         request.setEmail("newemail@example.com");
@@ -116,10 +108,8 @@ class ProfileServiceTest {
         when(userRepository.existsByEmail("newemail@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
         ProfileResponse response = profileService.updateProfile("testuser", request);
 
-        // Assert
         assertNotNull(response);
         verify(userRepository, times(1)).findByUsername("testuser");
         verify(userRepository, times(1)).existsByEmail("newemail@example.com");
@@ -129,7 +119,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should update profile successfully when changing username")
     void testUpdateProfile_ChangeUsername_Success() {
-        // Arrange
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setUsername("newusername");
         request.setEmail("test@example.com");
@@ -137,12 +126,12 @@ class ProfileServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(userRepository.existsByUsername("newusername")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(jwtUtil.generateToken(anyString())).thenReturn("mockedToken"); // Mock JWT token
 
-        // Act
         ProfileResponse response = profileService.updateProfile("testuser", request);
 
-        // Assert
         assertNotNull(response);
+        assertEquals("mockedToken", response.getToken());
         verify(userRepository, times(1)).findByUsername("testuser");
         verify(userRepository, times(1)).existsByUsername("newusername");
         verify(userRepository, times(1)).save(any(User.class));
@@ -151,7 +140,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when new username already exists")
     void testUpdateProfile_UsernameAlreadyExists() {
-        // Arrange
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setUsername("existinguser");
         request.setEmail("test@example.com");
@@ -159,10 +147,7 @@ class ProfileServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(userRepository.existsByUsername("existinguser")).thenReturn(true);
 
-        // Act & Assert
-        assertThrows(UserAlreadyExistsException.class, () -> {
-            profileService.updateProfile("testuser", request);
-        });
+        assertThrows(UserAlreadyExistsException.class, () -> profileService.updateProfile("testuser", request));
         verify(userRepository, times(1)).existsByUsername("existinguser");
         verify(userRepository, never()).save(any(User.class));
     }
@@ -170,7 +155,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when new email already exists")
     void testUpdateProfile_EmailAlreadyExists() {
-        // Arrange
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setUsername("testuser");
         request.setEmail("existing@example.com");
@@ -178,10 +162,7 @@ class ProfileServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
-        // Act & Assert
-        assertThrows(UserAlreadyExistsException.class, () -> {
-            profileService.updateProfile("testuser", request);
-        });
+        assertThrows(UserAlreadyExistsException.class, () -> profileService.updateProfile("testuser", request));
         verify(userRepository, times(1)).existsByEmail("existing@example.com");
         verify(userRepository, never()).save(any(User.class));
     }
@@ -189,17 +170,13 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when user not found during update")
     void testUpdateProfile_UserNotFound() {
-        // Arrange
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setUsername("testuser");
         request.setEmail("test@example.com");
 
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
-            profileService.updateProfile("nonexistent", request);
-        });
+        assertThrows(UsernameNotFoundException.class, () -> profileService.updateProfile("nonexistent", request));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -208,7 +185,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should change password successfully")
     void testChangePassword_Success() {
-        // Arrange
         PasswordChangeRequest request = new PasswordChangeRequest();
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("newPassword123");
@@ -220,12 +196,8 @@ class ProfileServiceTest {
         when(passwordEncoder.encode("newPassword123")).thenReturn("newEncodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
-        assertDoesNotThrow(() -> {
-            profileService.changePassword("testuser", request);
-        });
+        assertDoesNotThrow(() -> profileService.changePassword("testuser", request));
 
-        // Assert
         verify(userRepository, times(1)).findByUsername("testuser");
         verify(passwordEncoder, times(1)).matches("oldPassword", "encodedPassword");
         verify(passwordEncoder, times(1)).encode("newPassword123");
@@ -235,7 +207,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when current password is incorrect")
     void testChangePassword_IncorrectCurrentPassword() {
-        // Arrange
         PasswordChangeRequest request = new PasswordChangeRequest();
         request.setCurrentPassword("wrongPassword");
         request.setNewPassword("newPassword123");
@@ -244,10 +215,9 @@ class ProfileServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
-        // Act & Assert
-        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () -> {
-            profileService.changePassword("testuser", request);
-        });
+        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class,
+                () -> profileService.changePassword("testuser", request));
+
         assertEquals("Current password is incorrect", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
@@ -255,7 +225,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when passwords don't match")
     void testChangePassword_PasswordsDoNotMatch() {
-        // Arrange
         PasswordChangeRequest request = new PasswordChangeRequest();
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("newPassword123");
@@ -264,10 +233,9 @@ class ProfileServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
 
-        // Act & Assert
-        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () -> {
-            profileService.changePassword("testuser", request);
-        });
+        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class,
+                () -> profileService.changePassword("testuser", request));
+
         assertEquals("New password and confirmation do not match", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
@@ -275,7 +243,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when new password same as current")
     void testChangePassword_NewPasswordSameAsCurrent() {
-        // Arrange
         PasswordChangeRequest request = new PasswordChangeRequest();
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("oldPassword");
@@ -283,12 +250,10 @@ class ProfileServiceTest {
 
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
-        when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
 
-        // Act & Assert
-        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () -> {
-            profileService.changePassword("testuser", request);
-        });
+        InvalidPasswordException exception = assertThrows(InvalidPasswordException.class,
+                () -> profileService.changePassword("testuser", request));
+
         assertEquals("New password must be different from current password", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
@@ -296,7 +261,6 @@ class ProfileServiceTest {
     @Test
     @DisplayName("Should throw exception when user not found during password change")
     void testChangePassword_UserNotFound() {
-        // Arrange
         PasswordChangeRequest request = new PasswordChangeRequest();
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("newPassword123");
@@ -304,10 +268,7 @@ class ProfileServiceTest {
 
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
-            profileService.changePassword("nonexistent", request);
-        });
+        assertThrows(UsernameNotFoundException.class, () -> profileService.changePassword("nonexistent", request));
         verify(userRepository, never()).save(any(User.class));
     }
 }
