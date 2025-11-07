@@ -317,21 +317,28 @@ public class AppointmentServiceTest {
         Vehicle vehicle = new Vehicle();
         vehicle.setVehicleId(100L);
         vehicle.setVehicleName("Toyota");
-        when(vehicleRepository.findByVehicleId(100L)).thenReturn(vehicle);
+        vehicle.setRegistrationNo("ABC-123");
+        vehicle.setVehicleType(VehicleType.CAR);
+        vehicle.setCustomer(customer);
+        when(vehicleRepository.findById(100L)).thenReturn(Optional.of(vehicle));
 
         // Mock service items
         ServiceItem item1 = new ServiceItem();
+        item1.setServiceItemId(1L);
         item1.setServiceItemCost(BigDecimal.valueOf(50));
         item1.setEstimatedDuration(60);
+        item1.setServiceItemName("Service A");
 
         ServiceItem item2 = new ServiceItem();
+        item2.setServiceItemId(2L);
         item2.setServiceItemCost(BigDecimal.valueOf(30));
         item2.setEstimatedDuration(30);
+        item2.setServiceItemName("Service B");
 
         when(serviceItemRepository.findAllById(request.getSelectedServiceItemIds()))
                 .thenReturn(List.of(item1, item2));
 
-        // Mock session leave type and employees
+        // Mock employees
         Employee emp = new Employee();
         emp.setId(1L);
         when(employeeRepository.findAllByOrderByIdAsc()).thenReturn(List.of(emp));
@@ -343,12 +350,14 @@ public class AppointmentServiceTest {
         // No last assigned employee
         when(jobAssignmentRepository.findLastAssignedEmployeeId()).thenReturn(Optional.empty());
 
-        // Make getNextEmployee logic pass
+        // Employee has enough time in session
         when(jobAssignmentRepository.sumTotalDurationByDateAndEmployeeAndSession(emp.getId(), request.getAppointmentDate(), SessionType.MORNING))
                 .thenReturn(0);
 
+        // Mock work session
         WorkSession session = new WorkSession();
         session.setDurationHours(5.0);
+        session.setStartTime(java.time.LocalTime.of(9, 0));
         when(workSessionRepository.findBySessionType(SessionType.MORNING))
                 .thenReturn(Optional.of(session));
 
@@ -367,33 +376,53 @@ public class AppointmentServiceTest {
         Long userId = 10L;
 
         AppointmentCreateRequest request = new AppointmentCreateRequest();
+        request.setVehicleId(100L);
         request.setAppointmentDate(LocalDate.now());
         request.setSessionType(SessionType.MORNING);
-        request.setVehicleId(100L);
         request.setSelectedServiceItemIds(List.of(1L));
 
-        // Mock customer and vehicle
-        when(customerRepository.findById(userId)).thenReturn(Optional.of(new Customer()));
-        when(vehicleRepository.findByVehicleId(100L)).thenReturn(new Vehicle());
+        // Mock customer
+        Customer customer = new Customer();
+        customer.setId(userId);
+        when(customerRepository.findById(userId)).thenReturn(Optional.of(customer));
 
-        // One employee but he is on leave
-        Employee emp = new Employee();
-        emp.setId(1L);
-        when(employeeRepository.findAllByOrderByIdAsc()).thenReturn(List.of(emp));
-        when(leaveRepository.isEmployeeOnApprovedLeave(emp.getId(), request.getAppointmentDate(), LeaveType.HALFDAY_MORNING))
-                .thenReturn(true);
+        // Mock vehicle
+        Vehicle vehicle = new Vehicle();
+        vehicle.setVehicleId(100L);
+        vehicle.setVehicleName("Toyota");
+        vehicle.setVehicleType(VehicleType.CAR);
+        vehicle.setCustomer(customer);
+        when(vehicleRepository.findById(100L)).thenReturn(Optional.of(vehicle));
 
         // Mock service item
         ServiceItem item = new ServiceItem();
-        item.setServiceItemCost(BigDecimal.valueOf(50));
+        item.setServiceItemId(1L);
+        item.setEstimatedDuration(60);
+        item.setServiceItemCost(BigDecimal.valueOf(50)); // must not be null
         when(serviceItemRepository.findAllById(request.getSelectedServiceItemIds()))
                 .thenReturn(List.of(item));
 
-        // Assert exception
-        assertThrows(NoAvailableEmployeeException.class, () -> {
-            appointmentService.createAppointment(request, userId);
-        });
+        // Mock employees
+        Employee emp = new Employee();
+        emp.setId(1L);
+        when(employeeRepository.findAllByOrderByIdAsc()).thenReturn(List.of(emp));
+
+        // Employee on leave
+        when(leaveRepository.isEmployeeOnApprovedLeave(emp.getId(), request.getAppointmentDate(), LeaveType.HALFDAY_MORNING))
+                .thenReturn(true);
+
+        // Session duration
+        WorkSession session = new WorkSession();
+        session.setDurationHours(1.0); // 1 hour
+        session.setStartTime(java.time.LocalTime.of(9, 0));
+        when(workSessionRepository.findBySessionType(SessionType.MORNING))
+                .thenReturn(Optional.of(session));
+
+        // Act & Assert
+        assertThrows(NoAvailableEmployeeException.class, () -> appointmentService.createAppointment(request, userId));
     }
+
+
 
 
 
