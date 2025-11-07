@@ -27,18 +27,20 @@ public interface AppointmentJobRepository extends JpaRepository<AppointmentJob, 
      */
     @Query("SELECT new com.EAD.autoservice_backend.dto.ServicePopularity(s.serviceItemName, COUNT(aj)) " +
             "FROM AppointmentJob aj JOIN aj.serviceItem s " +
-            "JOIN aj.appointment a " +
+            "JOIN aj.appointment a " + // Join with Appointment to filter by date
             "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
             "GROUP BY s.serviceItemName")
-    List<ServicePopularity> getServicePopularity(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    List<ServicePopularity> getServicePopularity(@Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     /**
-     * Find jobs by appointment ID with ServiceItem and EmployeeAssignments eagerly fetched
+     * Find jobs by appointment ID with ServiceItem and EmployeeAssignments eagerly
+     * fetched
      */
     @Query("SELECT DISTINCT aj FROM AppointmentJob aj " +
-           "LEFT JOIN FETCH aj.serviceItem " +
-           "LEFT JOIN FETCH aj.employeeAssignments " +
-           "WHERE aj.appointment.appointmentId = :appointmentId")
+            "LEFT JOIN FETCH aj.serviceItem " +
+            "LEFT JOIN FETCH aj.employeeAssignments " +
+            "WHERE aj.appointment.appointmentId = :appointmentId")
     List<AppointmentJob> findByAppointmentId(@Param("appointmentId") Long appointmentId);
 
     /**
@@ -51,5 +53,6 @@ public interface AppointmentJobRepository extends JpaRepository<AppointmentJob, 
      * Count jobs by appointment ID and job status
      */
     @Query("SELECT COUNT(aj) FROM AppointmentJob aj WHERE aj.appointment.appointmentId = :appointmentId AND aj.itemStatus = :status")
-    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId, @Param("status") AppointmentStatus status);
+    Integer countByAppointmentIdAndJobStatus(@Param("appointmentId") Long appointmentId,
+            @Param("status") AppointmentStatus status);
 }

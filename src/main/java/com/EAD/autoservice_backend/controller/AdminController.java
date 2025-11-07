@@ -1,10 +1,10 @@
 package com.EAD.autoservice_backend.controller;
 
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
+import com.EAD.autoservice_backend.dto.ServiceItemResponse;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
-import com.EAD.autoservice_backend.model.ServiceItem;
 import com.EAD.autoservice_backend.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,33 +31,34 @@ public class AdminController {
     // --- Service CRUD ---
 
     @PostMapping("/services")
-    public ResponseEntity<ServiceItem> addServiceItem(@Valid @RequestBody ServiceItemRequest request) {
-        ServiceItem createdItem = adminService.createServiceItem(request);
+    public ResponseEntity<ServiceItemResponse> addServiceItem(@Valid @RequestBody ServiceItemRequest request) {
+        ServiceItemResponse createdItem = adminService.createServiceItem(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(createdItem.getServiceItemId())
+                .buildAndExpand(createdItem.serviceItemId())
                 .toUri();
 
         return ResponseEntity.created(location).body(createdItem);
     }
 
     @GetMapping("/services/{id}")
-    public ResponseEntity<ServiceItem> getServiceItemById(@PathVariable Long id) {
-        ServiceItem serviceItem = adminService.getServiceById(id);
+    public ResponseEntity<ServiceItemResponse> getServiceItemById(@PathVariable Long id) {
+        ServiceItemResponse serviceItem = adminService.getServiceById(id);
         return ResponseEntity.ok(serviceItem);
     }
 
     @GetMapping("/services")
-    public ResponseEntity<List<ServiceItem>> getAllServiceItems() {
-        List<ServiceItem> items = adminService.getAllServices();
+    public ResponseEntity<List<ServiceItemResponse>> getAllServiceItems() {
+        List<ServiceItemResponse> items = adminService.getAllServices();
         return ResponseEntity.ok(items);
     }
 
     @PutMapping("/services/{id}")
-    public ResponseEntity<ServiceItem> updateServiceItem(@PathVariable Long id, @Valid @RequestBody ServiceItemRequest request) {
-        ServiceItem updatedItem = adminService.updateService(id, request);
+    public ResponseEntity<ServiceItemResponse> updateServiceItem(@PathVariable Long id,
+            @Valid @RequestBody ServiceItemRequest request) {
+        ServiceItemResponse updatedItem = adminService.updateService(id, request);
         return ResponseEntity.ok(updatedItem);
     }
 
@@ -82,25 +83,26 @@ public class AdminController {
         return ResponseEntity.created(location).body(newUser);
     }
 
-    @GetMapping({"/employees/{id}"})
+    @GetMapping({ "/employees/{id}" })
     public ResponseEntity<UserCreateResponse> getUserById(@PathVariable Long id) {
         UserCreateResponse user = adminService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping({"/employees"})
+    @GetMapping({ "/employees" })
     public ResponseEntity<List<UserCreateResponse>> getAllUsers() {
         List<UserCreateResponse> users = adminService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping({"/employees/{id}"})
-    public ResponseEntity<UserCreateResponse> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
+    @PutMapping({ "/employees/{id}" })
+    public ResponseEntity<UserCreateResponse> updateUser(@PathVariable Long id,
+            @RequestBody UserUpdateRequest request) {
         UserCreateResponse updated = adminService.updateUser(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping({"/employees/{id}"})
+    @DeleteMapping({ "/employees/{id}" })
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.noContent().build();

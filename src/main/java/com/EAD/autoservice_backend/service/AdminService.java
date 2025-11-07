@@ -1,6 +1,7 @@
 package com.EAD.autoservice_backend.service;
 
 import com.EAD.autoservice_backend.dto.ServiceItemRequest;
+import com.EAD.autoservice_backend.dto.ServiceItemResponse;
 import com.EAD.autoservice_backend.dto.UserCreateRequest;
 import com.EAD.autoservice_backend.dto.UserCreateResponse;
 import com.EAD.autoservice_backend.dto.UserUpdateRequest;
@@ -15,6 +16,8 @@ import com.EAD.autoservice_backend.model.User;
 import com.EAD.autoservice_backend.model.VehicleType;
 import com.EAD.autoservice_backend.repository.ServiceItemRepository;
 import com.EAD.autoservice_backend.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +34,12 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public AdminService(ServiceItemRepository serviceItemRepository,
-                        UserRepository userRepository,
-                        PasswordEncoder passwordEncoder) {
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         this.serviceItemRepository = serviceItemRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -41,27 +47,32 @@ public class AdminService {
 
     // --- Service CRUD Logic ---
 
-    public ServiceItem createServiceItem(ServiceItemRequest request) {
+    public ServiceItemResponse createServiceItem(ServiceItemRequest request) {
         ServiceItem newItem = new ServiceItem();
         mapRequestToServiceItem(request, newItem);
-        return serviceItemRepository.save(newItem);
+        return mapServiceItemToResponse(serviceItemRepository.save(newItem));
     }
 
     @Transactional(readOnly = true)
-    public ServiceItem getServiceById(Long id) {
-        return serviceItemRepository.findById(id)
+    public ServiceItemResponse getServiceById(Long id) {
+        ServiceItem item = serviceItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
+        return mapServiceItemToResponse(item);
     }
 
     @Transactional(readOnly = true)
-    public List<ServiceItem> getAllServices() {
-        return serviceItemRepository.findAll();
+    public List<ServiceItemResponse> getAllServices() {
+        return serviceItemRepository.findAll()
+                .stream()
+                .map(this::mapServiceItemToResponse)
+                .collect(Collectors.toList());
     }
 
-    public ServiceItem updateService(Long id, ServiceItemRequest request) {
-        ServiceItem existingService = getServiceById(id);
+    public ServiceItemResponse updateService(Long id, ServiceItemRequest request) {
+        ServiceItem existingService = serviceItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceItem not found with id: " + id));
         mapRequestToServiceItem(request, existingService);
-        return serviceItemRepository.save(existingService);
+        return mapServiceItemToResponse(serviceItemRepository.save(existingService));
     }
 
     public void deleteService(Long id) {
@@ -109,6 +120,8 @@ public class AdminService {
     public List<UserCreateResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
+                // Only include employees and admins for this admin endpoint
+                .filter(u -> (u instanceof Employee) || (u instanceof Admin))
                 .map(this::mapUserToResponse)
                 .collect(Collectors.toList());
     }
@@ -122,8 +135,30 @@ public class AdminService {
         Optional.ofNullable(request.username()).map(String::trim).ifPresent(user::setUsername);
         Optional.ofNullable(request.email()).map(String::trim).ifPresent(user::setEmail);
 
-        // Note: This implementation does not allow changing the role of an existing user.
-        // This is often a good security practice to prevent accidental privilege escalation.
+        // Allow changing the role between ADMIN and EMPLOYEE only
+        if (request.role() != null && !request.role().isBlank()) {
+            String newRoleStr = request.role().trim().toUpperCase();
+
+            String currentType = (user instanceof Admin) ? "ADMIN"
+                    : (user instanceof Employee) ? "EMPLOYEE" : user.getRole().name();
+            if (!currentType.equals(newRoleStr)) {
+                // Persist any changes to username/email first
+                userRepository.save(user);
+                // Flush to ensure pending changes are stored before native update
+                entityManager.flush();
+
+                // Update discriminator and role atomically
+                int updated = userRepository.updateUserTypeAndRole(id, newRoleStr, newRoleStr);
+                if (updated != 1) {
+                    throw new ResourceConflictException("Failed to update user role");
+                }
+
+                // Detach and reload to the correct subclass type
+                entityManager.clear();
+                user = userRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found after role change"));
+            }
+        }
 
         User updatedUser = userRepository.save(user);
         return mapUserToResponse(updatedUser);
@@ -152,9 +187,23 @@ public class AdminService {
         }
     }
 
+    private ServiceItemResponse mapServiceItemToResponse(ServiceItem item) {
+        if (item == null)
+            return null;
+        return new ServiceItemResponse(
+                item.getServiceItemId(),
+                item.getServiceItemName(),
+                item.getVehicleType(),
+                item.getRequiredEmployeeCount(),
+                item.getServiceItemCost(),
+                item.getServiceItemType(),
+                item.getEstimatedDuration());
+    }
+
     private void validateUserUniqueness(String username, String email, Long currentUserId) {
         Optional.ofNullable(username).map(String::trim).ifPresent(u -> {
-            if (u.isBlank()) throw new BadRequestException("Username cannot be blank");
+            if (u.isBlank())
+                throw new BadRequestException("Username cannot be blank");
             userRepository.findByUsername(u).ifPresent(existingUser -> {
                 if (!existingUser.getId().equals(currentUserId)) {
                     throw new ResourceConflictException("Error: Username is already taken!");
@@ -163,7 +212,8 @@ public class AdminService {
         });
 
         Optional.ofNullable(email).map(String::trim).ifPresent(e -> {
-            if (e.isBlank()) throw new BadRequestException("Email cannot be blank");
+            if (e.isBlank())
+                throw new BadRequestException("Email cannot be blank");
             userRepository.findByEmail(e).ifPresent(existingUser -> {
                 if (!existingUser.getId().equals(currentUserId)) {
                     throw new ResourceConflictException("Error: User with this email is already in use!");
@@ -173,18 +223,27 @@ public class AdminService {
     }
 
     private UserCreateResponse mapUserToResponse(User user) {
+        // If the user object itself is null, or has no ID, return null
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+
         String role = "USER"; // Default
         if (user instanceof Admin) {
             role = "ADMIN";
         } else if (user instanceof Employee) {
             role = "EMPLOYEE";
         }
+
+        // Safely handle potentially null fields
+        String username = (user.getUsername() != null) ? user.getUsername() : "N/A";
+        String email = (user.getEmail() != null) ? user.getEmail() : "N/A";
+
         return new UserCreateResponse(
                 user.getId(),
-                user.getUsername(),
-                user.getEmail(),
+                username,
+                email,
                 role,
-                user.isRequiresPasswordChange()
-        );
+                user.isRequiresPasswordChange());
     }
 }

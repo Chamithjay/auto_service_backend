@@ -19,16 +19,16 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
      * Check if an employee is on approved leave for a specific date and type
      */
     @Query("""
-        SELECT COUNT(l) > 0
-        FROM Leave l
-        WHERE l.employee.id = :employeeId
-          AND l.leaveDate = :date
-          AND l.leaveStatus = 'APPROVED'
-          AND (l.leaveType = :leaveType OR l.leaveType = 'FULLDAY')
-    """)
+                SELECT COUNT(l) > 0
+                FROM Leave l
+                WHERE l.employee.id = :employeeId
+                  AND l.leaveDate = :date
+                  AND l.leaveStatus = 'APPROVED'
+                  AND (l.leaveType = :leaveType OR l.leaveType = 'FULLDAY')
+            """)
     boolean isEmployeeOnApprovedLeave(@Param("employeeId") Long employeeId,
-                                      @Param("date") LocalDate date,
-                                      @Param("leaveType") LeaveType leaveType);
+            @Param("date") LocalDate date,
+            @Param("leaveType") LeaveType leaveType);
 
     // Find leaves by status, ordered descending by date
     List<Leave> findByLeaveStatusOrderByLeaveDateDesc(LeaveStatus status);

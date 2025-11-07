@@ -27,28 +27,27 @@ public interface JobAssignmentRepository extends JpaRepository<JobAssignment, Lo
             "JOIN \"appointment jobs\" aj ON ja.appointment_job_id = aj.appointment_job_id " +
             "JOIN appointments a ON aj.appointment_id = a.appointment_id " +
             "WHERE a.appointment_date BETWEEN :startDate AND :endDate " +
-            "GROUP BY e.username",
-            nativeQuery = true)
-    List<EmployeePerformance> getEmployeePerformance(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+            "GROUP BY e.username", nativeQuery = true)
+    List<EmployeePerformance> getEmployeePerformance(@Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     /**
      * Sum total duration of services for a given employee on a date and session
      */
     @Query("""
-        SELECT COALESCE(SUM(si.estimatedDuration), 0)
-        FROM JobAssignment ja
-        JOIN ja.appointmentJob aj
-        JOIN aj.appointment a
-        JOIN aj.serviceItem si
-        WHERE ja.employee.id = :employeeId
-        AND a.appointmentDate = :date
-        AND a.sessionType = :sessionType
-    """)
+                SELECT COALESCE(SUM(si.estimatedDuration), 0)
+                FROM JobAssignment ja
+                JOIN ja.appointmentJob aj
+                JOIN aj.appointment a
+                JOIN aj.serviceItem si
+                WHERE ja.employee.id = :employeeId
+                AND a.appointmentDate = :date
+                AND a.sessionType = :sessionType
+            """)
     int sumTotalDurationByDateAndEmployeeAndSession(
             @Param("employeeId") Long employeeId,
             @Param("date") LocalDate date,
-            @Param("sessionType") SessionType sessionType
-    );
+            @Param("sessionType") SessionType sessionType);
 
     /**
      * Get the last assigned employee ID
@@ -71,5 +70,6 @@ public interface JobAssignmentRepository extends JpaRepository<JobAssignment, Lo
     /**
      * Fetch upcoming assignments (after today) for a given employee
      */
-    List<JobAssignment> findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDateAfter(Long employeeId, LocalDate date);
+    List<JobAssignment> findByEmployee_IdAndAppointmentJob_Appointment_AppointmentDateAfter(Long employeeId,
+            LocalDate date);
 }
