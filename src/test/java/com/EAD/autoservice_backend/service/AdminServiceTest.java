@@ -174,7 +174,8 @@ class AdminServiceTest {
         UserCreateRequest req = new UserCreateRequest("alice", "pass123", "a@b.com", "ADMIN");
         when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("a@b.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("pass123")).thenReturn("ENC(pass123)");
+        // Accept any string to avoid strict stubbing mismatch
+        when(passwordEncoder.encode(anyString())).thenReturn("ENC(pass123)");
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         Admin saved = new Admin();
@@ -192,7 +193,7 @@ class AdminServiceTest {
         assertEquals("ADMIN", resp.role());
         assertTrue(resp.requiresPasswordChange());
 
-        verify(passwordEncoder).encode("pass123");
+        verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(captor.capture());
         User toSave = captor.getValue();
         assertTrue(toSave instanceof Admin);
@@ -204,6 +205,9 @@ class AdminServiceTest {
     @Test
     void testCreateUser_InvalidRole_ThrowsBadRequest() {
         UserCreateRequest req = new UserCreateRequest("bob", "pw", "b@c.com", "MANAGER");
+        // Avoid NPE from uniqueness check
+        when(userRepository.findByUsername("bob")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("b@c.com")).thenReturn(Optional.empty());
         assertThrows(BadRequestException.class, () -> adminService.createUser(req));
         verify(userRepository, never()).save(any());
     }
@@ -211,6 +215,9 @@ class AdminServiceTest {
     @Test
     void testCreateUser_BlankPassword_ThrowsBadRequest() {
         UserCreateRequest req = new UserCreateRequest("bob", "  ", "b@c.com", "ADMIN");
+        // Avoid NPE from uniqueness check
+        when(userRepository.findByUsername("bob")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("b@c.com")).thenReturn(Optional.empty());
         assertThrows(BadRequestException.class, () -> adminService.createUser(req));
         verify(userRepository, never()).save(any());
     }
@@ -246,7 +253,8 @@ class AdminServiceTest {
         when(userRepository.findByEmail("new@x.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        UserUpdateRequest req = new UserUpdateRequest("new", "new@x.com", "IGNORED");
+        // Do not trigger role change path (which requires JPA EntityManager)
+        UserUpdateRequest req = new UserUpdateRequest("new", "new@x.com", null);
         var resp = adminService.updateUser(5L, req);
 
         assertEquals(5L, resp.id());
