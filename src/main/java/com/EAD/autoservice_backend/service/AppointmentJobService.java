@@ -24,7 +24,7 @@ public class AppointmentJobService {
 
 
     // Get appointment job by appointment job id.
-    public EmployeeAppointmentJobResponse getAppointmentById(Long appointmentJobId) {
+    public EmployeeAppointmentJobResponse getAppointmentJobById(Long appointmentJobId)  {
 
        try{
            AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)
@@ -67,19 +67,20 @@ public class AppointmentJobService {
            );
 
            return new EmployeeAppointmentJobResponse(
-                   appointmentJob.getAppointmentJobId(),
+                   appointmentJob.getId(),
                    appointmentJob.getJobNote(),
-                   appointmentJob.getAdditional_cost(),
-                   appointmentJob.getJobStatus().name(),
+                   appointmentJob.getAdditionalCost(),
+                   appointmentJob.getItemStatus().name(),
                    vehicleDetails,
                    serviceItemDetails,
                    customerDetails,
                    jobAssignmentList
            );
-       } catch (DetailsMissingException | AppointmentJobNotFoundException e) {
-           throw new RuntimeException(e);
-       } catch (Exception e) {
-           throw new RuntimeException("Failed to get Appointment Job: " + e.getMessage(), e);
+       }catch (AppointmentJobNotFoundException |DetailsMissingException e){
+           throw e;
+        }
+       catch (Exception e) {
+           throw new RuntimeException("Failed to get Appointment Job: " + e.getMessage());
        }
     }
 
@@ -90,10 +91,10 @@ public class AppointmentJobService {
 
         try {
             if (jobStatus == null) {
-                throw new IllegalArgumentException("Job Status cannot be empty");
+                throw new IllegalArgumentException();
             }
-            Status newStatus = Status.valueOf(jobStatus.toUpperCase());
-            appointmentJob.setJobStatus(newStatus);
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(jobStatus.toUpperCase());
+            appointmentJob.setItemStatus(newStatus);
 
             appointmentJobRepository.save(appointmentJob);
 
@@ -102,15 +103,14 @@ public class AppointmentJobService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid Job Status: " + jobStatus
                 + ". Valid values are: "
-                + java.util.Arrays.stream(Status.values())
+                + java.util.Arrays.stream(AppointmentStatus.values())
                     .map(Enum::name)
                     .reduce((a, b) -> a + ", " + b).orElse(""));
         }catch (AppointmentJobNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to update Appointment Job Status: " + e.getMessage());
         }
-
     }
 
     // Save job note for an appointment job.
@@ -132,10 +132,10 @@ public class AppointmentJobService {
             }
             appointmentJobRepository.save(appointmentJob);
 
-            return getAppointmentById(appointmentJobId);
+            return getAppointmentJobById(appointmentJobId);
 
         }catch (AppointmentJobNotFoundException | IllegalArgumentException e){
-            throw new RuntimeException(e.getMessage());
+            throw e;
         }catch (Exception e){
             throw new RuntimeException("Failed to save job note for Appointment Job: " + e.getMessage());
         }

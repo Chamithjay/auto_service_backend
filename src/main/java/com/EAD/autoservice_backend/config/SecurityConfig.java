@@ -260,22 +260,18 @@ public class SecurityConfig {
 
                         // Public endpoints
                         .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
-                                "/api/auth/password/**"
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/password/**", // for forgot/reset password
+                                "/api/v1/appointment-jobs/**",
+                                "/api/v1/leaves/**"
                         ).permitAll()
-
-                        // Notification endpoints - ROLE-BASED ACCESS
                         .requestMatchers(HttpMethod.GET, "/api/notifications/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/notifications/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/notifications/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/notifications/**").hasRole("ADMIN")
-
-                        // Admin endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // Profile endpoints
-                        .requestMatchers("/api/profile/**").authenticated()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/profile/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

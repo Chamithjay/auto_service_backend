@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public class EmployeeJobAssignmentAddCostsRequest {
 
     @NotNull(message = "Additional cost must not be empty")
-    private final BigDecimal additional_cost;
+    private final BigDecimal additionalcost;
     @NotNull(message = "Cost note is required")
-    private final String cost_note;
+    private final String costNote;
 }

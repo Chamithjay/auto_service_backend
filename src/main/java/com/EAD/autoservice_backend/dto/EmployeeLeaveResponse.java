@@ -20,7 +20,5 @@ public class EmployeeLeaveResponse {
     private final String leaveReason;
     @NotNull
     private final String leaveStatus;
-    private final LocalTime approvedTime;
-    private final LocalDate approvedDate;
-    private final String approvedBy;
+
 }
