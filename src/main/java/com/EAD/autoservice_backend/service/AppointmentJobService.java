@@ -27,7 +27,7 @@ public class AppointmentJobService {
     public EmployeeAppointmentJobResponse getAppointmentJobById(Long appointmentJobId)  {
 
        try{
-           AppointmentJob appointmentJob = appointmentJobRepository.findById(appointmentJobId)
+           AppointmentJob appointmentJob = appointmentJobRepository.findByIdWithDetails(appointmentJobId)
                    .orElseThrow(() -> new AppointmentJobNotFoundException("Appointment Job Not Found. Job ID: " + appointmentJobId));
 
            Appointment appointment = appointmentJob.getAppointment();

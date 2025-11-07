@@ -3,7 +3,6 @@ package com.EAD.autoservice_backend.service;
 import com.EAD.autoservice_backend.dto.VehicleRequest;
 import com.EAD.autoservice_backend.dto.CustomerVehicleResponse;
 import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
-import com.EAD.autoservice_backend.exception.UnauthorizedAccessException;
 import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
 import com.EAD.autoservice_backend.model.Customer;
 import com.EAD.autoservice_backend.model.Vehicle;
@@ -12,11 +11,13 @@ import com.EAD.autoservice_backend.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.EAD.autoservice_backend.dto.VehiclesDTO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 /**
  * Service for vehicle management operations
@@ -142,5 +143,26 @@ public class VehicleService {
                 vehicle.getCreatedAt().format(DATE_TIME_FORMATTER),
                 vehicle.getUpdatedAt().format(DATE_TIME_FORMATTER)
         );
+    }
+
+    // Get all vehicles as DTOs
+    public List<VehiclesDTO> getAllVehicles() {
+        return vehicleRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Convert Vehicle entity to VehiclesDTO
+    private VehiclesDTO convertToDTO(Vehicle vehicle) {
+        return VehiclesDTO.builder()
+                .vehicleId(vehicle.getVehicleId())
+                .vehicleName(vehicle.getVehicleName())
+                .registrationNo(vehicle.getRegistrationNo())
+                .vehicleType(vehicle.getVehicleType())
+                .model(vehicle.getModel())
+                .createdAt(vehicle.getCreatedAt())
+                .updatedAt(vehicle.getUpdatedAt())
+                .customerId(vehicle.getCustomer() != null ? vehicle.getCustomer().getId() : null)
+                .build();
     }
 }

@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.EAD.autoservice_backend.dto.UserDTO;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -34,4 +37,8 @@ public class UserService {
         user.setRequiresPasswordChange(false);
         userRepository.save(user);
     }
+    public List<UserDTO> getAllCustomersBasicInfo() {
+        return userRepository.findAllCustomersBasicInfo();
+    }
+
 }
