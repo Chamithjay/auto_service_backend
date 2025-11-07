@@ -18,7 +18,7 @@ import java.util.List;
  * REST Controller for Dashboard data
  */
 @RestController
-@RequestMapping("/api/admin/dashboard")
+@RequestMapping("/api/v1/admin/dashboard")
 @PreAuthorize("hasRole('ADMIN')")
 public class DashboardController {
 

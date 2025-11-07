@@ -18,7 +18,6 @@ public class Leave {
     private Long leaveId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private LeaveType leaveType;
 
     @Column(nullable = false) // 2025-10-24
