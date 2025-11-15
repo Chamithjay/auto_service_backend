@@ -1,12 +1,17 @@
 package com.EAD.autoservice_backend.dto;
 
 import com.EAD.autoservice_backend.model.VehicleType;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * DTO for vehicle response
  */
+@Setter
+@Getter
 public class CustomerVehicleResponse {
 
+    // Getters and Setters
     private Long vehicleId;
     private String vehicleName;
     private String registrationNo;
@@ -28,25 +33,4 @@ public class CustomerVehicleResponse {
         this.updatedAt = updatedAt;
     }
 
-    // Getters and Setters
-    public Long getVehicleId() { return vehicleId; }
-    public void setVehicleId(Long vehicleId) { this.vehicleId = vehicleId; }
-
-    public String getVehicleName() { return vehicleName; }
-    public void setVehicleName(String vehicleName) { this.vehicleName = vehicleName; }
-
-    public String getRegistrationNo() { return registrationNo; }
-    public void setRegistrationNo(String registrationNo) { this.registrationNo = registrationNo; }
-
-    public VehicleType getVehicleType() { return vehicleType; }
-    public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }
-
-    public String getModel() { return model; }
-    public void setModel(String model) { this.model = model; }
-
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 }

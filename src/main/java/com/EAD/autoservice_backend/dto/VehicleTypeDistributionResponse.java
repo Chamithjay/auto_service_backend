@@ -1,6 +1,12 @@
 package com.EAD.autoservice_backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class VehicleTypeDistributionResponse {
+    // Getters and Setters
     private String vehicleType;
     private Long count;
 
@@ -11,10 +17,4 @@ public class VehicleTypeDistributionResponse {
         this.count = count;
     }
 
-    // Getters and Setters
-    public String getVehicleType() { return vehicleType; }
-    public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
-
-    public Long getCount() { return count; }
-    public void setCount(Long count) { this.count = count; }
 }

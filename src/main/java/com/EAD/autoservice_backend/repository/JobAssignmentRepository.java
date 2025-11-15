@@ -17,7 +17,7 @@ public interface JobAssignmentRepository extends JpaRepository<JobAssignment, Lo
 
     /**
      * Report Query: Employee Performance
-     * Native PostgreSQL query for calculating total jobs and hours per employee
+     * Native PostgresSQL query for calculating total jobs and hours per employee
      */
     @Query(value = "SELECT e.username AS employeeName, " +
             "COUNT(ja.job_assignment_id) AS totalJobs, " +

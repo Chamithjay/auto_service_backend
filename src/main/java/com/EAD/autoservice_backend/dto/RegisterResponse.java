@@ -1,9 +1,14 @@
 package com.EAD.autoservice_backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * DTO for registration response sent to React frontend
  * Contains success message and user information (NO JWT TOKEN)
  */
+@Setter
+@Getter
 public class RegisterResponse {
     private String message;
     private String username;
@@ -18,12 +23,4 @@ public class RegisterResponse {
         this.email = email;
     }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
 }

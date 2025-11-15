@@ -1,8 +1,14 @@
 package com.EAD.autoservice_backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 public class RecentActivityResponse {
+    // Getters and Setters
     private String activityType; // "APPOINTMENT", "SERVICE", "LEAVE", "REGISTRATION"
     private String description;
     private String userName;
@@ -20,19 +26,4 @@ public class RecentActivityResponse {
         this.status = status;
     }
 
-    // Getters and Setters
-    public String getActivityType() { return activityType; }
-    public void setActivityType(String activityType) { this.activityType = activityType; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public String getUserName() { return userName; }
-    public void setUserName(String userName) { this.userName = userName; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 }

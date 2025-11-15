@@ -1,10 +1,16 @@
 package com.EAD.autoservice_backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * DTO for customer dashboard statistics
  */
+@Setter
+@Getter
 public class CustomerDashboardStatsResponse {
-    
+
+    // Getters and Setters
     private Integer totalVehicles;
     private Integer totalAppointments;
     private Integer activeAppointments;
@@ -20,16 +26,4 @@ public class CustomerDashboardStatsResponse {
         this.completedAppointments = completedAppointments;
     }
 
-    // Getters and Setters
-    public Integer getTotalVehicles() { return totalVehicles; }
-    public void setTotalVehicles(Integer totalVehicles) { this.totalVehicles = totalVehicles; }
-
-    public Integer getTotalAppointments() { return totalAppointments; }
-    public void setTotalAppointments(Integer totalAppointments) { this.totalAppointments = totalAppointments; }
-
-    public Integer getActiveAppointments() { return activeAppointments; }
-    public void setActiveAppointments(Integer activeAppointments) { this.activeAppointments = activeAppointments; }
-
-    public Integer getCompletedAppointments() { return completedAppointments; }
-    public void setCompletedAppointments(Integer completedAppointments) { this.completedAppointments = completedAppointments; }
 }
