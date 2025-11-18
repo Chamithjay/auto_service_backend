@@ -1,8 +1,14 @@
 package com.EAD.autoservice_backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 public class MonthlyRevenueResponse {
+    // Getters and Setters
     private String month; // "Jan", "Feb", etc.
     private BigDecimal revenue;
 
@@ -13,10 +19,4 @@ public class MonthlyRevenueResponse {
         this.revenue = revenue;
     }
 
-    // Getters and Setters
-    public String getMonth() { return month; }
-    public void setMonth(String month) { this.month = month; }
-
-    public BigDecimal getRevenue() { return revenue; }
-    public void setRevenue(BigDecimal revenue) { this.revenue = revenue; }
 }

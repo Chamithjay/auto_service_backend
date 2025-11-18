@@ -2,10 +2,12 @@ package com.EAD.autoservice_backend.dto;
 
 import com.EAD.autoservice_backend.model.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@Setter
 @Getter
 public class AssignmentDTO {
     // Getters and Setters
@@ -35,21 +37,4 @@ public class AssignmentDTO {
         this.jobNote = jobAssignment.getAppointmentJob().getJobNote();
     }
 
-    public void setAssignmentId(Long assignmentId) { this.assignmentId = assignmentId; }
-
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-
-    public void setVehicleInfo(String vehicleInfo) { this.vehicleInfo = vehicleInfo; }
-
-    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
-
-    public void setAppointmentDate(LocalDate appointmentDate) { this.appointmentDate = appointmentDate; }
-
-    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
-
-    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
-
-    public void setJobStatus(Status jobStatus) { this.jobStatus = jobStatus; }
-
-    public void setJobNote(String jobNote) { this.jobNote = jobNote; }
 }

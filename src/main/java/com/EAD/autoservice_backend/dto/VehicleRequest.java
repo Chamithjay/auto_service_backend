@@ -4,12 +4,17 @@ import com.EAD.autoservice_backend.model.VehicleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * DTO for creating or updating a vehicle
  */
+@Setter
+@Getter
 public class VehicleRequest {
 
+    // Getters and Setters
     @NotBlank(message = "Vehicle name is required")
     @Size(max = 255, message = "Vehicle name must not exceed 255 characters")
     private String vehicleName;
@@ -33,16 +38,4 @@ public class VehicleRequest {
         this.model = model;
     }
 
-    // Getters and Setters
-    public String getVehicleName() { return vehicleName; }
-    public void setVehicleName(String vehicleName) { this.vehicleName = vehicleName; }
-
-    public String getRegistrationNo() { return registrationNo; }
-    public void setRegistrationNo(String registrationNo) { this.registrationNo = registrationNo; }
-
-    public VehicleType getVehicleType() { return vehicleType; }
-    public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }
-
-    public String getModel() { return model; }
-    public void setModel(String model) { this.model = model; }
 }
