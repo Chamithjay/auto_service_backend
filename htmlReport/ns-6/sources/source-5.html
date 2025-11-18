@@ -1,0 +1,188 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Employee</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Employee (com.EAD.autoservice_backend.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Employee</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (2/5)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Employee$HibernateInstantiator</td>
+  </tr>
+  <tr>
+    <td class="name">Employee$HibernateProxy</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (2/5)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.model;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.Setter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.time.LocalDate;
+&nbsp;
+&nbsp;/**
+&nbsp; * Employee entity extending User with employee-specific attributes
+&nbsp; */
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;employees&quot;)
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@NoArgsConstructor
+&nbsp;public class Employee extends User {
+&nbsp;
+&nbsp;    @Column(name = &quot;employee_id&quot;, unique = true, length = 20)
+&nbsp;    private String employeeId;
+&nbsp;
+&nbsp;    @Column(name = &quot;position&quot;, length = 50)
+&nbsp;    private String position;
+&nbsp;
+&nbsp;    @Column(name = &quot;department&quot;, length = 50)
+&nbsp;    private String department;
+&nbsp;
+&nbsp;    @Column(name = &quot;salary&quot;, precision = 10, scale = 2)
+&nbsp;    private BigDecimal salary;
+&nbsp;
+&nbsp;    @Column(name = &quot;hire_date&quot;)
+&nbsp;    private LocalDate hireDate;
+&nbsp;
+&nbsp;    @Column(name = &quot;phone_number&quot;, length = 20)
+&nbsp;    private String phoneNumber;
+&nbsp;
+&nbsp;    public Employee(String username, String email, String password) {
+<b class="nc">&nbsp;        super(username, email, password);</b>
+<b class="nc">&nbsp;        setRole(Role.EMPLOYEE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Role getRole() {
+<b class="pc">&nbsp;        if (super.getRole() == null) {</b>
+<b class="nc">&nbsp;            setRole(Role.EMPLOYEE);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return super.getRole();</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CustomerProfileController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomerProfileController (com.EAD.autoservice_backend.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomerProfileController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33.3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8.7%
+  </span>
+  <span class="absValue">
+    (2/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.controller;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.CustomerProfileResponse;
+&nbsp;import com.EAD.autoservice_backend.dto.UpdateProfileRequest;
+&nbsp;import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
+&nbsp;import com.EAD.autoservice_backend.exception.UserAlreadyExistsException;
+&nbsp;import com.EAD.autoservice_backend.service.CustomerProfileService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * REST Controller for customer profile operations
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/v1/customer/profile&quot;)
+&nbsp;public class CustomerProfileController {
+&nbsp;
+&nbsp;    private final CustomerProfileService customerProfileService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public CustomerProfileController(CustomerProfileService customerProfileService) {</b>
+<b class="fc">&nbsp;        this.customerProfileService = customerProfileService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get current customer profile
+&nbsp;     * GET /api/v1/customer/profile
+&nbsp;     */
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;?&gt; getProfile(Authentication authentication) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String username = authentication.getName();</b>
+<b class="nc">&nbsp;            CustomerProfileResponse profile = customerProfileService.getCustomerProfile(username);</b>
+<b class="nc">&nbsp;            return ResponseEntity.ok(profile);</b>
+&nbsp;        } catch (ResourceNotFoundException e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, &quot;Failed to retrieve profile&quot;);</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Update customer profile
+&nbsp;     * PUT /api/v1/customer/profile
+&nbsp;     */
+&nbsp;    @PutMapping
+&nbsp;    public ResponseEntity&lt;?&gt; updateProfile(@Valid @RequestBody UpdateProfileRequest request,
+&nbsp;                                          Authentication authentication) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String username = authentication.getName();</b>
+<b class="nc">&nbsp;            CustomerProfileResponse updatedProfile = customerProfileService.updateCustomerProfile(username, request);</b>
+<b class="nc">&nbsp;            return ResponseEntity.ok(updatedProfile);</b>
+&nbsp;        } catch (ResourceNotFoundException e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</b>
+&nbsp;        } catch (UserAlreadyExistsException e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            error.put(&quot;error&quot;, &quot;Failed to update profile&quot;);</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

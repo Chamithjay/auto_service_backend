@@ -1,0 +1,466 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppointmentService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AppointmentService (com.EAD.autoservice_backend.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AppointmentService</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (6/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72.2%
+  </span>
+  <span class="absValue">
+    (26/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.6%
+  </span>
+  <span class="absValue">
+    (129/188)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AppointmentService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (6/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72.2%
+  </span>
+  <span class="absValue">
+    (26/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.6%
+  </span>
+  <span class="absValue">
+    (129/188)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.service;
+&nbsp;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import com.EAD.autoservice_backend.dto.*;
+&nbsp;import com.EAD.autoservice_backend.model.*;
+&nbsp;import com.EAD.autoservice_backend.repository.*;
+&nbsp;import com.EAD.autoservice_backend.exception.NoAvailableEmployeeException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.bind.annotation.RequestParam;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.time.LocalDate;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class AppointmentService {
+&nbsp;    private final VehicleRepository vehicleRepository;
+&nbsp;    private final ServiceItemRepository serviceItemRepository;
+&nbsp;    private final CustomerRepository customerRepository;
+&nbsp;    private final AppointmentRepository appointmentRepository;
+&nbsp;    private final EmployeeRepository employeeRepository;
+&nbsp;    private final LeaveRepository leaveRepository;
+&nbsp;    private final WorkSessionRepository workSessionRepository;
+&nbsp;    private final AppointmentJobRepository appointmentJobRepository;
+&nbsp;    private final JobAssignmentRepository jobAssignmentRepository;
+&nbsp;
+&nbsp;    public List&lt;VehicleResponse&gt; getVehiclesForUser(Long userId) {
+<b class="nc">&nbsp;        log.info(&quot;Fetching vehicles for user ID: {}&quot;, userId);</b>
+<b class="nc">&nbsp;        List&lt;Vehicle&gt; vehicles = vehicleRepository.findByCustomerId(userId);</b>
+<b class="nc">&nbsp;        log.info(&quot;Found {} vehicles for user ID: {}&quot;, vehicles.size(), userId);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;VehicleResponse&gt; response = vehicles.stream()</b>
+<b class="nc">&nbsp;                .map(v -&gt; {</b>
+<b class="nc">&nbsp;                    log.debug(&quot;Mapping vehicle: ID={}, Name={}, Type={}&quot;,</b>
+<b class="nc">&nbsp;                            v.getVehicleId(), v.getVehicleName(), v.getVehicleType());</b>
+<b class="nc">&nbsp;                    return new VehicleResponse(</b>
+<b class="nc">&nbsp;                            v.getVehicleId(),</b>
+<b class="nc">&nbsp;                            v.getVehicleName(),</b>
+<b class="nc">&nbsp;                            v.getVehicleType()</b>
+&nbsp;                    );
+&nbsp;                })
+<b class="nc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="nc">&nbsp;        log.info(&quot;Returning {} vehicle responses&quot;, response.size());</b>
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ServiceItemDTO mapToServiceItemDTO(ServiceItem item) {
+<b class="nc">&nbsp;        return ServiceItemDTO.builder()</b>
+<b class="nc">&nbsp;                .id(item.getServiceItemId())</b>
+<b class="nc">&nbsp;                .name(item.getServiceItemName())</b>
+<b class="nc">&nbsp;                .type(item.getServiceItemType().name()) // Enum -&gt; String</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public ServiceAndModificationResponse getServicesAndModificationsForVehicle(VehicleSelectionRequest request) {
+<b class="nc">&nbsp;        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Vehicle not found&quot;));</b>
+<b class="nc">&nbsp;        VehicleType vehicleType = vehicle.getVehicleType();</b>
+<b class="nc">&nbsp;        List&lt;ServiceItem&gt; allItems = serviceItemRepository.findByVehicleType(vehicleType);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ServiceItemDTO&gt; services = allItems.stream()</b>
+<b class="nc">&nbsp;                .filter(i -&gt; i.getServiceItemType() == ServiceItemType.SERVICE)</b>
+<b class="nc">&nbsp;                .map(this::mapToServiceItemDTO)</b>
+<b class="nc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ServiceItemDTO&gt; modifications = allItems.stream()</b>
+<b class="nc">&nbsp;                .filter(i -&gt; i.getServiceItemType() == ServiceItemType.MODIFICATION)</b>
+<b class="nc">&nbsp;                .map(this::mapToServiceItemDTO)</b>
+<b class="nc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="nc">&nbsp;        return ServiceAndModificationResponse.builder()</b>
+<b class="nc">&nbsp;                .services(services)</b>
+<b class="nc">&nbsp;                .modifications(modifications)</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public AppointmentCalculationResponse calculateAppointmentDetails(AppointmentCalculationRequest request) {
+&nbsp;
+<b class="fc">&nbsp;        List&lt;ServiceItem&gt; selectedItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());</b>
+<b class="fc">&nbsp;        if (selectedItems.isEmpty()) {</b>
+<b class="fc">&nbsp;            return AppointmentCalculationResponse.builder()</b>
+<b class="fc">&nbsp;                    .message(&quot;No service items selected.&quot;)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        BigDecimal totalCost = selectedItems.stream()</b>
+<b class="fc">&nbsp;                .map(ServiceItem::getServiceItemCost)</b>
+<b class="fc">&nbsp;                .reduce(BigDecimal.ZERO, BigDecimal::add);</b>
+&nbsp;
+<b class="fc">&nbsp;        SessionType sessionType = request.getSessionType();</b>
+<b class="pc">&nbsp;        LeaveType leaveType = (sessionType == SessionType.MORNING) ? LeaveType.HALFDAY_MORNING : LeaveType.HALFDAY_EVENING;</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Employee&gt; allEmployees = employeeRepository.findAll();</b>
+<b class="fc">&nbsp;        if (allEmployees.isEmpty()) {</b>
+<b class="fc">&nbsp;            return AppointmentCalculationResponse.builder()</b>
+<b class="fc">&nbsp;                    .message(&quot;No employees found in the system.&quot;)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Employee&gt; availableEmployees = allEmployees.stream()</b>
+<b class="fc">&nbsp;                .filter(emp -&gt; !leaveRepository.isEmployeeOnApprovedLeave(emp.getId(), request.getAppointmentDate(), leaveType))</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (availableEmployees.isEmpty()) {</b>
+<b class="fc">&nbsp;            return AppointmentCalculationResponse.builder()</b>
+<b class="fc">&nbsp;                    .message(&quot;No employees available for the selected date and session.&quot;)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        int sessionMinutes = (int) (workSessionRepository.findBySessionType(sessionType)</b>
+<b class="fc">&nbsp;                .map(WorkSession::getDurationHours)</b>
+<b class="fc">&nbsp;                .orElse(5.0) * 60);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (ServiceItem item : selectedItems) {</b>
+<b class="fc">&nbsp;            int serviceDuration = item.getEstimatedDuration();</b>
+&nbsp;
+<b class="fc">&nbsp;            boolean canBeAssigned = availableEmployees.stream()</b>
+<b class="fc">&nbsp;                    .anyMatch(emp -&gt; {</b>
+<b class="fc">&nbsp;                        int usedMinutes = jobAssignmentRepository</b>
+<b class="fc">&nbsp;                                .sumTotalDurationByDateAndEmployeeAndSession(emp.getId(), request.getAppointmentDate(), sessionType);</b>
+<b class="fc">&nbsp;                        return (usedMinutes + serviceDuration) &lt;= sessionMinutes;</b>
+&nbsp;                    });
+&nbsp;
+<b class="fc">&nbsp;            if (!canBeAssigned) {</b>
+<b class="fc">&nbsp;                return AppointmentCalculationResponse.builder()</b>
+<b class="fc">&nbsp;                        .message(&quot;No available employees can take the service item: &quot; + item.getServiceItemName())</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return AppointmentCalculationResponse.builder()</b>
+<b class="fc">&nbsp;                .totalCost(totalCost)</b>
+<b class="fc">&nbsp;                .message(&quot;Slot available for the selected session.&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Employee getNextEmployee(
+&nbsp;            Long lastEmployeeId,
+&nbsp;            LocalDate date,
+&nbsp;            int newJobDuration,
+&nbsp;            SessionType sessionType,
+&nbsp;            List&lt;Employee&gt; availableEmployees
+&nbsp;    ) {
+<b class="fc">&nbsp;        int lastIndex = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;        for (int i = 0; i &lt; availableEmployees.size(); i++) {</b>
+<b class="fc">&nbsp;            if (availableEmployees.get(i).getId().equals(lastEmployeeId)) {</b>
+<b class="fc">&nbsp;                lastIndex = i;</b>
+&nbsp;                break;
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        for (int offset = 1; offset &lt;= availableEmployees.size(); offset++) {</b>
+<b class="fc">&nbsp;            Employee candidate = availableEmployees.get((lastIndex + offset) % availableEmployees.size());</b>
+&nbsp;
+&nbsp;            // Total minutes already assigned to this employee in this session
+<b class="fc">&nbsp;            int totalMinutes = jobAssignmentRepository</b>
+<b class="fc">&nbsp;                    .sumTotalDurationByDateAndEmployeeAndSession(candidate.getId(), date, sessionType);</b>
+&nbsp;
+&nbsp;            // Available minutes in session
+<b class="fc">&nbsp;            WorkSession session = workSessionRepository</b>
+<b class="fc">&nbsp;                    .findBySessionType(sessionType)</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new RuntimeException(&quot;Work session not configured&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;            int availableMinutes = (int) (session.getDurationHours() * 60);</b>
+&nbsp;
+<b class="fc">&nbsp;            if (totalMinutes + newJobDuration &lt;= availableMinutes) {</b>
+<b class="fc">&nbsp;                return candidate;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        throw new NoAvailableEmployeeException(&quot;No available employee for the session.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public AppointmentResponse createAppointment(AppointmentCreateRequest request,@RequestParam Long userId ) {
+&nbsp;
+<b class="fc">&nbsp;        Customer customer = customerRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Customer not found&quot;));</b>
+<b class="fc">&nbsp;        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Vehicle not found&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;ServiceItem&gt; serviceItems = serviceItemRepository.findAllById(request.getSelectedServiceItemIds());</b>
+&nbsp;
+<b class="fc">&nbsp;        BigDecimal totalCost = serviceItems.stream()</b>
+<b class="fc">&nbsp;                .map(ServiceItem::getServiceItemCost)</b>
+<b class="fc">&nbsp;                .reduce(BigDecimal.ZERO, BigDecimal::add);</b>
+&nbsp;
+&nbsp;        // Calculate total duration in minutes
+<b class="fc">&nbsp;        int totalDurationMinutes = serviceItems.stream()</b>
+<b class="fc">&nbsp;                .mapToInt(ServiceItem::getEstimatedDuration)</b>
+<b class="fc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Total service duration: {} minutes for {} items&quot;, totalDurationMinutes, serviceItems.size());</b>
+&nbsp;
+&nbsp;        // Get work session to determine start time
+<b class="fc">&nbsp;        WorkSession workSession = workSessionRepository.findBySessionType(request.getSessionType())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new RuntimeException(&quot;Work session not configured for &quot; + request.getSessionType()));</b>
+&nbsp;
+&nbsp;        // Calculate appointment start time: appointment date + work session start time
+<b class="fc">&nbsp;        LocalDateTime appointmentStartTime = LocalDateTime.of(</b>
+<b class="fc">&nbsp;                request.getAppointmentDate(),</b>
+<b class="fc">&nbsp;                workSession.getStartTime()</b>
+&nbsp;        );
+&nbsp;
+&nbsp;        // Calculate appointment end time: start time + total duration
+<b class="fc">&nbsp;        LocalDateTime appointmentEndTime = appointmentStartTime.plusMinutes(totalDurationMinutes);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Appointment scheduled for {} from {} to {} ({} minutes)&quot;,</b>
+<b class="fc">&nbsp;                request.getAppointmentDate(),</b>
+<b class="fc">&nbsp;                appointmentStartTime.toLocalTime(),</b>
+<b class="fc">&nbsp;                appointmentEndTime.toLocalTime(),</b>
+<b class="fc">&nbsp;                totalDurationMinutes);</b>
+&nbsp;
+<b class="fc">&nbsp;        Appointment appointment = Appointment.builder()</b>
+<b class="fc">&nbsp;                .customer(customer)</b>
+<b class="fc">&nbsp;                .vehicle(vehicle)</b>
+<b class="fc">&nbsp;                .vehicleName(vehicle.getVehicleName())</b>
+<b class="fc">&nbsp;                .appointmentDate(request.getAppointmentDate())</b>
+<b class="fc">&nbsp;                .sessionType(request.getSessionType())</b>
+<b class="fc">&nbsp;                .totalCost(totalCost)</b>
+<b class="fc">&nbsp;                .appointmentStartTime(appointmentStartTime)</b>
+<b class="fc">&nbsp;                .appointmentEndTime(appointmentEndTime)</b>
+<b class="fc">&nbsp;                .status(AppointmentStatus.NEW)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        appointmentRepository.save(appointment);</b>
+&nbsp;
+&nbsp;        // Determine leave type based on session
+<b class="pc">&nbsp;        LeaveType leaveType = (request.getSessionType() == SessionType.MORNING)</b>
+<b class="fc">&nbsp;                ? LeaveType.HALFDAY_MORNING</b>
+<b class="fc">&nbsp;                : LeaveType.HALFDAY_EVENING;</b>
+&nbsp;
+&nbsp;        // Filter only employees not on approved leave
+<b class="fc">&nbsp;        List&lt;Employee&gt; availableEmployees = employeeRepository.findAllByOrderByIdAsc().stream()</b>
+<b class="fc">&nbsp;                .filter(emp -&gt; !leaveRepository.isEmployeeOnApprovedLeave(</b>
+<b class="fc">&nbsp;                        emp.getId(),</b>
+<b class="fc">&nbsp;                        request.getAppointmentDate(),</b>
+&nbsp;                        leaveType
+&nbsp;                ))
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (availableEmployees.isEmpty()) {</b>
+<b class="fc">&nbsp;            throw new NoAvailableEmployeeException(&quot;No employees available due to approved leave&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Long lastEmployeeId = jobAssignmentRepository.findLastAssignedEmployeeId().orElse(null);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (ServiceItem item : serviceItems) {</b>
+<b class="fc">&nbsp;            int newJobDuration = item.getEstimatedDuration();</b>
+&nbsp;
+<b class="fc">&nbsp;            Employee nextEmployee = getNextEmployee(</b>
+&nbsp;                    lastEmployeeId,
+<b class="fc">&nbsp;                    request.getAppointmentDate(),</b>
+&nbsp;                    newJobDuration,
+<b class="fc">&nbsp;                    request.getSessionType(),</b>
+&nbsp;                    availableEmployees
+&nbsp;            );
+&nbsp;
+<b class="fc">&nbsp;            AppointmentJob job = new AppointmentJob();</b>
+<b class="fc">&nbsp;            job.setAppointment(appointment);</b>
+<b class="fc">&nbsp;            job.setServiceItem(item);</b>
+<b class="fc">&nbsp;            job.setItemStatus(AppointmentStatus.NEW);</b>
+<b class="fc">&nbsp;            job.setEmployeeAssignments(new HashSet&lt;&gt;());</b>
+<b class="fc">&nbsp;            appointmentJobRepository.save(job);</b>
+&nbsp;
+<b class="fc">&nbsp;            JobAssignment assignment = new JobAssignment();</b>
+<b class="fc">&nbsp;            assignment.setAppointmentJob(job);</b>
+<b class="fc">&nbsp;            assignment.setEmployee(nextEmployee);</b>
+<b class="fc">&nbsp;            jobAssignmentRepository.save(assignment);</b>
+&nbsp;
+<b class="fc">&nbsp;            job.getEmployeeAssignments().add(assignment);</b>
+<b class="fc">&nbsp;            appointmentJobRepository.save(job);</b>
+&nbsp;
+<b class="fc">&nbsp;            lastEmployeeId = nextEmployee.getId();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return AppointmentResponse.builder()</b>
+<b class="fc">&nbsp;                .appointmentId(appointment.getAppointmentId())</b>
+<b class="fc">&nbsp;                .vehicleName(appointment.getVehicleName())</b>
+<b class="fc">&nbsp;                .appointmentDate(appointment.getAppointmentDate())</b>
+<b class="fc">&nbsp;                .sessionType(appointment.getSessionType())</b>
+<b class="fc">&nbsp;                .totalCost(appointment.getTotalCost())</b>
+<b class="fc">&nbsp;                .status(appointment.getStatus().name())</b>
+<b class="fc">&nbsp;                .message(&quot;Appointment created successfully.&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;AppointmentHistoryResponse&gt; getCustomerAppointments(Long customerId, LocalDate startDate, LocalDate endDate) {
+&nbsp;        List&lt;Appointment&gt; appointments;
+&nbsp;
+<b class="nc">&nbsp;        if (startDate == null || endDate == null) {</b>
+<b class="nc">&nbsp;            appointments = appointmentRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)</b>
+<b class="nc">&nbsp;                    .stream()</b>
+<b class="nc">&nbsp;                    .limit(15)</b>
+<b class="nc">&nbsp;                    .toList();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            LocalDateTime from = startDate.atStartOfDay();</b>
+<b class="nc">&nbsp;            LocalDateTime to = endDate.atTime(23, 59, 59);</b>
+&nbsp;
+<b class="nc">&nbsp;            appointments = appointmentRepository.findByCustomerIdAndDateRange(customerId, from, to);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return appointments.stream().map(appointment -&gt; {</b>
+<b class="nc">&nbsp;            List&lt;AppointmentJob&gt; jobs = appointmentJobRepository.findByAppointment(appointment);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;String&gt; serviceNames = jobs.stream()</b>
+<b class="nc">&nbsp;                    .map(job -&gt; job.getServiceItem().getServiceItemName())</b>
+<b class="nc">&nbsp;                    .toList();</b>
+&nbsp;
+<b class="nc">&nbsp;            return AppointmentHistoryResponse.builder()</b>
+<b class="nc">&nbsp;                    .appointmentId(appointment.getAppointmentId())</b>
+<b class="nc">&nbsp;                    .createdAt(appointment.getCreatedAt())</b>
+<b class="nc">&nbsp;                    .appointmentDate(appointment.getAppointmentDate())</b>
+<b class="nc">&nbsp;                    .sessionType(appointment.getSessionType())</b>
+<b class="nc">&nbsp;                    .status(appointment.getStatus())</b>
+<b class="nc">&nbsp;                    .totalCost(appointment.getTotalCost())</b>
+<b class="nc">&nbsp;                    .vehicleName(appointment.getVehicleName())</b>
+<b class="nc">&nbsp;                    .selectedServices(serviceNames)</b>
+<b class="nc">&nbsp;                    .build();</b>
+<b class="nc">&nbsp;        }).toList();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

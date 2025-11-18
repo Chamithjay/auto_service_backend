@@ -1,0 +1,285 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobAssignmentService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.service</a>
+</div>
+
+<h1>Coverage Summary for Class: JobAssignmentService (com.EAD.autoservice_backend.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JobAssignmentService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57.1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    22.7%
+  </span>
+  <span class="absValue">
+    (5/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37.5%
+  </span>
+  <span class="absValue">
+    (24/64)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.service;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentAddCostsRequest;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentLogEndTimeRequest;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentLogStartTimeRequest;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentResponse;
+&nbsp;import com.EAD.autoservice_backend.exception.FieldUpdatingException;
+&nbsp;import com.EAD.autoservice_backend.exception.JobAssignmentNotFoundException;
+&nbsp;import com.EAD.autoservice_backend.model.*;
+&nbsp;import com.EAD.autoservice_backend.repository.AppointmentJobRepository;
+&nbsp;import com.EAD.autoservice_backend.repository.AppointmentRepository;
+&nbsp;import com.EAD.autoservice_backend.repository.JobAssignmentRepository;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class JobAssignmentService {
+&nbsp;
+&nbsp;    private final JobAssignmentRepository jobAssignmentRepository;
+&nbsp;    private final AppointmentJobRepository appointmentJobRepository;
+&nbsp;    private final AppointmentRepository appointmentRepository;
+&nbsp;
+<b class="fc">&nbsp;    public JobAssignmentService(JobAssignmentRepository jobAssignmentRepository, AppointmentJobRepository appointmentJobRepository, AppointmentRepository appointmentRepository) {</b>
+<b class="fc">&nbsp;        this.jobAssignmentRepository = jobAssignmentRepository;</b>
+<b class="fc">&nbsp;        this.appointmentJobRepository = appointmentJobRepository;</b>
+<b class="fc">&nbsp;        this.appointmentRepository = appointmentRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Get all job assignments for a specific appointment job id.
+&nbsp;    public List&lt;EmployeeJobAssignmentResponse&gt; getJobAssignmentListByAppointmentJobId(Long appointmentJobId) {
+&nbsp;
+<b class="fc">&nbsp;        if (appointmentJobId == null) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Appointment job ID cannot be empty&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Use nested property method to fetch by relation id
+<b class="fc">&nbsp;        List&lt;JobAssignment&gt; jobAssignmentList = jobAssignmentRepository.findByAppointmentJob_Id(appointmentJobId);</b>
+&nbsp;
+<b class="fc">&nbsp;        return jobAssignmentList.stream()</b>
+<b class="fc">&nbsp;                .map(this::toDto)</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    private EmployeeJobAssignmentResponse toDto(JobAssignment jobAssignment) {
+<b class="fc">&nbsp;        Employee employee = jobAssignment.getEmployee();</b>
+<b class="pc">&nbsp;        Long employeeId = (employee != null) ? employee.getId() : null;</b>
+<b class="pc">&nbsp;        String employeeUsername = (employee != null) ? employee.getUsername() : null;</b>
+<b class="fc">&nbsp;        return new EmployeeJobAssignmentResponse(</b>
+&nbsp;                employeeId,
+&nbsp;                employeeUsername,
+<b class="fc">&nbsp;                jobAssignment.getStartTime(),</b>
+<b class="fc">&nbsp;                jobAssignment.getEndTime(),</b>
+<b class="fc">&nbsp;                jobAssignment.getAdditionalCost(),</b>
+<b class="fc">&nbsp;                jobAssignment.getCostNote()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    /*
+&nbsp;    Log start time for a job assignment by an employee.
+&nbsp;    Update the job status to ONGOING if it is still a NEW job.
+&nbsp;    Update the appointment status to ONGOING if it is still at NEW status.
+&nbsp;     */
+&nbsp;    public EmployeeJobAssignmentResponse logStartTimeForJobAssignment(EmployeeJobAssignmentLogStartTimeRequest employeeJobAssignmentLogStartTimeRequest, Long jobAssignmentId) {
+&nbsp;        try {
+<b class="nc">&nbsp;            JobAssignment jobAssignment = jobAssignmentRepository.findById(jobAssignmentId)</b>
+<b class="nc">&nbsp;                    .orElseThrow(() -&gt; new JobAssignmentNotFoundException(&quot;Job Assignment not found&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;            if (jobAssignment.getStartTime() != null) {</b>
+<b class="nc">&nbsp;                throw new FieldUpdatingException(&quot;Job starting time has already been logged for this Job Assignment.&quot;);</b>
+&nbsp;            }else{
+&nbsp;                // Save start time for the job assignment.
+<b class="nc">&nbsp;                jobAssignment.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());</b>
+<b class="nc">&nbsp;                JobAssignment updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);</b>
+&nbsp;
+&nbsp;                // Update the appointment job status to ONGOING and update start time.
+<b class="nc">&nbsp;                AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();</b>
+<b class="nc">&nbsp;                com.EAD.autoservice_backend.model.AppointmentStatus appStatus = parseAppointmentStatus(employeeJobAssignmentLogStartTimeRequest.getStatus());</b>
+<b class="nc">&nbsp;                appointmentJob.setItemStatus(appStatus);</b>
+<b class="nc">&nbsp;                appointmentJob.setStartTime(employeeJobAssignmentLogStartTimeRequest.getStartTime());</b>
+<b class="nc">&nbsp;                appointmentJobRepository.save(appointmentJob);</b>
+&nbsp;
+&nbsp;                // Update the appointment status to ONGOING if it is not already.
+<b class="nc">&nbsp;                Appointment appointment = appointmentJob.getAppointment();</b>
+<b class="nc">&nbsp;                if (appointment.getStatus() == com.EAD.autoservice_backend.model.AppointmentStatus.NEW){</b>
+<b class="nc">&nbsp;                    appointment.setStatus(appStatus);</b>
+<b class="nc">&nbsp;                    appointmentRepository.save(appointment);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                return toDto(updatedJobAssignment);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to log time for Job Assignment: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // Helper to parse incoming status string to AppointmentStatus enum
+&nbsp;    private com.EAD.autoservice_backend.model.AppointmentStatus parseAppointmentStatus(String statusStr) {
+<b class="nc">&nbsp;        for (com.EAD.autoservice_backend.model.AppointmentStatus s : com.EAD.autoservice_backend.model.AppointmentStatus.values()) {</b>
+<b class="nc">&nbsp;            if (s.name().equalsIgnoreCase(statusStr)) {</b>
+<b class="nc">&nbsp;                return s;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        throw new IllegalArgumentException(&quot;Invalid status value: &quot; + statusStr);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // Log end time for a job assignment by an employee.
+&nbsp;    public EmployeeJobAssignmentResponse logEndTimeForJobAssignment(EmployeeJobAssignmentLogEndTimeRequest employeeJobAssignmentLogEndTimeRequest, Long jobAssignmentId) {
+&nbsp;        try {
+<b class="fc">&nbsp;            JobAssignment jobAssignment = jobAssignmentRepository.findById(jobAssignmentId)</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new JobAssignmentNotFoundException(&quot;Job Assignment not found&quot;));</b>
+&nbsp;
+<b class="pc">&nbsp;            if (jobAssignment.getEndTime() != null) {</b>
+<b class="nc">&nbsp;                throw new FieldUpdatingException(&quot;Job ending time has already been logged for this Job Assignment.&quot;);</b>
+&nbsp;            }else{
+&nbsp;                // Save end time for the job assignment.
+<b class="fc">&nbsp;                jobAssignment.setEndTime(employeeJobAssignmentLogEndTimeRequest.getEndTime());</b>
+<b class="fc">&nbsp;                JobAssignment updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);</b>
+&nbsp;
+<b class="fc">&nbsp;                return toDto(updatedJobAssignment);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        }catch (JobAssignmentNotFoundException | FieldUpdatingException e) {
+&nbsp;            throw e;
+&nbsp;        }
+&nbsp;        catch (Exception e) {
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to log end time for Job Assignment: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Add additional costs to an appointment job by an employee.
+&nbsp;    public EmployeeJobAssignmentResponse addAdditionalCostsToAnAppointmentJob(EmployeeJobAssignmentAddCostsRequest employeeJobAssignmentAddCostsRequest, Long jobAssignmentId) {
+<b class="nc">&nbsp;                JobAssignment jobAssignment = jobAssignmentRepository.findById(jobAssignmentId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new JobAssignmentNotFoundException(&quot;Job Assignment not found&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        BigDecimal additionalCost = employeeJobAssignmentAddCostsRequest.getAdditionalcost();</b>
+&nbsp;        JobAssignment updatedJobAssignment;
+&nbsp;
+<b class="nc">&nbsp;        if (jobAssignment.getAdditionalCost() == null) {</b>
+<b class="nc">&nbsp;            jobAssignment.setAdditionalCost(additionalCost);</b>
+<b class="nc">&nbsp;            jobAssignment.setCostNote(employeeJobAssignmentAddCostsRequest.getCostNote());</b>
+<b class="nc">&nbsp;            updatedJobAssignment = jobAssignmentRepository.save(jobAssignment);</b>
+&nbsp;
+&nbsp;        }else{
+<b class="nc">&nbsp;            throw new FieldUpdatingException(&quot;Additional cost has already been set for this Job Assignment.&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;        // Update the total additional cost in the AppointmentJob entity.
+<b class="nc">&nbsp;        AppointmentJob appointmentJob = jobAssignment.getAppointmentJob();</b>
+<b class="nc">&nbsp;        BigDecimal totalJobCost = additionalCost.add(appointmentJob.getAdditionalCost() != null ? appointmentJob.getAdditionalCost() : BigDecimal.ZERO);</b>
+<b class="nc">&nbsp;        appointmentJob.setAdditionalCost(totalJobCost);</b>
+<b class="nc">&nbsp;        appointmentJobRepository.save(appointmentJob);</b>
+&nbsp;
+&nbsp;        //Update the total cost in appointment entity.
+<b class="nc">&nbsp;        Appointment appointment = appointmentJob.getAppointment();</b>
+<b class="nc">&nbsp;        BigDecimal NewTotalAppointmentCost = additionalCost.add( appointment.getTotalCost() != null ? appointment.getTotalCost() : BigDecimal.ZERO);</b>
+<b class="nc">&nbsp;        appointment.setTotalCost(NewTotalAppointmentCost);</b>
+<b class="nc">&nbsp;        appointmentRepository.save(appointment);</b>
+&nbsp;
+<b class="nc">&nbsp;        return toDto(updatedJobAssignment);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

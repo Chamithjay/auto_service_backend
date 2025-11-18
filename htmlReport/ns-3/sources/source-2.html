@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppointmentController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AppointmentController (com.EAD.autoservice_backend.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AppointmentController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4.2%
+  </span>
+  <span class="absValue">
+    (1/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.controller;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.*;
+&nbsp;import com.EAD.autoservice_backend.service.AppointmentService;
+&nbsp;import com.EAD.autoservice_backend.util.JwtUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/v1/appointments&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class AppointmentController {
+&nbsp;
+&nbsp;    private final AppointmentService appointmentService;
+&nbsp;    private final JwtUtil jwtUtil;
+&nbsp;
+&nbsp;    @GetMapping(&quot;/vehicles&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;VehicleResponse&gt;&gt; getUserVehicles(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader
+&nbsp;    ) {
+<b class="nc">&nbsp;        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</b>
+<b class="nc">&nbsp;        log.info(&quot;Extracting userId from token&quot;);</b>
+<b class="nc">&nbsp;        Long userId = jwtUtil.extractUserId(token);</b>
+<b class="nc">&nbsp;        log.info(&quot;Extracted userId: {}&quot;, userId);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;VehicleResponse&gt; response = appointmentService.getVehiclesForUser(userId);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/services&quot;)
+&nbsp;    public ResponseEntity&lt;ServiceAndModificationResponse&gt; getServicesAndModifications(
+&nbsp;            @RequestBody VehicleSelectionRequest request
+&nbsp;    ) {
+<b class="nc">&nbsp;        ServiceAndModificationResponse response =</b>
+<b class="nc">&nbsp;                appointmentService.getServicesAndModificationsForVehicle(request);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/availability&quot;)
+&nbsp;    public ResponseEntity&lt;AppointmentCalculationResponse&gt; getAvailableTimes(
+&nbsp;            @RequestBody AppointmentCalculationRequest request
+&nbsp;    ) {
+<b class="nc">&nbsp;        AppointmentCalculationResponse response = appointmentService.calculateAppointmentDetails(request);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/calculate&quot;)
+&nbsp;    public ResponseEntity&lt;AppointmentCalculationResponse&gt; calculateAppointmentDetails(
+&nbsp;            @RequestBody AppointmentCalculationRequest request
+&nbsp;    ) {
+<b class="nc">&nbsp;        AppointmentCalculationResponse response =</b>
+<b class="nc">&nbsp;                appointmentService.calculateAppointmentDetails(request);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/create&quot;)
+&nbsp;    public ResponseEntity&lt;AppointmentResponse&gt; createAppointment(
+&nbsp;            @RequestBody AppointmentCreateRequest request,
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader
+&nbsp;    ) {
+<b class="nc">&nbsp;        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</b>
+<b class="nc">&nbsp;        Long userId = jwtUtil.extractUserId(token);</b>
+&nbsp;
+<b class="nc">&nbsp;        AppointmentResponse response = appointmentService.createAppointment(request, userId);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/history&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;AppointmentHistoryResponse&gt;&gt; getCustomerAppointmentHistory(
+&nbsp;            @RequestHeader(&quot;Authorization&quot;) String authHeader,
+&nbsp;            @RequestParam(required = false) LocalDate startDate,
+&nbsp;            @RequestParam(required = false) LocalDate endDate
+&nbsp;    ) {
+<b class="nc">&nbsp;        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</b>
+<b class="nc">&nbsp;        Long userId = jwtUtil.extractUserId(token);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;AppointmentHistoryResponse&gt; response =</b>
+<b class="nc">&nbsp;                appointmentService.getCustomerAppointments(userId, startDate, endDate);</b>
+&nbsp;
+<b class="nc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

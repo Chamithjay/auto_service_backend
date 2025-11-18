@@ -1,0 +1,417 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CustomerDashboardService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.service</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomerDashboardService (com.EAD.autoservice_backend.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomerDashboardService</td>
+<td class="coverageStat">
+  <span class="percent">
+    22.2%
+  </span>
+  <span class="absValue">
+    (2/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6%
+  </span>
+  <span class="absValue">
+    (8/133)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CustomerDashboardService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    22.2%
+  </span>
+  <span class="absValue">
+    (2/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    6%
+  </span>
+  <span class="absValue">
+    (8/133)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.service;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.AppointmentProgressResponse;
+&nbsp;import com.EAD.autoservice_backend.dto.AppointmentSummaryResponse;
+&nbsp;import com.EAD.autoservice_backend.dto.CustomerDashboardStatsResponse;
+&nbsp;import com.EAD.autoservice_backend.exception.ResourceNotFoundException;
+&nbsp;import com.EAD.autoservice_backend.model.*;
+&nbsp;import com.EAD.autoservice_backend.repository.*;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service for customer dashboard operations
+&nbsp; */
+&nbsp;@Service
+&nbsp;@Transactional(readOnly = true)
+&nbsp;public class CustomerDashboardService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(CustomerDashboardService.class);</b>
+&nbsp;
+&nbsp;    private final CustomerRepository customerRepository;
+&nbsp;    private final VehicleRepository vehicleRepository;
+&nbsp;    private final AppointmentRepository appointmentRepository;
+&nbsp;    private final AppointmentJobRepository appointmentJobRepository;
+&nbsp;
+<b class="fc">&nbsp;    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;);</b>
+<b class="fc">&nbsp;    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(&quot;HH:mm:ss&quot;);</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public CustomerDashboardService(CustomerRepository customerRepository,
+&nbsp;                                    VehicleRepository vehicleRepository,
+&nbsp;                                    AppointmentRepository appointmentRepository,
+<b class="fc">&nbsp;                                    AppointmentJobRepository appointmentJobRepository) {</b>
+<b class="fc">&nbsp;        this.customerRepository = customerRepository;</b>
+<b class="fc">&nbsp;        this.vehicleRepository = vehicleRepository;</b>
+<b class="fc">&nbsp;        this.appointmentRepository = appointmentRepository;</b>
+<b class="fc">&nbsp;        this.appointmentJobRepository = appointmentJobRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get dashboard statistics for a customer
+&nbsp;     */
+&nbsp;    public CustomerDashboardStatsResponse getDashboardStats(String username) {
+&nbsp;        try {
+<b class="nc">&nbsp;            logger.info(&quot;Fetching dashboard stats for user: {}&quot;, username);</b>
+&nbsp;
+<b class="nc">&nbsp;            Customer customer = customerRepository.findByUsername(username)</b>
+<b class="nc">&nbsp;                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with username: &quot; + username));</b>
+&nbsp;
+<b class="nc">&nbsp;            logger.debug(&quot;Found customer with ID: {}&quot;, customer.getId());</b>
+&nbsp;
+<b class="nc">&nbsp;            Integer totalVehicles = vehicleRepository.countByCustomerId(customer.getId());</b>
+<b class="nc">&nbsp;            logger.debug(&quot;Total vehicles: {}&quot;, totalVehicles);</b>
+&nbsp;
+<b class="nc">&nbsp;            Integer totalAppointments = appointmentRepository.countByCustomerId(customer.getId());</b>
+<b class="nc">&nbsp;            logger.debug(&quot;Total appointments: {}&quot;, totalAppointments);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;AppointmentStatus&gt; activeStatuses = Arrays.asList(AppointmentStatus.NEW, AppointmentStatus.ONGOING);</b>
+<b class="nc">&nbsp;            Integer activeAppointments = appointmentRepository.countByCustomerIdAndStatusIn(</b>
+<b class="nc">&nbsp;                    customer.getId(), activeStatuses</b>
+&nbsp;            );
+<b class="nc">&nbsp;            logger.debug(&quot;Active appointments: {}&quot;, activeAppointments);</b>
+&nbsp;
+<b class="nc">&nbsp;            Integer completedAppointments = appointmentRepository.countByCustomerIdAndStatus(</b>
+<b class="nc">&nbsp;                    customer.getId(), AppointmentStatus.COMPLETED</b>
+&nbsp;            );
+<b class="nc">&nbsp;            logger.debug(&quot;Completed appointments: {}&quot;, completedAppointments);</b>
+&nbsp;
+<b class="nc">&nbsp;            return new CustomerDashboardStatsResponse(</b>
+<b class="nc">&nbsp;                    totalVehicles != null ? totalVehicles : 0,</b>
+<b class="nc">&nbsp;                    totalAppointments != null ? totalAppointments : 0,</b>
+<b class="nc">&nbsp;                    activeAppointments != null ? activeAppointments : 0,</b>
+<b class="nc">&nbsp;                    completedAppointments != null ? completedAppointments : 0</b>
+&nbsp;            );
+&nbsp;        } catch (ResourceNotFoundException e) {
+<b class="nc">&nbsp;            logger.error(&quot;Customer not found: {}&quot;, username);</b>
+&nbsp;            throw e;
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            logger.error(&quot;Error fetching dashboard stats for user {}: {}&quot;, username, e.getMessage(), e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to fetch dashboard statistics: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get all appointments for a customer with summary information
+&nbsp;     */
+&nbsp;    public List&lt;AppointmentSummaryResponse&gt; getCustomerAppointments(String username) {
+<b class="nc">&nbsp;        Customer customer = customerRepository.findByUsername(username)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with username: &quot; + username));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Appointment&gt; appointments = appointmentRepository.findByCustomerId(customer.getId());</b>
+&nbsp;
+<b class="nc">&nbsp;        return appointments.stream()</b>
+<b class="nc">&nbsp;                .map(this::mapToAppointmentSummary)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get active appointments only (NEW or ONGOING)
+&nbsp;     */
+&nbsp;    public List&lt;AppointmentSummaryResponse&gt; getActiveAppointments(String username) {
+<b class="nc">&nbsp;        Customer customer = customerRepository.findByUsername(username)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with username: &quot; + username));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;AppointmentStatus&gt; activeStatuses = Arrays.asList(AppointmentStatus.NEW, AppointmentStatus.ONGOING);</b>
+<b class="nc">&nbsp;        List&lt;Appointment&gt; appointments = appointmentRepository.findActiveAppointmentsByCustomerId(</b>
+<b class="nc">&nbsp;                customer.getId(), activeStatuses</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        return appointments.stream()</b>
+<b class="nc">&nbsp;                .map(this::mapToAppointmentSummary)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get detailed progress information for a specific appointment
+&nbsp;     */
+&nbsp;    public AppointmentProgressResponse getAppointmentProgress(String username, Long appointmentId) {
+<b class="nc">&nbsp;        Customer customer = customerRepository.findByUsername(username)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with username: &quot; + username));</b>
+&nbsp;
+<b class="nc">&nbsp;        Appointment appointment = appointmentRepository.findByAppointmentIdAndCustomerId(</b>
+<b class="nc">&nbsp;                        appointmentId, customer.getId())</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Appointment not found with ID: &quot; + appointmentId));</b>
+&nbsp;
+<b class="nc">&nbsp;        return mapToAppointmentProgress(appointment);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Map Appointment to AppointmentSummaryResponse
+&nbsp;     */
+&nbsp;    private AppointmentSummaryResponse mapToAppointmentSummary(Appointment appointment) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Integer totalJobs = appointmentJobRepository.countByAppointmentId(appointment.getAppointmentId());</b>
+<b class="nc">&nbsp;            Integer completedJobs = appointmentJobRepository.countByAppointmentIdAndJobStatus(</b>
+<b class="nc">&nbsp;                    appointment.getAppointmentId(), AppointmentStatus.COMPLETED</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            Vehicle vehicle = null;</b>
+&nbsp;            AppointmentSummaryResponse.VehicleBasicInfo vehicleInfo;
+&nbsp;
+&nbsp;            // Try to get vehicle from appointment&#39;s vehicle_id
+&nbsp;            try {
+<b class="nc">&nbsp;                vehicle = appointment.getVehicle();</b>
+&nbsp;            } catch (Exception e) {
+<b class="nc">&nbsp;                logger.debug(&quot;Could not load vehicle from appointment relationship: {}&quot;, e.getMessage());</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // If vehicle is still null, try to load it directly using vehicle_id
+<b class="nc">&nbsp;            if (vehicle == null &amp;&amp; appointment.getVehicleId() != null) {</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    vehicle = vehicleRepository.findById(appointment.getVehicleId()).orElse(null);</b>
+&nbsp;                } catch (Exception e) {
+<b class="nc">&nbsp;                    logger.debug(&quot;Could not load vehicle by ID {}: {}&quot;, appointment.getVehicleId(), e.getMessage());</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (vehicle == null) {</b>
+<b class="nc">&nbsp;                logger.warn(&quot;No vehicle found for appointment ID: {}. Using fallback vehicle data from appointment.&quot;,</b>
+<b class="nc">&nbsp;                           appointment.getAppointmentId());</b>
+&nbsp;                // Use vehicle data stored in the appointment itself as fallback
+<b class="nc">&nbsp;                vehicleInfo = new AppointmentSummaryResponse.VehicleBasicInfo(</b>
+<b class="nc">&nbsp;                        appointment.getVehicleId(),  // Use the stored vehicle_id</b>
+<b class="nc">&nbsp;                        appointment.getVehicleName() != null ? appointment.getVehicleName() : &quot;Unknown Vehicle&quot;,</b>
+&nbsp;                        &quot;N/A&quot;  // No registration number available
+&nbsp;                );
+&nbsp;            } else {
+<b class="nc">&nbsp;                vehicleInfo = new AppointmentSummaryResponse.VehicleBasicInfo(</b>
+<b class="nc">&nbsp;                        vehicle.getVehicleId(),</b>
+<b class="nc">&nbsp;                        vehicle.getVehicleName(),</b>
+<b class="nc">&nbsp;                        vehicle.getRegistrationNo()</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;
+&nbsp;            // Handle null timestamps
+<b class="nc">&nbsp;            String startTime = appointment.getAppointmentStartTime() != null</b>
+<b class="nc">&nbsp;                ? appointment.getAppointmentStartTime().toLocalTime().format(TIME_FORMATTER)</b>
+<b class="nc">&nbsp;                : &quot;N/A&quot;;</b>
+<b class="nc">&nbsp;            String endTime = appointment.getAppointmentEndTime() != null</b>
+<b class="nc">&nbsp;                ? appointment.getAppointmentEndTime().toLocalTime().format(TIME_FORMATTER)</b>
+<b class="nc">&nbsp;                : &quot;N/A&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;            return new AppointmentSummaryResponse(</b>
+<b class="nc">&nbsp;                    appointment.getAppointmentId(),</b>
+<b class="nc">&nbsp;                    appointment.getAppointmentDate().format(DATE_FORMATTER),</b>
+&nbsp;                    startTime,
+&nbsp;                    endTime,
+<b class="nc">&nbsp;                    appointment.getStatus(),</b>
+<b class="nc">&nbsp;                    appointment.getTotalCost(),</b>
+&nbsp;                    vehicleInfo,
+<b class="nc">&nbsp;                    totalJobs != null ? totalJobs : 0,</b>
+<b class="nc">&nbsp;                    completedJobs != null ? completedJobs : 0</b>
+&nbsp;            );
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            logger.error(&quot;Error mapping appointment {}: {}&quot;, appointment.getAppointmentId(), e.getMessage(), e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to map appointment data: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Map Appointment to detailed AppointmentProgressResponse
+&nbsp;     */
+&nbsp;    private AppointmentProgressResponse mapToAppointmentProgress(Appointment appointment) {
+<b class="nc">&nbsp;        AppointmentProgressResponse response = new AppointmentProgressResponse();</b>
+&nbsp;
+<b class="nc">&nbsp;        response.setAppointmentId(appointment.getAppointmentId());</b>
+<b class="nc">&nbsp;        response.setAppointmentDate(appointment.getAppointmentDate().format(DATE_FORMATTER));</b>
+&nbsp;
+&nbsp;        // Handle null timestamps
+<b class="nc">&nbsp;        String startTime = appointment.getAppointmentStartTime() != null</b>
+<b class="nc">&nbsp;            ? appointment.getAppointmentStartTime().toLocalTime().format(TIME_FORMATTER)</b>
+<b class="nc">&nbsp;            : &quot;N/A&quot;;</b>
+<b class="nc">&nbsp;        String endTime = appointment.getAppointmentEndTime() != null</b>
+<b class="nc">&nbsp;            ? appointment.getAppointmentEndTime().toLocalTime().format(TIME_FORMATTER)</b>
+<b class="nc">&nbsp;            : &quot;N/A&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        response.setStartTime(startTime);</b>
+<b class="nc">&nbsp;        response.setEndTime(endTime);</b>
+<b class="nc">&nbsp;        response.setStatus(appointment.getStatus());</b>
+<b class="nc">&nbsp;        response.setTotalCost(appointment.getTotalCost());</b>
+&nbsp;
+&nbsp;        // Map vehicle information
+<b class="nc">&nbsp;        Vehicle vehicle = appointment.getVehicle();</b>
+<b class="nc">&nbsp;        AppointmentProgressResponse.VehicleInfo vehicleInfo = new AppointmentProgressResponse.VehicleInfo();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (vehicle == null) {</b>
+<b class="nc">&nbsp;            logger.warn(&quot;No vehicle found for appointment ID: {} in progress details. Using fallback data.&quot;,</b>
+<b class="nc">&nbsp;                       appointment.getAppointmentId());</b>
+<b class="nc">&nbsp;            vehicleInfo.setVehicleId(null);</b>
+<b class="nc">&nbsp;            vehicleInfo.setVehicleName(appointment.getVehicleName() != null ? appointment.getVehicleName() : &quot;Unknown Vehicle&quot;);</b>
+<b class="nc">&nbsp;            vehicleInfo.setRegistrationNo(&quot;N/A&quot;);</b>
+<b class="nc">&nbsp;            vehicleInfo.setVehicleType(&quot;N/A&quot;);</b>
+<b class="nc">&nbsp;            vehicleInfo.setModel(&quot;N/A&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            vehicleInfo.setVehicleId(vehicle.getVehicleId());</b>
+<b class="nc">&nbsp;            vehicleInfo.setVehicleName(vehicle.getVehicleName());</b>
+<b class="nc">&nbsp;            vehicleInfo.setRegistrationNo(vehicle.getRegistrationNo());</b>
+<b class="nc">&nbsp;            vehicleInfo.setVehicleType(vehicle.getVehicleType().name());</b>
+<b class="nc">&nbsp;            vehicleInfo.setModel(vehicle.getModel());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        response.setVehicle(vehicleInfo);</b>
+&nbsp;
+&nbsp;        // Map job information
+<b class="nc">&nbsp;        List&lt;AppointmentJob&gt; jobs = appointmentJobRepository.findByAppointmentId(appointment.getAppointmentId());</b>
+<b class="nc">&nbsp;        List&lt;AppointmentProgressResponse.JobProgressInfo&gt; jobInfos = jobs.stream()</b>
+<b class="nc">&nbsp;                .map(this::mapToJobProgressInfo)</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        response.setJobs(jobInfos);</b>
+&nbsp;
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Map AppointmentJob to JobProgressInfo
+&nbsp;     */
+&nbsp;    private AppointmentProgressResponse.JobProgressInfo mapToJobProgressInfo(AppointmentJob job) {
+<b class="nc">&nbsp;        AppointmentProgressResponse.JobProgressInfo jobInfo = new AppointmentProgressResponse.JobProgressInfo();</b>
+&nbsp;
+<b class="nc">&nbsp;        jobInfo.setAppointmentJobId(job.getId());</b>
+<b class="nc">&nbsp;        jobInfo.setServiceItemName(job.getServiceItem().getServiceItemName());</b>
+<b class="nc">&nbsp;        jobInfo.setServiceItemType(job.getServiceItem().getServiceItemType().name());</b>
+<b class="nc">&nbsp;        jobInfo.setJobStatus(job.getItemStatus());</b>
+<b class="nc">&nbsp;        jobInfo.setStartTime(job.getStartTime() != null ? job.getStartTime().toString() : null);</b>
+<b class="nc">&nbsp;        jobInfo.setEndTime(job.getEndTime() != null ? job.getEndTime().toString() : null);</b>
+<b class="nc">&nbsp;        jobInfo.setAdditionalCost(job.getAdditionalCost());</b>
+<b class="nc">&nbsp;        jobInfo.setJobNote(job.getJobNote());</b>
+&nbsp;
+&nbsp;        // Count assigned employees
+<b class="nc">&nbsp;        Integer assignedEmployees = job.getEmployeeAssignments() != null ?</b>
+<b class="nc">&nbsp;                job.getEmployeeAssignments().size() : 0;</b>
+<b class="nc">&nbsp;        jobInfo.setAssignedEmployees(assignedEmployees);</b>
+&nbsp;
+<b class="nc">&nbsp;        return jobInfo;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

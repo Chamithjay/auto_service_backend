@@ -1,0 +1,261 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AppointmentProgressResponse</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: AppointmentProgressResponse (com.EAD.autoservice_backend.dto)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AppointmentProgressResponse</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/17)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AppointmentProgressResponse$JobProgressInfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">AppointmentProgressResponse$VehicleInfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.dto;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.model.AppointmentStatus;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * DTO for detailed appointment progress information
+&nbsp; */
+&nbsp;public class AppointmentProgressResponse {
+&nbsp;
+&nbsp;    private Long appointmentId;
+&nbsp;    private String appointmentDate;
+&nbsp;    private String startTime;
+&nbsp;    private String endTime;
+&nbsp;    private AppointmentStatus status; // &lt;-- changed
+&nbsp;    private BigDecimal totalCost;
+&nbsp;    private VehicleInfo vehicle;
+&nbsp;    private List&lt;JobProgressInfo&gt; jobs;
+&nbsp;
+<b class="nc">&nbsp;    public AppointmentProgressResponse() {}</b>
+&nbsp;
+<b class="nc">&nbsp;    public Long getAppointmentId() { return appointmentId; }</b>
+<b class="nc">&nbsp;    public void setAppointmentId(Long appointmentId) { this.appointmentId = appointmentId; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public String getAppointmentDate() { return appointmentDate; }</b>
+<b class="nc">&nbsp;    public void setAppointmentDate(String appointmentDate) { this.appointmentDate = appointmentDate; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public String getStartTime() { return startTime; }</b>
+<b class="nc">&nbsp;    public void setStartTime(String startTime) { this.startTime = startTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public String getEndTime() { return endTime; }</b>
+<b class="nc">&nbsp;    public void setEndTime(String endTime) { this.endTime = endTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public AppointmentStatus getStatus() { return status; }</b>
+<b class="nc">&nbsp;    public void setStatus(AppointmentStatus status) { this.status = status; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public BigDecimal getTotalCost() { return totalCost; }</b>
+<b class="nc">&nbsp;    public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public VehicleInfo getVehicle() { return vehicle; }</b>
+<b class="nc">&nbsp;    public void setVehicle(VehicleInfo vehicle) { this.vehicle = vehicle; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public List&lt;JobProgressInfo&gt; getJobs() { return jobs; }</b>
+<b class="nc">&nbsp;    public void setJobs(List&lt;JobProgressInfo&gt; jobs) { this.jobs = jobs; }</b>
+&nbsp;
+&nbsp;    public static class VehicleInfo {
+&nbsp;        private Long vehicleId;
+&nbsp;        private String vehicleName;
+&nbsp;        private String registrationNo;
+&nbsp;        private String vehicleType;
+&nbsp;        private String model;
+&nbsp;
+<b class="nc">&nbsp;        public VehicleInfo() {}</b>
+&nbsp;
+<b class="nc">&nbsp;        public Long getVehicleId() { return vehicleId; }</b>
+<b class="nc">&nbsp;        public void setVehicleId(Long vehicleId) { this.vehicleId = vehicleId; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getVehicleName() { return vehicleName; }</b>
+<b class="nc">&nbsp;        public void setVehicleName(String vehicleName) { this.vehicleName = vehicleName; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getRegistrationNo() { return registrationNo; }</b>
+<b class="nc">&nbsp;        public void setRegistrationNo(String registrationNo) { this.registrationNo = registrationNo; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getVehicleType() { return vehicleType; }</b>
+<b class="nc">&nbsp;        public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getModel() { return model; }</b>
+<b class="nc">&nbsp;        public void setModel(String model) { this.model = model; }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static class JobProgressInfo {
+&nbsp;        private Long appointmentJobId;
+&nbsp;        private String serviceItemName;
+&nbsp;        private String serviceItemType;
+&nbsp;        private AppointmentStatus jobStatus; // &lt;-- changed
+&nbsp;        private String startTime;
+&nbsp;        private String endTime;
+&nbsp;        private BigDecimal additionalCost;
+&nbsp;        private String jobNote;
+&nbsp;        private Integer assignedEmployees;
+&nbsp;
+<b class="nc">&nbsp;        public JobProgressInfo() {}</b>
+&nbsp;
+<b class="nc">&nbsp;        public Long getAppointmentJobId() { return appointmentJobId; }</b>
+<b class="nc">&nbsp;        public void setAppointmentJobId(Long appointmentJobId) { this.appointmentJobId = appointmentJobId; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getServiceItemName() { return serviceItemName; }</b>
+<b class="nc">&nbsp;        public void setServiceItemName(String serviceItemName) { this.serviceItemName = serviceItemName; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getServiceItemType() { return serviceItemType; }</b>
+<b class="nc">&nbsp;        public void setServiceItemType(String serviceItemType) { this.serviceItemType = serviceItemType; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public AppointmentStatus getJobStatus() { return jobStatus; }</b>
+<b class="nc">&nbsp;        public void setJobStatus(AppointmentStatus jobStatus) { this.jobStatus = jobStatus; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getStartTime() { return startTime; }</b>
+<b class="nc">&nbsp;        public void setStartTime(String startTime) { this.startTime = startTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getEndTime() { return endTime; }</b>
+<b class="nc">&nbsp;        public void setEndTime(String endTime) { this.endTime = endTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public BigDecimal getAdditionalCost() { return additionalCost; }</b>
+<b class="nc">&nbsp;        public void setAdditionalCost(BigDecimal additionalCost) { this.additionalCost = additionalCost; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public String getJobNote() { return jobNote; }</b>
+<b class="nc">&nbsp;        public void setJobNote(String jobNote) { this.jobNote = jobNote; }</b>
+&nbsp;
+<b class="nc">&nbsp;        public Integer getAssignedEmployees() { return assignedEmployees; }</b>
+<b class="nc">&nbsp;        public void setAssignedEmployees(Integer assignedEmployees) { this.assignedEmployees = assignedEmployees; }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

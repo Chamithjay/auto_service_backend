@@ -1,0 +1,143 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EmployeeController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.EAD.autoservice_backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: EmployeeController (com.EAD.autoservice_backend.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EmployeeController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.EAD.autoservice_backend.controller;
+&nbsp;
+&nbsp;import com.EAD.autoservice_backend.dto.EmployeeProfileDTO;
+&nbsp;import com.EAD.autoservice_backend.service.EmployeeService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/v1/employee&quot;)
+&nbsp;@CrossOrigin(origins = &quot;http://localhost:3000&quot;)
+<b class="fc">&nbsp;public class EmployeeController {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private EmployeeService employeeService;
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{employeeId}/dashboard&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getEmployeeDashboard(@PathVariable Long employeeId) {
+<b class="nc">&nbsp;        Map&lt;String, Object&gt; dashboardData = employeeService.getEmployeeDashboard(employeeId);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(dashboardData);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{employeeId}/profile&quot;)
+&nbsp;    public ResponseEntity&lt;EmployeeProfileDTO&gt; getEmployeeProfile(@PathVariable Long employeeId) {
+<b class="nc">&nbsp;        EmployeeProfileDTO profile = employeeService.getEmployeeProfile(employeeId);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(profile);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{employeeId}/profile&quot;)
+&nbsp;    public ResponseEntity&lt;EmployeeProfileDTO&gt; updateEmployeeProfile(
+&nbsp;            @PathVariable Long employeeId,
+&nbsp;            @RequestBody EmployeeProfileDTO updatedProfile) {
+&nbsp;
+<b class="nc">&nbsp;        EmployeeProfileDTO updated = employeeService.updateEmployeeProfile(employeeId, updatedProfile);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(updated);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-07 22:58</div>
+</div>
+</body>
+</html>

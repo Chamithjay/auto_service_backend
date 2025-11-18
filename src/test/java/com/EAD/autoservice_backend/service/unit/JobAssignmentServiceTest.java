@@ -1,4 +1,4 @@
-package com.EAD.autoservice_backend.service;
+package com.EAD.autoservice_backend.service.unit;
 
 import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentAddCostsRequest;
 import com.EAD.autoservice_backend.dto.EmployeeJobAssignmentLogEndTimeRequest;
@@ -12,6 +12,7 @@ import com.EAD.autoservice_backend.model.JobAssignment;
 import com.EAD.autoservice_backend.repository.AppointmentJobRepository;
 import com.EAD.autoservice_backend.repository.AppointmentRepository;
 import com.EAD.autoservice_backend.repository.JobAssignmentRepository;
+import com.EAD.autoservice_backend.service.JobAssignmentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

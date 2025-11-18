@@ -1,4 +1,4 @@
-package com.EAD.autoservice_backend.service;
+package com.EAD.autoservice_backend.service.unit;
 
 import com.EAD.autoservice_backend.dto.EmployeeAppointmentJobResponse;
 import com.EAD.autoservice_backend.dto.EmployeeCustomerDetailsResponse;
@@ -10,6 +10,8 @@ import com.EAD.autoservice_backend.exception.AppointmentJobNotFoundException;
 import com.EAD.autoservice_backend.exception.DetailsMissingException;
 import com.EAD.autoservice_backend.model.*;
 import com.EAD.autoservice_backend.repository.AppointmentJobRepository;
+import com.EAD.autoservice_backend.service.AppointmentJobService;
+import com.EAD.autoservice_backend.service.JobAssignmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

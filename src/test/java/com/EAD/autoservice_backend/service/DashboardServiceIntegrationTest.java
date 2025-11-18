@@ -545,6 +545,9 @@ class DashboardServiceIntegrationTest {
         appointment.setTotalCost(cost);
         appointment.setStatus(status);
 
+        appointment.setSessionType(SessionType.MORNING);
+        appointment.setCreatedAt(LocalDateTime.now());
+
         return appointment;
     }
 
