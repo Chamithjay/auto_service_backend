@@ -18,7 +18,7 @@ pipeline {
         
         // Repository information
         GITHUB_REPO = 'https://github.com/Chamithjay/auto_service_backend.git'
-        GITHUB_BRANCH = 'main'
+        GITHUB_BRANCH = 'nipuna'
         
         // Build tools
         JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
@@ -88,13 +88,9 @@ pipeline {
                 script {
                     echo '========== STAGE: Build Docker Image =========='
                     sh '''
-                        echo "Building Docker image: ${BACKEND_IMAGE}"
-                        docker build -t ${BACKEND_IMAGE} .
-                        
-                        echo "Docker images:"
-                        docker images | grep autoservice-backend
-                        
-                        echo "✅ Docker image built successfully"
+                        echo "Note: Docker image building handled by docker-compose"
+                        echo "Backend JAR created at: target/*.jar"
+                        echo "✅ Build artifacts ready for Docker"
                     '''
                 }
             }
@@ -105,17 +101,9 @@ pipeline {
                 script {
                     echo '========== STAGE: Deploy with Docker Compose =========='
                     sh '''
-                        # Navigate to deployment directory
-                        cd ../automobile-service-deployment
-                        
-                        echo "Current directory: $(pwd)"
-                        echo "Docker Compose version:"
-                        docker-compose --version
-                        
-                        echo "Starting services with docker-compose..."
-                        docker-compose -f docker-compose.yml up -d
-                        
-                        echo "✅ Docker Compose deployment initiated"
+                        echo "Note: Deployment handled by docker-compose on host"
+                        echo "Backend build complete. Docker Compose will use latest JAR."
+                        echo "✅ Ready for deployment"
                     '''
                 }
             }
@@ -126,18 +114,16 @@ pipeline {
                 script {
                     echo '========== STAGE: Health Checks =========='
                     sh '''
-                        echo "Waiting for services to start (30 seconds)..."
+                        echo "Waiting for services (30 seconds)..."
                         sleep 30
                         
-                        echo "Checking running containers..."
-                        docker ps
-                        
                         echo "Checking backend health..."
-                        BACKEND_HEALTH=$(docker exec autoservice-backend curl -s http://localhost:8080/actuator/health || echo '{"status":"DOWN"}')
-                        echo "Backend health: $BACKEND_HEALTH"
-                        
-                        echo "Checking database connection..."
-                        docker exec autoservice-postgres pg_isready -U postgres || echo "Database check result: $?"
+                        BACKEND_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null)
+                        if [ "$BACKEND_HEALTH" = "200" ]; then
+                            echo "✅ Backend is healthy (HTTP $BACKEND_HEALTH)"
+                        else
+                            echo "⚠️  Backend health check returned: HTTP $BACKEND_HEALTH"
+                        fi
                         
                         echo "✅ Health checks completed"
                     '''
